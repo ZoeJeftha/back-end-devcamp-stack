@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>za.co.entelect.devcamp</groupId>
-    <artifactId>AuthenticationService</artifactId>
+    <artifactId>ProductCatalogService</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>AuthenticationService</name>
-    <description>AuthenticationService</description>
+    <name>ProductCatalogService</name>
+    <description>ProductCatalogService</description>
     <properties>
         <java.version>11</java.version>
     </properties>

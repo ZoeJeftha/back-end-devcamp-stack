@@ -7,17 +7,23 @@ import javax.persistence.*;
 
 @Data
 @Entity
-@Table(name= "fulfilment_type", shcema="pc")
+@Table(name= "fulfilment_type", schema="pc")
 @AllArgsConstructor
 @NoArgsConstructor
-public class Products {
+public class FulfilmentType {
 
-    @Column(name="product_id"
+    @Id
+    @Column(name="fulfilment_type_id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "app_user_sequence")
+    @SequenceGenerator(name = "app_user_sequence", sequenceName = "app_user_sequence", allocationSize = 1)
+    private Long fulfilmentTypeId;
+
+    @Column(name="product_id", nullable = false)
     private Long productId;
 
-    @Column(name="name" nullable = false)
+    @Column(name="name",  nullable = false)
     private String name;
 
-    @Column(name="description" nullable = false)
+    @Column(name="description", nullable = false)
     private String description;
 }

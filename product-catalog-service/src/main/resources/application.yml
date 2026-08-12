@@ -3,12 +3,15 @@ jwt:
   public.key: classpath:app.pub
 spring:
   datasource:
-    url: jdbc:postgresql://DevCamp-Postgres-db:5432/postgres
+    url: jdbc:postgresql://devcamp-db:5432/postgres
     username: user
     password: password
     driverClassName: org.postgresql.Driver
   flyway:
+    enabled: true
     ignore-migration-patterns: "*:missing"
+    schemas: pc
+    default-schema: pc
   jpa:
     hibernate:
       ddl-auto: none
