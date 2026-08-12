@@ -56,5 +56,13 @@ services:
       volumes:
         - db-data:/var/lib/postgresql/data
 
+  devcamp-pc-service:
+    # image: harbor.entelectprojects.co.za/internaltraining-devcamp/devcamp-pc-service:latest
+    build:
+      context: ./product-catalog-service
+    container_name: DevCamp-PC-Service
+    ports:
+      - 8085:8080
+
 volumes:
   db-data:
