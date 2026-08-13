@@ -1,0 +1,26 @@
+openapi: "3.0.0"
+
+info:
+  version: "1.0.0"
+  title: "Product Catalog"
+  license:
+    name: "MIT"
+
+servers:
+  - url: "http://localhost:8085/v1"
+
+paths:
+  /something:
+    get:
+      summary: "Test endpoint"
+      operationId: getSomething
+      tags:
+        - "something"
+      security: []
+      responses:
+        "200":
+          description: "Expected response"
+          content:
+            text/plain:
+              schema:
+                type: string
