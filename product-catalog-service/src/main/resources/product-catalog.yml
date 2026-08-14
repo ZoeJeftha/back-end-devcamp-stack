@@ -10,6 +10,7 @@ servers:
   - url: "http://localhost:8085/v1"
 
 paths:
+
   /something:
     get:
       summary: "Test endpoint"
@@ -24,3 +25,45 @@ paths:
             text/plain:
               schema:
                 type: string
+
+  /create-products:
+    post:
+      summary: "Create a product"
+      operationId: createProduct
+      tags:
+        - "products"
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductDto"
+      responses:
+        "200":
+          description: "Product created successfully"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductDto"
+
+components:
+  schemas:
+    ProductDto:
+      type: object
+      properties:
+        productId:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          format: double
+        imageUrl:
+          type: string
+      required:
+        - name
+        - price
