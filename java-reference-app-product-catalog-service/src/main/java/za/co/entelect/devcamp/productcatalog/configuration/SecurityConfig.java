@@ -33,7 +33,7 @@ public class SecurityConfig {
         http
                 .csrf().disable()
                 .authorizeHttpRequests()
-                .antMatchers("/v1/products").permitAll()
+                .antMatchers("/v1/products","/health", "/info", "/metrics").permitAll()
                 .anyRequest().authenticated();
         return http.build();
     }
