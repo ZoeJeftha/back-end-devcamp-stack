@@ -1,0 +1,2 @@
+INSERT INTO auth.application_user (user_id, email, password, role)
+VALUES (nextval('auth.app_user_sequence'), 'products@entelect.co.za', '$2a$12$2xgduN2ZKEO77b9KvUvd5O3xdnxov724BciM2ursEc3oHVtpHGeRu', 'admin');

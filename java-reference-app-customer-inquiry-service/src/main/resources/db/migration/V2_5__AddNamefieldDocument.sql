@@ -1,0 +1,2 @@
+ALTER TABLE cis.document
+ADD COLUMN name VARCHAR(255)

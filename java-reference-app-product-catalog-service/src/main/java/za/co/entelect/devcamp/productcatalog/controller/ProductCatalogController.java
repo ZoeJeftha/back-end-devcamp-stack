@@ -32,6 +32,7 @@ public class ProductCatalogController {
     @GetMapping("/products")
     public ResponseEntity<List<ProductDto>> getProducts()
     {
+        log.info("Getting Products");
         return productService.getProducts();
     }
 

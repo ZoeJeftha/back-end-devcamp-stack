@@ -1,0 +1,26 @@
+info:
+  app: Authentication Service
+  version: 0.0.1
+  description: Authentication API
+jwt:
+  private.key: classpath:app.key
+  public.key: classpath:app.pub
+spring:
+  datasource:
+    url: jdbc:postgresql://DevCamp-Postgres-db:5432/postgres
+    username: user
+    password: password
+    driverClassName: org.postgresql.Driver
+  flyway:
+    ignore-migration-patterns: "*:missing"
+  jpa:
+    hibernate:
+      ddl-auto: none
+springdoc:
+  show-actuator: false
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: health,info,metrics

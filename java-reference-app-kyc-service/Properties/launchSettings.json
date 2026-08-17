@@ -1,0 +1,53 @@
+{
+  "profiles": {
+    "http": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "http://localhost:5172"
+    },
+    "https": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "https://localhost:7112;http://localhost:5172"
+    },
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+        "environmentVariables": {
+            "ASPNETCORE_ENVIRONMENT": "Development"
+        }
+    },
+    "Docker": {
+        "commandName": "Docker",
+        "launchBrowser": true,
+        "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger",
+        "publishAllPorts": true,
+        "useSSL": true,
+        "environmentVariables": {
+            "Application__FailureResponses__Error4xx__FrequencyPercentage": "10",
+            "Application__FailureResponses__Error5xx__FrequencyPercentage": "20",
+            "Application_PublicKey": "-----BEGIN PUBLIC KEY-----MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzVyrZ1llUGdc/MY/ObLStHi8mPnx0FhC4TiDniWUhtVm5I+VkxswmUOY89MXsC6cvgDppN/fx5l+J34nsibes1iS7WKlX8OpWOIDHlV4hIf2AWUqA64kaIgTvTJQJIjP9HD0/zBOVfSdYETyah5TChLG2OxhoL3WmI1WURFLrC5Tkw0aOWuTcR/adjzfgE1vDXwQSNcBk9C//D8KSALl7vzQWA+UrtRYyoTxoDrXw6IO8Ph/hbZwHqwF1PIzdtUEp0PlVctUH0aRpmHStZPIw/Tt5ubeJy+7DqHPc6BvfjvHZ7KLUgp2gAnpPdj/O4GiA7Frr5Ml55fsuL+PbcFVGwIDAQAB-----END PUBLIC KEY-----"
+        }
+    }
+  },
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:34915",
+      "sslPort": 44317
+    }
+  }
+}
