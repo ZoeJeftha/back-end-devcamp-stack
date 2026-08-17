@@ -1,0 +1,62 @@
+@startuml
+
+' hide the spot
+' hide circle
+
+' avoid problems with angled crows feet
+skinparam linetype ortho
+
+entity "CustomerTypes" as customerTypes {
+    *description : text
+    *name : text
+    --
+    *customerTypesId : number <<generated>>
+}
+
+entity "Customer Accounts" as customerAccounts {
+    *customerId : number <<FK>>
+    *accountTypeId : number <<FK>>
+    --
+    *customerAccountId : number <<generated>>
+}
+
+entity "Account Types" as accountTypes {
+    *description : text
+    *name : text
+    --
+    *accountTypeId : number <<generated>>
+}
+
+
+entity "Customer" as customer {
+    *email : text
+    *password : text
+    *role : text
+    firstName : text
+    lastName : text
+    *idNumber : text
+    *customerTypesId : number <<FK>>
+    --
+    *customerId : number <<generate>>
+}
+
+entity "Customer Documents" as customerDocuments {
+    *customerId : number <<FK>>
+    *documentId : number <<FK>>
+    --
+    *customerDocumentsId : number <<generated>>
+}
+
+entity "Documents" as documents {
+    *document : blob
+    --
+    *documentId : number <<generated>>
+}
+
+customer ||..o{ customerDocuments
+documents ||..|{ customerDocuments
+customer ||..o{ customerAccounts
+accountTypes ||..o{ customerAccounts
+customerTypes ||..o{ customer
+
+@enduml

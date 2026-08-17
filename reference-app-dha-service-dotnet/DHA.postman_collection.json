@@ -1,0 +1,320 @@
+{
+	"info": {
+		"_postman_id": "83429967-1a60-4130-95e1-f3d043237568",
+		"name": "DHA",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "2358591"
+	},
+	"item": [
+		{
+			"name": "Get People",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Id Numbers for people are populated\", function()\r",
+							"{\r",
+							"    var idNumber = pm.response.json()[0].idNumber;\r",
+							"    var allIdNumbersExist = pm.response.json().every(x => x.idNumber != null && x.idNumber != undefined)\r",
+							"    \r",
+							"    pm.collectionVariables.set(\"id_number\", idNumber);\r",
+							"    pm.expect(allIdNumbersExist).equal(true);\r",
+							"})\r",
+							"\r",
+							"\r",
+							"pm.test(\"There is atleast one current status that is single\", function()\r",
+							"{\r",
+							"    var atleastOneCurrentStatusIsSingle = pm.response.json().find(x => x.currentStatus.status == \"Single\") != undefined;\r",
+							"    \r",
+							"    pm.expect(atleastOneCurrentStatusIsSingle).equal(true);\r",
+							"})\r",
+							"\r",
+							"\r",
+							"pm.test(\"There is atleast one current status that is married\", function()\r",
+							"{\r",
+							"    var atleastOneCurrentStatusIsMarried = pm.response.json().find(x => x.currentStatus.status == \"Married\") != undefined;\r",
+							"    \r",
+							"    pm.expect(atleastOneCurrentStatusIsMarried).equal(true);\r",
+							"})\r",
+							"\r",
+							"pm.test(\"There is atleast one current status that is Widowed\", function()\r",
+							"{\r",
+							"    var atleastOneCurrentStatusIsWidowed = pm.response.json().find(x => x.currentStatus.status == \"Widowed\") != undefined;\r",
+							"    \r",
+							"    pm.expect(atleastOneCurrentStatusIsWidowed).equal(true);\r",
+							"})\r",
+							"\r",
+							"pm.test(\"There is atleast one current status that is Divorced\", function()\r",
+							"{\r",
+							"    var atleastOneCurrentStatusIsDivorced = pm.response.json().find(x => x.currentStatus?.status == \"Divorced\") != undefined;\r",
+							"    \r",
+							"    pm.expect(atleastOneCurrentStatusIsDivorced).equal(true);\r",
+							"})\r",
+							"\r",
+							"pm.test(\"There is atleast one previous status that is Married\", function()\r",
+							"{\r",
+							"    var atleastOnePreviousStatusIsMarried = pm.response.json().find(x => x.previousStatus?.status == \"Married\") != undefined;\r",
+							"    \r",
+							"    pm.expect(atleastOnePreviousStatusIsMarried).equal(true);\r",
+							"})\r",
+							"\r",
+							"\r",
+							"pm.test(\"There is atleast one previous status that is Single\", function()\r",
+							"{\r",
+							"    var atleastOnePreviousStatusIsSingle = pm.response.json().find(x => x.previousStatus?.status == \"Single\") != undefined;\r",
+							"    \r",
+							"    pm.expect(atleastOnePreviousStatusIsSingle).equal(true);\r",
+							"})\r",
+							"\r",
+							"pm.test(\"There is atleast one living person\", function()\r",
+							"{\r",
+							"    var atleastOnePersonIsAlive = pm.response.json().find(x => x.livingStatus == \"Alive\" && x.deceasedDate == null) != undefined;\r",
+							"    \r",
+							"    pm.expect(atleastOnePersonIsAlive).equal(true);\r",
+							"})\r",
+							"\r",
+							"pm.test(\"There is atleast one deceased person\", function()\r",
+							"{\r",
+							"    var atleastOnePersonIsDeceased = pm.response.json().find(x => x.livingStatus == \"Deceased\" && x.deceasedDate != null) != undefined;\r",
+							"    \r",
+							"    pm.expect(atleastOnePersonIsDeceased).equal(true);\r",
+							"})\r",
+							"\r",
+							"pm.test(\"There is atleast one person with a duplicate ID\", function()\r",
+							"{\r",
+							"    var atleastOnePersonHasADuplicatedId = pm.response.json().find(x => x.hasDuplicatedId === true && x.duplicateIssueDate != \"\") != undefined;\r",
+							"    \r",
+							"    pm.expect(atleastOnePersonHasADuplicatedId).equal(true);\r",
+							"})\r",
+							"\r",
+							"pm.test(\"There is atleast one person without a duplicate ID\", function()\r",
+							"{\r",
+							"    var atleastOnePersonHasADuplicatedId = pm.response.json().find(x => x.hasDuplicatedId === false && x.duplicateIssueDate == null) != undefined;\r",
+							"    \r",
+							"    pm.expect(atleastOnePersonHasADuplicatedId).equal(true);\r",
+							"})\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7080/status/people",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7080",
+					"path": [
+						"status",
+						"people"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Marital Status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"First User in List should have a current status of 'single'\", function()\r",
+							"{\r",
+							"    var responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson.currentStatus.status).to.eql(\"Single\");\r",
+							"})\r",
+							"\r",
+							"pm.test(\"First User in List should have an effectiveFrom date\", function()\r",
+							"{\r",
+							"    var responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson.currentStatus.effectiveFrom).not.null;\r",
+							"})\r",
+							"\r",
+							"pm.test(\"First User in List should not have a effectiveTo date\", function()\r",
+							"{\r",
+							"    var responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson.currentStatus.effectiveTo).to.eql(\"\");\r",
+							"})\r",
+							"\r",
+							"\r",
+							"pm.test(\"First User in List should not have a previousStatus\", function()\r",
+							"{\r",
+							"    var responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson.currentStatus.previousStatus).to.eql(\"\" || undefined);\r",
+							"})\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7080/status/marital/{{id_number}}",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7080",
+					"path": [
+						"status",
+						"marital",
+						"{{id_number}}"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check if Citizen has Duplicate Id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"First User in List should have a hasDuplicatedID value set to false\", function()\r",
+							"{\r",
+							"    var responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson.hasDuplicateId).to.eql(false);\r",
+							"})\r",
+							"\r",
+							"pm.test(\"First User in List should not have a duplicatedIssueDate\", function()\r",
+							"{\r",
+							"    var responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson.duplicatedIssueDate).to.eql(\"\" || undefined);\r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7080/status/duplicateId/{{id_number}}",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7080",
+					"path": [
+						"status",
+						"duplicateId",
+						"{{id_number}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Living Status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"First User in List should have a living status of alive\", function()\r",
+							"{\r",
+							"    var responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson.livingStatus).to.eql(\"Alive\");\r",
+							"})\r",
+							"\r",
+							"pm.test(\"First User in List should not have a deaceased Date\", function()\r",
+							"{\r",
+							"    var responseJson = pm.response.json();\r",
+							"    console.log(responseJson)\r",
+							"    pm.expect(responseJson.deceasedDate).to.eql(\"\");\r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7080/status/Living/{{id_number}}",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7080",
+					"path": [
+						"status",
+						"Living",
+						"{{id_number}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2OTAzNjQ1ODIsImV4cCI6MTY5OTM2NDU4Mn0.cynMdHOvyYIwyAOzvoVmUV8qg1_MQjziiPtHnUKZCjCNxQEA6qwCgDAn4uYdy1LULS7f_Hv8dNj4N5oEMc2-9oF2HB8Mcpx-oSpxNDlq2o5PFryEzcE65ElMjgErhfteAeSmU2HQHVcq_FijwIlXFJwnDNmBsufYZzDyV_egfMc2a7xEnqonOaJEgQiBRZh9h2WmNW1picu9oFAlvndSpw4yK2XLgVZo1mBDzEk8pm17k4PTVd5JDbaHY_nrFsQ9FzcwjgfqxlieZoU2VRwZVrmY_HK8p1N7MgJ42XcXGqec5OEkuB3kHhdmxX2A9Wtxu5fa46uVN9OjAdQQR5ECdg",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"response must be valid and have a body\", function () {",
+					"     pm.response.to.be.ok;",
+					"     pm.response.to.be.withBody;",
+					"     pm.response.to.be.json;",
+					"});",
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "id_number",
+			"value": ""
+		}
+	]
+}
