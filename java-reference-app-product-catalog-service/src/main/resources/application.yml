@@ -1,3 +1,7 @@
+info:
+  app: Product Catalog Service
+  version: 0.0.1
+  description: Product Catalog API
 jwt:
   private.key: classpath:app.key
   public.key: classpath:app.pub
@@ -20,5 +24,6 @@ springdoc:
 management:
   endpoints:
     web:
+      base-path: /
       exposure:
-        include: "*"
+        include: health,info,metrics

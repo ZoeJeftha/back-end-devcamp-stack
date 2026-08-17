@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: user
+    password: password
+    driver-class-name: org.postgresql.Driver
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: health,info,metrics
