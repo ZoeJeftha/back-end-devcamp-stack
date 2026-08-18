@@ -10,7 +10,8 @@ public interface IProductService {
 
     ResponseEntity<List<ProductDto>> getProducts();
 
-   // ResponseEntity<ProductDto> createProduct(ProductDto productDto);
+    ResponseEntity<ProductDto> getProductById(Long id);
 
+    // ResponseEntity<ProductDto> createProduct(ProductDto productDto);
 }
 

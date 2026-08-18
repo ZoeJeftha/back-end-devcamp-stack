@@ -16,6 +16,7 @@ import za.co.entelect.devcamp.productcatalog.dto.ProductDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @Slf4j
 @RestController
@@ -34,6 +35,14 @@ public class ProductCatalogController {
     {
         log.info("Getting Products");
         return productService.getProducts();
+    }
+
+
+    @GetMapping("/products/{id}")
+    public ResponseEntity<ProductDto> getProductById(@PathVariable Long id)
+    {
+        log.info("Getting Product by Id");
+        return productService.getProductById(id);
     }
 
 //    @PostMapping("/create-products")

@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
 
 import java.time.Instant;
 
@@ -36,4 +37,11 @@ public class AuthenticationController {
                 .build();
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
     }
+
+//    @PostMapping("/register")
+//    public ResponseEntity<String> register(@RequestBody ApplicationUser request)
+//    {
+//
+//    }
+
 }
