@@ -7,13 +7,13 @@ import javax.persistence.*;
 
 @Data
 @Entity
-@Table(name = "applicationUser", schema = "auth")
+@Table(name = "application_user", schema = "auth")
 @AllArgsConstructor
 @NoArgsConstructor
 public class ApplicationUser {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "app_user_sequence")
-    @SequenceGenerator(name = "app_user_sequence", sequenceName = "app_user_sequence", allocationSize = 1)
+    @SequenceGenerator(name = "app_user_sequence", sequenceName = "app_user_sequence",schema="auth", allocationSize = 1)
     private Long userId;
 
     @Column(nullable = false)

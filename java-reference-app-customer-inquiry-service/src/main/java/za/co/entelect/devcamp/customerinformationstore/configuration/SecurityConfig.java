@@ -25,7 +25,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .authorizeHttpRequests(requests -> requests
-                        .antMatchers("/health", "/info", "/metrics").permitAll()
+                        .antMatchers("/health", "/info", "/metrics", "/v1/customer").permitAll()
                         .anyRequest().authenticated())
                 .csrf().disable()
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

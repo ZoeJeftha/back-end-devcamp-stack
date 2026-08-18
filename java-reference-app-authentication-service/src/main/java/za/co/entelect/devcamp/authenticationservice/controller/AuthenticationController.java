@@ -10,6 +10,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
+import za.co.entelect.devcamp.authenticationservice.requests.RegisterRequest;
+import za.co.entelect.devcamp.authenticationservice.service.ApplicationUserDetailsService;
+import org.springframework.http.HttpStatus;
 
 import java.time.Instant;
 
@@ -19,10 +23,12 @@ import java.time.Instant;
 public class AuthenticationController {
 
     public final JwtEncoder jwtEncoder;
+    public final ApplicationUserDetailsService applicationUserDetailsService;
 
     @Autowired
-    public AuthenticationController(JwtEncoder jwtEncoder) {
+    public AuthenticationController(JwtEncoder jwtEncoder, ApplicationUserDetailsService applicationUserDetailsService) {
         this.jwtEncoder = jwtEncoder;
+        this.applicationUserDetailsService = applicationUserDetailsService;
     }
 
     @PostMapping("/token")
@@ -38,10 +44,20 @@ public class AuthenticationController {
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
     }
 
-//    @PostMapping("/register")
-//    public ResponseEntity<String> register(@RequestBody ApplicationUser request)
-//    {
-//
-//    }
+    @PostMapping("/register")
+    public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
+        try
+        {
+            log.info("Register client request received");
+            applicationUserDetailsService.register(request);
+            log.info("Client registered");
+            return ResponseEntity.ok("User registered successfully");
+        }
+        catch(RuntimeException e)
+        {
+            log.info("Register client request failed");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }
+    }
 
 }
