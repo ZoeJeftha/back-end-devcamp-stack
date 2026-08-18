@@ -11,12 +11,12 @@ servers:
 
 paths:
 
-  /something:
+  /products:
     get:
-      summary: "Test endpoint"
-      operationId: getSomething
+      summary: "Get products"
+      operationId: getProducts
       tags:
-        - "something"
+        - "products"
       security: []
       responses:
         "200":
