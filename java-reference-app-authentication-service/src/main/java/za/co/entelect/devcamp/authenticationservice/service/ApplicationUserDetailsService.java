@@ -14,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Optional;
 import za.co.entelect.devcamp.authenticationservice.requests.RegisterRequest;
 import  za.co.entelect.devcamp.authenticationservice.requests.CreateCustomerRequest;
+import za.co.entelect.devcamp.authenticationservice.requests.LoginRequest;
+import org.springframework.security.authentication.BadCredentialsException;
 
 @Slf4j
 @Service
@@ -74,5 +76,26 @@ public class ApplicationUserDetailsService implements UserDetailsService {
         return applicationUserRepository.save(user);
     }
 
+    public boolean validateUsernameAndPassword(LoginRequest request) throws UsernameNotFoundException {
+
+        Optional<ApplicationUser> applicationUser = applicationUserRepository.findFirstByEmailIgnoreCase(request.getUsername());
+
+        if (applicationUser.isPresent()) {
+            log.info("Username exists, validating password");
+            String enteredPassword = request.getPassword();
+            String storedPassword = applicationUser.get().getPassword();
+
+            if (passwordEncoder.matches(enteredPassword, storedPassword)) {
+                return true;
+            } else {
+                log.info("Incorrect password entered");
+                throw new BadCredentialsException("Incorrect password");
+            }
+
+        } else {
+            log.info("Username not found");
+            throw new UsernameNotFoundException(request.getUsername());
+        }
+    }
 
 }
