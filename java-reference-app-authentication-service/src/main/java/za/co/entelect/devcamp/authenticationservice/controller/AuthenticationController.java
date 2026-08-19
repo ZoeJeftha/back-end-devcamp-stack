@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import za.co.entelect.devcamp.authenticationservice.requests.RegisterRequest;
 import za.co.entelect.devcamp.authenticationservice.service.ApplicationUserDetailsService;
 import org.springframework.http.HttpStatus;
+import za.co.entelect.devcamp.authenticationservice.requests.LoginRequest;
 
 import java.time.Instant;
 
@@ -32,14 +33,15 @@ public class AuthenticationController {
     }
 
     @PostMapping("/token")
-    public String token(Authentication authentication) {
+    public String token(@RequestBody LoginRequest loginRequest) {
+        log.info("Logging in: " + loginRequest.getUsername());
         Instant now = Instant.now();
         Long expiry = 3600L;
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("self")
                 .issuedAt(now)
                 .expiresAt(now.plusSeconds(expiry))
-                .subject(authentication.getName())
+                .subject(loginRequest.getUsername())
                 .build();
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
     }
