@@ -13,8 +13,8 @@ import javax.persistence.*;
 public class QualifyingAccounts {
     @Id
     @Column(name="qualifying_accounts_id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "app_user_sequence")
-    @SequenceGenerator(name = "app_user_sequence", sequenceName = "app_user_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "qualifying_accounts_sequence")
+    @SequenceGenerator(name = "qualifying_accounts_sequence", sequenceName = "qualifying_accounts_sequence", schema="pc", allocationSize = 1)
     private Long qualifyingAccountsId;
 
     @Column(name="product_id", nullable = false)

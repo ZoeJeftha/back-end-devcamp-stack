@@ -28,7 +28,6 @@ public class FulfilmentController {
     @GetMapping("/stuff")
     public String getStuff()
     {
-        log.info("******** THIS IS MY NEW FULFILMENT SERVICE 2********");
         return "TEST 123";
     }
 }

@@ -27,7 +27,7 @@ public class SecurityConfig {
                 .formLogin().disable()
                 .httpBasic().disable()
                 .authorizeHttpRequests(requests -> requests
-                        .antMatchers("/health", "/info", "/metrics", "/v1/stuff").permitAll()
+                        .antMatchers("/health", "/info", "/metrics").permitAll()
                         .anyRequest().authenticated())
                 .csrf().disable()
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
