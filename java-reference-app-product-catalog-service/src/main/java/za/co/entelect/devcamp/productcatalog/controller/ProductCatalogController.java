@@ -55,10 +55,4 @@ public class ProductCatalogController {
         log.info("Customer eligibility request received");
         return productEligibilityService.isCustomerEligible(customerEligibilityRequest);
     }
-
-//    @PostMapping("/create-products")
-//    public ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto productDto)
-//    {
-//        return productService.createProduct(productDto);
-//    }
 }

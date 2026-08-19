@@ -19,6 +19,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
+pub.key: classpath:app.pub
 springdoc:
   show-actuator: false
 management:

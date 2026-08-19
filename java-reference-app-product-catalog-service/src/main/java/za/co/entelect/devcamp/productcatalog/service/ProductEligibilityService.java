@@ -15,6 +15,7 @@ public class ProductEligibilityService implements IProductEligibilityService {
     }
 
     public boolean isCustomerEligible(CustomerEligibilityRequest customerEligibilityRequest) {
+        
         return qualifyingCustomerTypesRepository.existsByProductIdAndCustomerTypesId(
                 customerEligibilityRequest.getProductId(),
                 customerEligibilityRequest.getCustomerTypesId()

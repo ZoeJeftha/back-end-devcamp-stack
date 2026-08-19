@@ -62,25 +62,4 @@ public class ProductService implements IProductService {
             return ResponseEntity.internalServerError().build();
         }
     }
-
-//    @Override
-//    public ResponseEntity<ProductDto> createProduct(ProductDto productDto) {
-//        Products product = new Products();
-//
-//        product.setName(productDto.getName());
-//        product.setDescription(productDto.getDescription());
-//        product.setPrice(productDto.getPrice());
-//        product.setImageUrl(productDto.getImageUrl());
-//
-//        Products savedProduct = productRepository.save(product);
-//
-//        ProductDto productDtoResponse = ProductDto(
-//                savedProduct.getProductId(),
-//                savedProduct.getName(),
-//                savedProduct.getDescription(),
-//                savedProduct.getPrice(),
-//                savedProduct.getImageUrl()
-//        );
-//        return new ResponseEntity<>(productDtoResponse, HttpStatus.OK);
-//    }
 }
