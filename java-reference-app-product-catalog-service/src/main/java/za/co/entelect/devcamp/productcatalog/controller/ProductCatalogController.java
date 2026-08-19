@@ -17,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 import org.springframework.web.bind.annotation.PathVariable;
+import za.co.entelect.devcamp.productcatalog.requests.CustomerEligibilityRequest;
+import za.co.entelect.devcamp.productcatalog.service.IProductEligibilityService;
 
 @Slf4j
 @RestController
@@ -24,10 +26,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 public class ProductCatalogController {
 
     public final IProductService productService;
+    public final IProductEligibilityService productEligibilityService;
 
-    public ProductCatalogController(IProductService productService)
+    public ProductCatalogController(IProductService productService, IProductEligibilityService productEligibilityService)
     {
         this.productService = productService;
+        this.productEligibilityService = productEligibilityService;
     }
 
     @GetMapping("/products")
@@ -45,9 +49,10 @@ public class ProductCatalogController {
         return productService.getProductById(id);
     }
 
-//    @PostMapping("/create-products")
-//    public ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto productDto)
-//    {
-//        return productService.createProduct(productDto);
-//    }
+    @PostMapping("/customer-eligibility-check")
+    public boolean getProductById(@RequestBody CustomerEligibilityRequest customerEligibilityRequest)
+    {
+        log.info("Customer eligibility request received");
+        return productEligibilityService.isCustomerEligible(customerEligibilityRequest);
+    }
 }

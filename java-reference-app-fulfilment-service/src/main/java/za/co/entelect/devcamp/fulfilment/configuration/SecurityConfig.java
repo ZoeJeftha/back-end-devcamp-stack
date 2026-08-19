@@ -1,4 +1,4 @@
-package za.co.entelect.devcamp.productcatalog.configuration;
+package za.co.entelect.devcamp.fulfilment.configuration;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -24,8 +24,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
+                .formLogin().disable()
+                .httpBasic().disable()
                 .authorizeHttpRequests(requests -> requests
-                        .antMatchers("/v1/products", "/v1/products/{id}", "/health", "/info", "/metrics").permitAll()
+                        .antMatchers("/health", "/info", "/metrics").permitAll()
                         .anyRequest().authenticated())
                 .csrf().disable()
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -1,7 +1,7 @@
 info:
-  app: Product Catalog Service
+  app: Fulfilment Service
   version: 0.0.1
-  description: Product Catalog API
+  description: Fulfilment API
 jwt:
   private.key: classpath:app.key
   public.key: classpath:app.pub
@@ -19,9 +19,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
-pub.key: classpath:app.pub
 springdoc:
   show-actuator: false
+pub.key: classpath:app.pub
 management:
   endpoints:
     web:
