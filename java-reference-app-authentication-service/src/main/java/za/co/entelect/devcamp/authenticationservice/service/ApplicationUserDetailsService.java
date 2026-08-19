@@ -68,7 +68,8 @@ public class ApplicationUserDetailsService implements UserDetailsService {
                         request.getUsername(),
                         request.getFirstName(),
                         request.getLastName(),
-                        request.getIdNumber()));
+                        request.getIdNumber(),
+                        request.getCustomerTypeId()));
 
         return applicationUserRepository.save(user);
     }

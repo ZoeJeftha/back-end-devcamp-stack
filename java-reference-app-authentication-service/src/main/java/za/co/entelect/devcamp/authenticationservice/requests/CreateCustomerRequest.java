@@ -12,4 +12,5 @@ public class CreateCustomerRequest {
     private String firstName;
     private String lastName;
     private String idNumber;
+    private int customerTypeId;
 }

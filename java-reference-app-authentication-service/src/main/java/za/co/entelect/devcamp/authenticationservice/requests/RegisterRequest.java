@@ -17,4 +17,5 @@ public class RegisterRequest {
     private String lastName;
     private String idNumber;
     private String role;
+    private int customerTypeId;
 }
