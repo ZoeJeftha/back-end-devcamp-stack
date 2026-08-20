@@ -34,7 +34,7 @@ public class SecurityConfig {
             // -- Swagger UI v3 (OpenAPI)
             "/v3/api-docs/**", "/swagger-ui/**"
             // other public endpoints of your API may be appended to this array
-            ,"/health", "/metrics" , "/info"
+            ,"/health", "/metrics" , "/info", "/token", "/register"
     };
     @Value("${jwt.public.key}")
     private RSAPublicKey publicKey;

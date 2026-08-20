@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import javax.persistence.*;
 import za.co.entelect.devcamp.customerinformationstore.model.CustomerDto;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PostMapping;
 
 @RestController
 @RequestMapping("/v1")
@@ -28,4 +30,21 @@ public class CustomerController {
 
         return customerService.getCustomerByEmailAddress(username);
     }
+
+    @PostMapping("/open-account")
+    public ResponseEntity<?> OpenAccount(
+            @AuthenticationPrincipal Jwt jwt , @RequestBody Integer accountTypeId) {
+
+        try {
+            String username = jwt.getSubject();
+
+            return customerService.OpenAccount(username, accountTypeId);
+        }
+        catch(Exception e)
+        {
+            return ResponseEntity.internalServerError().body("Failed to open an account");
+        }
+
+    }
+
 }
