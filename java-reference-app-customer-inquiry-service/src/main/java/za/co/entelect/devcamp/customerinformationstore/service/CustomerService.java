@@ -145,4 +145,23 @@ public class CustomerService implements CustomerApiDelegate {
             return ResponseEntity.notFound().build();
         }
     }
+
+    public ResponseEntity<CustomerDto> OpenAccount(String emailAddress, Integer accountTypeId) throws Exception
+    {
+        try {
+            Optional<Customer> customerByEmail = customerRepository.findCustomerByEmail(emailAddress);
+            if (customerByEmail.isPresent()) {
+                addCustomerAccountsToCustomerById(Math.toIntExact(customerByEmail.get().getCustomerId()), accountTypeId);
+                ResponseEntity<CustomerDto> customer = getCustomerByEmailAddress(emailAddress);
+                return customer;
+            } else {
+                throw new Exception("Customer not found");
+            }
+        }
+        catch(Exception e)
+        {
+            throw new Exception("Error occurred while trying to open account", e);
+        }
+    }
+
 }
