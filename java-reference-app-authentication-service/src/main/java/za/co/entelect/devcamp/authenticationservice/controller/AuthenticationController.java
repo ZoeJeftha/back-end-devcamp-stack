@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import za.co.entelect.devcamp.authenticationservice.requests.LoginRequest;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.authentication.BadCredentialsException;
+import za.co.entelect.devcamp.authenticationservice.responses.RegisterResponse;
 
 import java.time.Instant;
 
@@ -72,18 +73,30 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request) {
         try
         {
             log.info("Register client request received");
             applicationUserDetailsService.register(request);
             log.info("Client registered");
-            return ResponseEntity.ok("User registered successfully");
+
+            Instant now = Instant.now();
+            Long expiry = 3600L;
+            JwtClaimsSet claims = JwtClaimsSet.builder()
+                    .issuer("self")
+                    .issuedAt(now)
+                    .expiresAt(now.plusSeconds(expiry))
+                    .subject(request.getUsername())
+                    .build();
+            String token =  jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+
+            RegisterResponse response = new RegisterResponse(true, "User registered successfully", token);
+            return ResponseEntity.ok(response);
         }
         catch(RuntimeException e)
         {
-            log.info("Register client request failed");
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+            RegisterResponse response = new RegisterResponse(false, "Registration failed: " + e.getMessage(), "");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
