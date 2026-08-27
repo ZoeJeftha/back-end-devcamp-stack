@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegisterResponse {
+public class RegisterOrLoginResponse {
     public Boolean success;
     public String message;
     public String token;
