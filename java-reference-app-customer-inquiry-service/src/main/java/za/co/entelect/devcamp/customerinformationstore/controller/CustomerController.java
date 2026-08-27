@@ -44,7 +44,5 @@ public class CustomerController {
         {
             return ResponseEntity.internalServerError().body("Failed to open an account");
         }
-
     }
-
 }

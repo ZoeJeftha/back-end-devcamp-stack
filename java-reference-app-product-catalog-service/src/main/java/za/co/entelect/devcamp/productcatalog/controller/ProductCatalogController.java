@@ -17,7 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 import org.springframework.web.bind.annotation.PathVariable;
-import za.co.entelect.devcamp.productcatalog.requests.CustomerEligibilityRequest;
+import za.co.entelect.devcamp.productcatalog.requests.CustomerProductEligibilityRequest;
+import za.co.entelect.devcamp.productcatalog.requests.CustomerAccountEligibilityRequest;
 import za.co.entelect.devcamp.productcatalog.service.IProductEligibilityService;
 
 @Slf4j
@@ -49,10 +50,17 @@ public class ProductCatalogController {
         return productService.getProductById(id);
     }
 
-    @PostMapping("/customer-eligibility-check")
-    public boolean getProductById(@RequestBody CustomerEligibilityRequest customerEligibilityRequest)
+    @PostMapping("/customer-product-eligibility-check")
+    public boolean CustomerTypeEligibilityCheck(@RequestBody CustomerProductEligibilityRequest customerProductEligibilityRequest)
     {
-        log.info("Customer eligibility request received");
-        return productEligibilityService.isCustomerEligible(customerEligibilityRequest);
+        log.info("Customer product eligibility request received");
+        return productEligibilityService.isCustomerEligible(customerProductEligibilityRequest);
+    }
+
+    @PostMapping("/customer-account-eligibility-check")
+    public boolean CustomerAccountEligibilityCheck(@RequestBody CustomerAccountEligibilityRequest customerEligibilityRequest)
+    {
+        log.info("Customer account eligibility request received");
+        return productEligibilityService.isCustomerAccountEligible(customerEligibilityRequest);
     }
 }
