@@ -8,8 +8,8 @@ import java.util.List;
 
 public interface IProductService {
 
-    ResponseEntity<List<ProductDto>> getProducts();
+    List<ProductDto> getProducts();
 
-    ResponseEntity<ProductDto> getProductById(Long id);
+    ProductDto getProductById(Long id);
 }
 

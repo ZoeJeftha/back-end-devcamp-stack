@@ -23,43 +23,32 @@ public class ProductService implements IProductService {
     }
 
     @Override
-    public ResponseEntity<List<ProductDto>> getProducts() {
-        try {
-            List<Products> allProducts = productRepository.findAll();
-            List<ProductDto> productDtoList = allProducts.stream()
-                    .map(product -> new ProductDto(
-                            product.getProductId(),
-                            product.getName(),
-                            product.getDescription(),
-                            product.getPrice(),
-                            product.getImageUrl()
-                    ))
-                    .collect(Collectors.toList());
-            return new ResponseEntity<>(productDtoList, HttpStatus.OK);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+    public List<ProductDto> getProducts() {
+        List<Products> allProducts = productRepository.findAll();
+        List<ProductDto> productDtoList = allProducts.stream()
+                .map(product -> new ProductDto(
+                        product.getProductId(),
+                        product.getName(),
+                        product.getDescription(),
+                        product.getPrice(),
+                        product.getImageUrl()
+                ))
+                .collect(Collectors.toList());
+        return productDtoList;
     }
 
     @Override
-    public ResponseEntity<ProductDto> getProductById(Long id) {
-        try
-        {
-            Products product = productRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Product not found"));
+    public ProductDto getProductById(Long id) {
+        Products product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
 
-            ProductDto productDto = new ProductDto(
-                    product.getProductId(),
-                    product.getName(),
-                    product.getDescription(),
-                    product.getPrice(),
-                    product.getImageUrl()
-            );
-            return new ResponseEntity<>(productDto, HttpStatus.OK);
-        }
-        catch(Exception e)
-        {
-            return ResponseEntity.internalServerError().build();
-        }
+        ProductDto productDto = new ProductDto(
+                product.getProductId(),
+                product.getName(),
+                product.getDescription(),
+                product.getPrice(),
+                product.getImageUrl()
+        );
+        return productDto;
     }
 }

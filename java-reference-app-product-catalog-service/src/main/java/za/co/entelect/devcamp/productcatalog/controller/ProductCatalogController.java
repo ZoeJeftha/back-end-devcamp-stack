@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import za.co.entelect.devcamp.productcatalog.requests.CustomerProductEligibilityRequest;
 import za.co.entelect.devcamp.productcatalog.requests.CustomerAccountEligibilityRequest;
 import za.co.entelect.devcamp.productcatalog.service.IProductEligibilityService;
+import za.co.entelect.devcamp.productcatalog.responses.ApiResponse;
 
 @Slf4j
 @RestController
@@ -36,31 +37,64 @@ public class ProductCatalogController {
     }
 
     @GetMapping("/products")
-    public ResponseEntity<List<ProductDto>> getProducts()
+    public ResponseEntity<ApiResponse<List<ProductDto>>> getProducts()
     {
         log.info("Getting Products");
-        return productService.getProducts();
+        try {
+            List<ProductDto> products = productService.getProducts();
+            ApiResponse<List<ProductDto>> response = new ApiResponse<List<ProductDto>>(true, "Products retrieved successfully",products);
+            return ResponseEntity.ok(response);
+        }
+        catch(Exception e)
+        {
+            log.info("Failed to retrieve products: " + e.getMessage());
+            ApiResponse<List<ProductDto>> response = new ApiResponse<List<ProductDto>>(false, "Failed to retrieve products: "+ e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
+        }
     }
 
-
     @GetMapping("/products/{id}")
-    public ResponseEntity<ProductDto> getProductById(@PathVariable Long id)
+    public ResponseEntity<ApiResponse<ProductDto>> getProductById(@PathVariable Long id)
     {
         log.info("Getting Product by Id");
-        return productService.getProductById(id);
+        try {
+            ProductDto product = productService.getProductById(id);
+            ApiResponse<ProductDto> response = new ApiResponse<ProductDto>(true, "Product retrieved successfully",product);
+            return ResponseEntity.ok(response);
+        }
+        catch(Exception e)
+        {
+            log.info("Failed to retrieve product" + e.getMessage());
+            ApiResponse<ProductDto> response = new ApiResponse<ProductDto>(false, "Failed to retrieve product: "+ e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
+        }
+
     }
 
     @PostMapping("/customer-product-eligibility-check")
     public boolean CustomerTypeEligibilityCheck(@RequestBody CustomerProductEligibilityRequest customerProductEligibilityRequest)
     {
         log.info("Customer product eligibility request received");
-        return productEligibilityService.isCustomerEligible(customerProductEligibilityRequest);
+        try {
+            return productEligibilityService.isCustomerEligible(customerProductEligibilityRequest);
+        }
+        catch(Exception e)
+        {
+            return false;
+        }
     }
 
     @PostMapping("/customer-account-eligibility-check")
     public boolean CustomerAccountEligibilityCheck(@RequestBody CustomerAccountEligibilityRequest customerEligibilityRequest)
     {
         log.info("Customer account eligibility request received");
-        return productEligibilityService.isCustomerAccountEligible(customerEligibilityRequest);
+        try {
+            return productEligibilityService.isCustomerAccountEligible(customerEligibilityRequest);
+        }
+        catch(Exception e)
+        {
+            return false;
+        }
+
     }
 }
