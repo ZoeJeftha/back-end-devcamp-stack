@@ -160,7 +160,7 @@ public class CustomerService implements CustomerApiDelegate {
         }
         catch(Exception e)
         {
-            throw new Exception("Error occurred while trying to open account", e);
+            throw new Exception("Error occurred while trying to open account: "+ e.getMessage(),e);
         }
     }
 

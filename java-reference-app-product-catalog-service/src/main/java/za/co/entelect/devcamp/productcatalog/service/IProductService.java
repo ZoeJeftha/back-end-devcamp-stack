@@ -5,11 +5,15 @@ import za.co.entelect.devcamp.productcatalog.dto.ProductDto;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface IProductService {
 
-    ResponseEntity<List<ProductDto>> getProducts();
+    List<ProductDto> getProducts();
 
-    ResponseEntity<ProductDto> getProductById(Long id);
+    Page<ProductDto> getProducts(Pageable pageable);
+
+    ProductDto getProductById(Long id);
 }
 
