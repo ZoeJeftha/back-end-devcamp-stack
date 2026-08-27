@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CustomerEligibilityRequest {
+public class CustomerProductEligibilityRequest {
     public Long productId;
     public Long customerTypesId;
 }
