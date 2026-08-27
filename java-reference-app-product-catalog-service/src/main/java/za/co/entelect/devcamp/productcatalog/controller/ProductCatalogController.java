@@ -72,28 +72,36 @@ public class ProductCatalogController {
     }
 
     @PostMapping("/customer-product-eligibility-check")
-    public boolean CustomerTypeEligibilityCheck(@RequestBody CustomerProductEligibilityRequest customerProductEligibilityRequest)
+    public ResponseEntity<ApiResponse<Boolean>> CustomerTypeEligibilityCheck(@RequestBody CustomerProductEligibilityRequest customerProductEligibilityRequest)
     {
         log.info("Customer product eligibility request received");
         try {
-            return productEligibilityService.isCustomerEligible(customerProductEligibilityRequest);
+            Boolean isEligible = productEligibilityService.isCustomerEligible(customerProductEligibilityRequest);
+            ApiResponse<Boolean> response = new ApiResponse<Boolean>(true, "Customer Eligibility Result Retrieved",isEligible);
+            return ResponseEntity.ok(response);
         }
         catch(Exception e)
         {
-            return false;
+            log.info("Failed to check customer eligibility" + e.getMessage());
+            ApiResponse<Boolean> response = new ApiResponse<Boolean>(false, "Failed to retrieve customer eligibility: "+ e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
         }
     }
 
     @PostMapping("/customer-account-eligibility-check")
-    public boolean CustomerAccountEligibilityCheck(@RequestBody CustomerAccountEligibilityRequest customerEligibilityRequest)
+    public ResponseEntity<ApiResponse<Boolean>> CustomerAccountEligibilityCheck(@RequestBody CustomerAccountEligibilityRequest customerEligibilityRequest)
     {
         log.info("Customer account eligibility request received");
         try {
-            return productEligibilityService.isCustomerAccountEligible(customerEligibilityRequest);
+            Boolean isEligible= productEligibilityService.isCustomerAccountEligible(customerEligibilityRequest);
+            ApiResponse<Boolean> response = new ApiResponse<Boolean>(true, "Customer Eligibility Result Retrieved",isEligible);
+            return ResponseEntity.ok(response);
         }
         catch(Exception e)
         {
-            return false;
+            log.info("Failed to check customer account eligibility" + e.getMessage());
+            ApiResponse<Boolean> response = new ApiResponse<Boolean>(false, "Failed to retrieve customer account eligibility: "+ e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
         }
 
     }

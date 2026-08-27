@@ -25,6 +25,7 @@ public class ProductService implements IProductService {
     @Override
     public List<ProductDto> getProducts() {
         List<Products> allProducts = productRepository.findAll();
+
         List<ProductDto> productDtoList = allProducts.stream()
                 .map(product -> new ProductDto(
                         product.getProductId(),
