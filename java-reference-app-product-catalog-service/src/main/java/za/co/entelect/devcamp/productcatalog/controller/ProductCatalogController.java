@@ -21,6 +21,10 @@ import za.co.entelect.devcamp.productcatalog.requests.CustomerProductEligibility
 import za.co.entelect.devcamp.productcatalog.requests.CustomerAccountEligibilityRequest;
 import za.co.entelect.devcamp.productcatalog.service.IProductEligibilityService;
 import za.co.entelect.devcamp.productcatalog.responses.ApiResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Slf4j
 @RestController
@@ -37,13 +41,27 @@ public class ProductCatalogController {
     }
 
     @GetMapping("/products")
-    public ResponseEntity<ApiResponse<List<ProductDto>>> getProducts()
+    public ResponseEntity<ApiResponse<List<ProductDto>>> getProducts(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size
+    )
     {
         log.info("Getting Products");
         try {
-            List<ProductDto> products = productService.getProducts();
-            ApiResponse<List<ProductDto>> response = new ApiResponse<List<ProductDto>>(true, "Products retrieved successfully",products);
-            return ResponseEntity.ok(response);
+            if (page == null || size == null) {
+                List<ProductDto> products = productService.getProducts();
+                ApiResponse<List<ProductDto>> response = new ApiResponse<List<ProductDto>>(true, "Products retrieved successfully", products);
+                return ResponseEntity.ok(response);
+            }
+            else
+            {
+                Pageable pageable = PageRequest.of(page, size);
+
+                Page<ProductDto> pagedProducts = productService.getProducts(pageable);
+                List<ProductDto> products = pagedProducts.getContent();
+                ApiResponse<List<ProductDto>> response = new ApiResponse<List<ProductDto>>(true, "Products retrieved successfully", products);
+                return ResponseEntity.ok(response);
+            }
         }
         catch(Exception e)
         {

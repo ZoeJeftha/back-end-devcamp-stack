@@ -11,6 +11,8 @@ import za.co.entelect.devcamp.productcatalog.service.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 public class ProductService implements IProductService {
@@ -51,5 +53,19 @@ public class ProductService implements IProductService {
                 product.getImageUrl()
         );
         return productDto;
+    }
+
+    @Override
+    public Page<ProductDto> getProducts(Pageable pageable) {
+
+        Page<Products> products = productRepository.findAll(pageable);
+
+        return products.map(product -> new ProductDto(
+                product.getProductId(),
+                product.getName(),
+                product.getDescription(),
+                product.getPrice(),
+                product.getImageUrl()
+        ));
     }
 }
