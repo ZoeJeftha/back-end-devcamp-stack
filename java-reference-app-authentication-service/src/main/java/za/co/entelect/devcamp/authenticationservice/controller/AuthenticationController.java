@@ -17,7 +17,7 @@ import org.springframework.http.HttpStatus;
 import za.co.entelect.devcamp.authenticationservice.requests.LoginRequest;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.authentication.BadCredentialsException;
-import za.co.entelect.devcamp.authenticationservice.responses.RegisterResponse;
+import za.co.entelect.devcamp.authenticationservice.responses.RegisterOrLoginResponse;
 
 import java.time.Instant;
 
@@ -36,8 +36,9 @@ public class AuthenticationController {
     }
 
     @PostMapping("/token")
-    public String token(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<RegisterOrLoginResponse> token(@RequestBody LoginRequest loginRequest) {
         log.info("Log in request recieved for username: " + loginRequest.getUsername());
+        RegisterOrLoginResponse response = null;
         try {
             log.info("Validating username and password");
             boolean passwordValidated = applicationUserDetailsService.validateUsernameAndPassword(loginRequest);
@@ -51,29 +52,41 @@ public class AuthenticationController {
                         .expiresAt(now.plusSeconds(expiry))
                         .subject(loginRequest.getUsername())
                         .build();
-                return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+                String token = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+
+                response = new RegisterOrLoginResponse(true, "Logged in successfully", token);
+                return ResponseEntity.ok(response);
             }
             else
             {
-                return "Username or password is incorrect";
+                response = new RegisterOrLoginResponse(false, "Incorrect username or password", "");
+                return ResponseEntity.ok(response);
             }
         }
         catch(UsernameNotFoundException e)
         {
-            return "Username does not exist";
+            response = new RegisterOrLoginResponse(false, "Username does not exist", "");
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(response);
         }
         catch(BadCredentialsException e)
         {
-            return "Password incorrect";
+            response = new RegisterOrLoginResponse(false, "Password incorrect", "");
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(response);
         }
         catch(Exception e)
         {
-            return "Error occured: "+ e.getMessage();
+            response = new RegisterOrLoginResponse(false, "Login failed. Error occurred: " + e.getMessage(), "");
+            return ResponseEntity.internalServerError()
+                    .body(response);
         }
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<RegisterOrLoginResponse> register(@RequestBody RegisterRequest request) {
         try
         {
             log.info("Register client request received");
@@ -90,14 +103,13 @@ public class AuthenticationController {
                     .build();
             String token =  jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
 
-            RegisterResponse response = new RegisterResponse(true, "User registered successfully", token);
+            RegisterOrLoginResponse response = new RegisterOrLoginResponse(true, "User registered successfully", token);
             return ResponseEntity.ok(response);
         }
         catch(RuntimeException e)
         {
-            RegisterResponse response = new RegisterResponse(false, "Registration failed: " + e.getMessage(), "");
+            RegisterOrLoginResponse response = new RegisterOrLoginResponse(false, "Registration failed: " + e.getMessage(), "");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-
 }
