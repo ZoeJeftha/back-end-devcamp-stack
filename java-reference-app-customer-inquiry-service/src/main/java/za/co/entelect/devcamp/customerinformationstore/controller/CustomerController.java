@@ -46,19 +46,19 @@ public class CustomerController {
     }
 
     @PostMapping("/open-account")
-    public ResponseEntity<ApiResponse<ResponseEntity<CustomerDto>>> OpenAccount(
+    public ResponseEntity<ApiResponse<CustomerDto>> OpenAccount(
             @AuthenticationPrincipal Jwt jwt , @RequestBody Integer accountTypeId) {
 
         try {
             String username = jwt.getSubject();
 
-            ResponseEntity<CustomerDto> customer = customerService.OpenAccount(username, accountTypeId);
-            ApiResponse<ResponseEntity<CustomerDto>> response = new ApiResponse<ResponseEntity<CustomerDto>>(true, "Account opened successfully", customer);
+            CustomerDto customer = customerService.OpenAccount(username, accountTypeId);
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(true, "Account opened successfully", customer);
             return ResponseEntity.ok(response);
         }
         catch(Exception e)
         {
-            ApiResponse<ResponseEntity<CustomerDto>> response = new ApiResponse<ResponseEntity<CustomerDto>>(false, "Failed to open account: "+ e.getMessage(), null);
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to open account: "+ e.getMessage(), null);
             return ResponseEntity.internalServerError().body(response);
         }
     }
@@ -98,14 +98,11 @@ public class CustomerController {
     }
 //
 //    @PostMapping("/customer-eligibility")
-//    public String CheckCustomerEligibility(
+//    public ResponseEntity<ApiResponse<ResponseEntity<CustomerDto>>> OpenAccount(
 //            @AuthenticationPrincipal Jwt jwt , @RequestBody Integer accountTypeId) {
 //
 //        try {
 //            String username = jwt.getSubject();
-//
-//
-//            ResponseEntity<CustomerDto> customer = customerService.getCustomerByEmailAddress(username);
 //
 //            ResponseEntity<CustomerDto> customer = customerService.OpenAccount(username, accountTypeId);
 //            ApiResponse<ResponseEntity<CustomerDto>> response = new ApiResponse<ResponseEntity<CustomerDto>>(true, "Account opened successfully", customer);
