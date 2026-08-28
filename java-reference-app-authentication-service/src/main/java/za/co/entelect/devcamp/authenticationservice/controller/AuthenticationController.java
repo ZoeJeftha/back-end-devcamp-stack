@@ -75,30 +75,20 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterOrLoginResponse> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<RegisterOrLoginResponse> register(@RequestBody RegisterRequest request)
+    {
         try
         {
             log.info("Register client request received");
             applicationUserDetailsService.register(request);
             log.info("Client registered");
 
-            Instant now = Instant.now();
-            Long expiry = 3600L;
-            JwtClaimsSet claims = JwtClaimsSet.builder()
-                    .issuer("self")
-                    .issuedAt(now)
-                    .expiresAt(now.plusSeconds(expiry))
-                    .subject(request.getUsername())
-                    .claim("role", "customer")
-                    .build();
-            String token =  jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
-
-            RegisterOrLoginResponse response = new RegisterOrLoginResponse(true, "User registered successfully", token);
+            RegisterOrLoginResponse response = new RegisterOrLoginResponse(true, "User registered successfully", null);
             return ResponseEntity.ok(response);
         }
         catch(RuntimeException e)
         {
-            RegisterOrLoginResponse response = new RegisterOrLoginResponse(false, "Registration failed: " + e.getMessage(), "");
+            RegisterOrLoginResponse response = new RegisterOrLoginResponse(false, "Registration failed: " + e.getMessage(), null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
