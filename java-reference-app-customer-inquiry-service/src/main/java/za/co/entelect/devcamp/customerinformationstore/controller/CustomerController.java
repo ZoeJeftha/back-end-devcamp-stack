@@ -98,13 +98,13 @@ public class CustomerController {
     }
 //
 //    @PostMapping("/customer-eligibility")
-//    public ResponseEntity<ApiResponse<ResponseEntity<CustomerDto>>> OpenAccount(
-//            @AuthenticationPrincipal Jwt jwt , @RequestBody Integer accountTypeId) {
+//    public String IsCustomerEligibile(
+//            @AuthenticationPrincipal Jwt jwt , @RequestBody Integer productId) {
 //
 //        try {
 //            String username = jwt.getSubject();
 //
-//            ResponseEntity<CustomerDto> customer = customerService.OpenAccount(username, accountTypeId);
+//            CustomerDto customer = customerService.isCustomerEligible(username, productId);
 //            ApiResponse<ResponseEntity<CustomerDto>> response = new ApiResponse<ResponseEntity<CustomerDto>>(true, "Account opened successfully", customer);
 //            return ResponseEntity.ok(response);
 //        }

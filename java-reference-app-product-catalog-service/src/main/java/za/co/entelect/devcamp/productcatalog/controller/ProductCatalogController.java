@@ -17,8 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 import org.springframework.web.bind.annotation.PathVariable;
-import za.co.entelect.devcamp.productcatalog.requests.CustomerProductEligibilityRequest;
-import za.co.entelect.devcamp.productcatalog.requests.CustomerAccountEligibilityRequest;
+import za.co.entelect.devcamp.productcatalog.requests.CustomerEligibilityRequest;
 import za.co.entelect.devcamp.productcatalog.service.IProductEligibilityService;
 import za.co.entelect.devcamp.productcatalog.responses.ApiResponse;
 import org.springframework.data.domain.Page;
@@ -89,12 +88,12 @@ public class ProductCatalogController {
 
     }
 
-    @PostMapping("/customer-product-eligibility-check")
-    public ResponseEntity<ApiResponse<Boolean>> CustomerTypeEligibilityCheck(@RequestBody CustomerProductEligibilityRequest customerProductEligibilityRequest)
+    @PostMapping("/customer-eligibility-check")
+    public ResponseEntity<ApiResponse<Boolean>> CustomerTypeEligibilityCheck(@RequestBody CustomerEligibilityRequest customerEligibilityRequest)
     {
         log.info("Customer product eligibility request received");
         try {
-            Boolean isEligible = productEligibilityService.isCustomerEligible(customerProductEligibilityRequest);
+            Boolean isEligible = productEligibilityService.isCustomerEligible(customerEligibilityRequest);
             ApiResponse<Boolean> response = new ApiResponse<Boolean>(true, "Customer Eligibility Result Retrieved",isEligible);
             return ResponseEntity.ok(response);
         }
@@ -106,21 +105,4 @@ public class ProductCatalogController {
         }
     }
 
-    @PostMapping("/customer-account-eligibility-check")
-    public ResponseEntity<ApiResponse<Boolean>> CustomerAccountEligibilityCheck(@RequestBody CustomerAccountEligibilityRequest customerEligibilityRequest)
-    {
-        log.info("Customer account eligibility request received");
-        try {
-            Boolean isEligible= productEligibilityService.isCustomerAccountEligible(customerEligibilityRequest);
-            ApiResponse<Boolean> response = new ApiResponse<Boolean>(true, "Customer Eligibility Result Retrieved",isEligible);
-            return ResponseEntity.ok(response);
-        }
-        catch(Exception e)
-        {
-            log.info("Failed to check customer account eligibility" + e.getMessage());
-            ApiResponse<Boolean> response = new ApiResponse<Boolean>(false, "Failed to retrieve customer account eligibility: "+ e.getMessage(), null);
-            return ResponseEntity.internalServerError().body(response);
-        }
-
-    }
 }

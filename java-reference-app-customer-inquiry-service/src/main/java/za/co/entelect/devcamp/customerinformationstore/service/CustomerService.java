@@ -169,4 +169,15 @@ public class CustomerService implements CustomerApiDelegate {
         }
     }
 
+//    public String IsCustomerEligible(username, productId)
+//    {
+//        Optional<Customer> customerByEmail = customerRepository.findCustomerByEmail(emailAddress);
+//        if (customerByEmail.isPresent()) {
+//
+//            return customer.getBody();
+//        } else {
+//            throw new Exception("Customer not found");
+//        }
+//    }
+
 }
