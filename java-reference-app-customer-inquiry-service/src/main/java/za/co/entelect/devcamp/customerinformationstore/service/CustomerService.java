@@ -10,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import za.co.entelect.devcamp.customerinformationstore.controller.CustomerApiDelegate;
 import za.co.entelect.devcamp.customerinformationstore.model.*;
 import za.co.entelect.devcamp.customerinformationstore.repository.*;
+import za.co.entelect.devcamp.authenticationservice.helpers.CustomerHelper;
 
 import java.util.List;
 import java.util.Optional;
@@ -140,27 +141,31 @@ public class CustomerService implements CustomerApiDelegate {
     public ResponseEntity<CustomerDto> getCustomerByEmailAddress(String emailAddress) {
         Optional<Customer> customerByEmail = customerRepository.findCustomerByEmail(emailAddress);
         if (customerByEmail.isPresent()) {
-            return ResponseEntity.ok(customerByEmail.get().toCustomerDto());
+            Customer customer = customerByEmail.get();
+            String maskedIdNumber = CustomerHelper.maskIdNumber(customer.getIdNumber());
+            customer.setIdNumber(maskedIdNumber);
+
+            return ResponseEntity.ok(customer.toCustomerDto());
         } else {
             return ResponseEntity.notFound().build();
         }
     }
 
-    public ResponseEntity<CustomerDto> OpenAccount(String emailAddress, Integer accountTypeId) throws Exception
+    public CustomerDto OpenAccount(String emailAddress, Integer accountTypeId) throws Exception
     {
         try {
             Optional<Customer> customerByEmail = customerRepository.findCustomerByEmail(emailAddress);
             if (customerByEmail.isPresent()) {
                 addCustomerAccountsToCustomerById(Math.toIntExact(customerByEmail.get().getCustomerId()), accountTypeId);
                 ResponseEntity<CustomerDto> customer = getCustomerByEmailAddress(emailAddress);
-                return customer;
+                return customer.getBody();
             } else {
                 throw new Exception("Customer not found");
             }
         }
         catch(Exception e)
         {
-            throw new Exception("Error occurred while trying to open account: "+ e.getMessage(),e);
+            throw new Exception("Error occurred while trying to open account", e);
         }
     }
 
