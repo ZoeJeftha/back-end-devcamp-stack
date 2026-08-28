@@ -16,6 +16,7 @@ import za.co.entelect.devcamp.authenticationservice.requests.RegisterRequest;
 import  za.co.entelect.devcamp.authenticationservice.requests.CreateCustomerRequest;
 import za.co.entelect.devcamp.authenticationservice.requests.LoginRequest;
 import org.springframework.security.authentication.BadCredentialsException;
+import za.co.entelect.devcamp.authenticationservice.responses.ValidationResult;
 
 @Slf4j
 @Service
@@ -76,7 +77,8 @@ public class ApplicationUserDetailsService implements UserDetailsService {
         return applicationUserRepository.save(user);
     }
 
-    public boolean validateUsernameAndPassword(LoginRequest request) throws UsernameNotFoundException {
+    public ValidationResult validateUsernameAndPassword(LoginRequest request) throws Exception
+    {
 
         Optional<ApplicationUser> applicationUser = applicationUserRepository.findFirstByEmailIgnoreCase(request.getUsername());
 
@@ -86,15 +88,15 @@ public class ApplicationUserDetailsService implements UserDetailsService {
             String storedPassword = applicationUser.get().getPassword();
 
             if (passwordEncoder.matches(enteredPassword, storedPassword)) {
-                return true;
+                return new ValidationResult(true, applicationUser.get().getRole());
             } else {
-                log.info("Incorrect password entered");
-                throw new BadCredentialsException("Incorrect password");
+                log.info("Incorrect username or password");
+                throw new Exception("Incorrect username or password");
             }
 
         } else {
-            log.info("Username not found");
-            throw new UsernameNotFoundException(request.getUsername());
+            log.info("Incorrect username or password");
+            throw new Exception("Incorrect username or password");
         }
     }
 

@@ -18,6 +18,7 @@ import za.co.entelect.devcamp.authenticationservice.requests.LoginRequest;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.authentication.BadCredentialsException;
 import za.co.entelect.devcamp.authenticationservice.responses.RegisterOrLoginResponse;
+import za.co.entelect.devcamp.authenticationservice.responses.ValidationResult;
 
 import java.time.Instant;
 
@@ -37,13 +38,14 @@ public class AuthenticationController {
 
     @PostMapping("/token")
     public ResponseEntity<RegisterOrLoginResponse> token(@RequestBody LoginRequest loginRequest) {
-        log.info("Log in request recieved for username: " + loginRequest.getUsername());
+        log.info("Log in request recieved");
         RegisterOrLoginResponse response = null;
-        try {
+        try
+        {
             log.info("Validating username and password");
-            boolean passwordValidated = applicationUserDetailsService.validateUsernameAndPassword(loginRequest);
+            ValidationResult validationResult = applicationUserDetailsService.validateUsernameAndPassword(loginRequest);
 
-            if(passwordValidated) {
+            if(validationResult.getValid()) {
                 Instant now = Instant.now();
                 Long expiry = 3600L;
                 JwtClaimsSet claims = JwtClaimsSet.builder()
@@ -51,6 +53,7 @@ public class AuthenticationController {
                         .issuedAt(now)
                         .expiresAt(now.plusSeconds(expiry))
                         .subject(loginRequest.getUsername())
+                        .claim("role", validationResult.getRole())
                         .build();
                 String token = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
 
@@ -63,23 +66,9 @@ public class AuthenticationController {
                 return ResponseEntity.ok(response);
             }
         }
-        catch(UsernameNotFoundException e)
-        {
-            response = new RegisterOrLoginResponse(false, "Username does not exist", "");
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(response);
-        }
-        catch(BadCredentialsException e)
-        {
-            response = new RegisterOrLoginResponse(false, "Password incorrect", "");
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body(response);
-        }
         catch(Exception e)
         {
-            response = new RegisterOrLoginResponse(false, "Login failed. Error occurred: " + e.getMessage(), "");
+            response = new RegisterOrLoginResponse(false, "Login failed: " + e.getMessage(), "");
             return ResponseEntity.internalServerError()
                     .body(response);
         }
@@ -100,6 +89,7 @@ public class AuthenticationController {
                     .issuedAt(now)
                     .expiresAt(now.plusSeconds(expiry))
                     .subject(request.getUsername())
+                    .claim("role", "customer")
                     .build();
             String token =  jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
 
