@@ -11,6 +11,8 @@ import za.co.entelect.devcamp.customerinformationstore.controller.CustomerApiDel
 import za.co.entelect.devcamp.customerinformationstore.model.*;
 import za.co.entelect.devcamp.customerinformationstore.repository.*;
 import za.co.entelect.devcamp.authenticationservice.helpers.CustomerHelper;
+import za.co.entelect.devcamp.customerinformationstore.requests.CustomerEligibilityRequest;
+import za.co.entelect.devcamp.customerinformationstore.client.ProductApiClient;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,15 +29,23 @@ public class CustomerService implements CustomerApiDelegate {
     private final DocumentRepository documentRepository;
     private final AccountRepository accountRepository;
     private final CustomerAccountsRepository customerAccountsRepository;
+    private final ProductApiClient productApiClient;
 
     @Autowired
-    public CustomerService(CustomerRepository customerRepository, CustomerTypesRepository customerTypesRepository, CustomerDocumentRepository customerDocumentRepository, DocumentRepository documentRepository, AccountRepository accountRepository, CustomerAccountsRepository customerAccountsRepository) {
+    public CustomerService(CustomerRepository customerRepository,
+                           CustomerTypesRepository customerTypesRepository,
+                           CustomerDocumentRepository customerDocumentRepository,
+                           DocumentRepository documentRepository,
+                           AccountRepository accountRepository,
+                           CustomerAccountsRepository customerAccountsRepository,
+                           ProductApiClient productApiClient) {
         this.customerRepository = customerRepository;
         this.customerTypesRepository = customerTypesRepository;
         this.customerDocumentRepository = customerDocumentRepository;
         this.documentRepository = documentRepository;
         this.accountRepository = accountRepository;
         this.customerAccountsRepository = customerAccountsRepository;
+        this.productApiClient = productApiClient;
     }
 
     @Override
@@ -169,15 +179,10 @@ public class CustomerService implements CustomerApiDelegate {
         }
     }
 
-//    public String IsCustomerEligible(username, productId)
-//    {
-//        Optional<Customer> customerByEmail = customerRepository.findCustomerByEmail(emailAddress);
-//        if (customerByEmail.isPresent()) {
-//
-//            return customer.getBody();
-//        } else {
-//            throw new Exception("Customer not found");
-//        }
-//    }
+    public boolean IsCustomerEligible(String username, CustomerEligibilityRequest customerEligibilityRequest)
+    {
+        boolean flag = productApiClient.IsCustomerEligible(username, customerEligibilityRequest);
+        return flag;
+    }
 
 }
