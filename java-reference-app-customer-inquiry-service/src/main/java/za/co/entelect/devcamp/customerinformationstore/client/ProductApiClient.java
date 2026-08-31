@@ -23,7 +23,7 @@ public class ProductApiClient {
         this.restTemplate = restTemplate;
     }
 
-    public boolean IsCustomerEligible(String token, CustomerEligibilityRequest request) {
+    public ResponseEntity<ApiResponse<Boolean>> IsCustomerEligible(String token, CustomerEligibilityRequest request) {
         String url = "http://devcamp-pc-service:8080/v1/customer-eligibility-check";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -40,6 +40,6 @@ public class ProductApiClient {
                         new ParameterizedTypeReference<ApiResponse<Boolean>>() {}
                 );
 
-        return Boolean.TRUE.equals(response.getBody().getResult());
+        return response;
     }
 }

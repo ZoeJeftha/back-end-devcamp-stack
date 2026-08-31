@@ -13,6 +13,9 @@ import za.co.entelect.devcamp.customerinformationstore.repository.*;
 import za.co.entelect.devcamp.authenticationservice.helpers.CustomerHelper;
 import za.co.entelect.devcamp.customerinformationstore.requests.CustomerEligibilityRequest;
 import za.co.entelect.devcamp.customerinformationstore.client.ProductApiClient;
+import za.co.entelect.devcamp.customerinformationstore.model.CustomerTypes;
+import za.co.entelect.devcamp.customerinformationstore.model.AccountType;
+import za.co.entelect.devcamp.customerinformationstore.responses.ApiResponse;
 
 import java.util.List;
 import java.util.Optional;
@@ -179,10 +182,32 @@ public class CustomerService implements CustomerApiDelegate {
         }
     }
 
-    public boolean IsCustomerEligible(String username, CustomerEligibilityRequest customerEligibilityRequest)
+    public ResponseEntity<ApiResponse<Boolean>> IsCustomerEligible(String jwt, String username, Long productId) throws Exception
     {
-        boolean flag = productApiClient.IsCustomerEligible(username, customerEligibilityRequest);
-        return flag;
+        Optional<Customer> customerByEmail = customerRepository.findCustomerByEmail(username);
+        if (customerByEmail.isPresent()) {
+            Customer customer = customerByEmail.get();
+
+            CustomerTypes customerType = customer.getCustomerTypes();
+            Long customerTypeId = customerType.getCustomerTypesId();
+
+            List<CustomerAccounts> customerAccounts = customer.getCustomerAccounts();
+
+            List<AccountType> accountTypes = customerAccounts.stream()
+                    .map(CustomerAccounts::getAccountType)
+                    .toList();
+
+            List<Long> accountTypeIds = accountTypes.stream()
+                            .map(AccountType::getAccountTypeId)
+                            .toList();
+            CustomerEligibilityRequest customerEligibilityRequest = new CustomerEligibilityRequest(productId,accountTypeIds, customerTypeId);
+
+            ResponseEntity<ApiResponse<Boolean>> response = productApiClient.IsCustomerEligible(jwt, customerEligibilityRequest);
+            return response;
+
+        } else {
+            throw new Exception("Customer not found");
+        }
     }
 
 }
