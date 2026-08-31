@@ -11,6 +11,11 @@ import za.co.entelect.devcamp.customerinformationstore.controller.CustomerApiDel
 import za.co.entelect.devcamp.customerinformationstore.model.*;
 import za.co.entelect.devcamp.customerinformationstore.repository.*;
 import za.co.entelect.devcamp.authenticationservice.helpers.CustomerHelper;
+import za.co.entelect.devcamp.customerinformationstore.requests.CustomerEligibilityRequest;
+import za.co.entelect.devcamp.customerinformationstore.client.ProductApiClient;
+import za.co.entelect.devcamp.customerinformationstore.model.CustomerTypes;
+import za.co.entelect.devcamp.customerinformationstore.model.AccountType;
+import za.co.entelect.devcamp.customerinformationstore.responses.ApiResponse;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,15 +32,23 @@ public class CustomerService implements CustomerApiDelegate {
     private final DocumentRepository documentRepository;
     private final AccountRepository accountRepository;
     private final CustomerAccountsRepository customerAccountsRepository;
+    private final ProductApiClient productApiClient;
 
     @Autowired
-    public CustomerService(CustomerRepository customerRepository, CustomerTypesRepository customerTypesRepository, CustomerDocumentRepository customerDocumentRepository, DocumentRepository documentRepository, AccountRepository accountRepository, CustomerAccountsRepository customerAccountsRepository) {
+    public CustomerService(CustomerRepository customerRepository,
+                           CustomerTypesRepository customerTypesRepository,
+                           CustomerDocumentRepository customerDocumentRepository,
+                           DocumentRepository documentRepository,
+                           AccountRepository accountRepository,
+                           CustomerAccountsRepository customerAccountsRepository,
+                           ProductApiClient productApiClient) {
         this.customerRepository = customerRepository;
         this.customerTypesRepository = customerTypesRepository;
         this.customerDocumentRepository = customerDocumentRepository;
         this.documentRepository = documentRepository;
         this.accountRepository = accountRepository;
         this.customerAccountsRepository = customerAccountsRepository;
+        this.productApiClient = productApiClient;
     }
 
     @Override
@@ -166,6 +179,34 @@ public class CustomerService implements CustomerApiDelegate {
         catch(Exception e)
         {
             throw new Exception("Error occurred while trying to open account", e);
+        }
+    }
+
+    public ResponseEntity<ApiResponse<Boolean>> IsCustomerEligible(String jwt, String username, Long productId) throws Exception
+    {
+        Optional<Customer> customerByEmail = customerRepository.findCustomerByEmail(username);
+        if (customerByEmail.isPresent()) {
+            Customer customer = customerByEmail.get();
+
+            CustomerTypes customerType = customer.getCustomerTypes();
+            Long customerTypeId = customerType.getCustomerTypesId();
+
+            List<CustomerAccounts> customerAccounts = customer.getCustomerAccounts();
+
+            List<AccountType> accountTypes = customerAccounts.stream()
+                    .map(CustomerAccounts::getAccountType)
+                    .toList();
+
+            List<Long> accountTypeIds = accountTypes.stream()
+                            .map(AccountType::getAccountTypeId)
+                            .toList();
+            CustomerEligibilityRequest customerEligibilityRequest = new CustomerEligibilityRequest(productId,accountTypeIds, customerTypeId);
+
+            ResponseEntity<ApiResponse<Boolean>> response = productApiClient.IsCustomerEligible(jwt, customerEligibilityRequest);
+            return response;
+
+        } else {
+            throw new Exception("Customer not found");
         }
     }
 

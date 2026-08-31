@@ -15,7 +15,11 @@ import za.co.entelect.devcamp.customerinformationstore.responses.ApiResponse;
 import  za.co.entelect.devcamp.customerinformationstore.service.CustomersService;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import za.co.entelect.devcamp.customerinformationstore.requests.CustomerEligibilityRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.PathVariable;
 
+@Slf4j
 @RestController
 @RequestMapping("/v1")
 public class CustomerController {
@@ -96,23 +100,27 @@ public class CustomerController {
                     .body(response);
         }
     }
-//
-//    @PostMapping("/customer-eligibility")
-//    public ResponseEntity<ApiResponse<ResponseEntity<CustomerDto>>> OpenAccount(
-//            @AuthenticationPrincipal Jwt jwt , @RequestBody Integer accountTypeId) {
-//
-//        try {
-//            String username = jwt.getSubject();
-//
-//            ResponseEntity<CustomerDto> customer = customerService.OpenAccount(username, accountTypeId);
-//            ApiResponse<ResponseEntity<CustomerDto>> response = new ApiResponse<ResponseEntity<CustomerDto>>(true, "Account opened successfully", customer);
-//            return ResponseEntity.ok(response);
-//        }
-//        catch(Exception e)
-//        {
-//            ApiResponse<ResponseEntity<CustomerDto>> response = new ApiResponse<ResponseEntity<CustomerDto>>(false, "Failed to open account: "+ e.getMessage(), null);
-//            return ResponseEntity.internalServerError().body(response);
-//        }
-//    }
+
+    @GetMapping("/customer-eligibility/{productId}")
+    public ResponseEntity<ApiResponse<Boolean>>  IsCustomerEligibile(
+            @AuthenticationPrincipal Jwt jwt , @PathVariable Long productId) {
+
+        try
+        {
+            String token = jwt.getTokenValue();
+            String username = jwt.getSubject();
+            ResponseEntity<ApiResponse<Boolean>> response = customerService.IsCustomerEligible(token,username, productId);
+            return response;
+        }
+        catch(Exception e)
+        {
+            ApiResponse<Boolean> response = new ApiResponse<Boolean>(false, "Failed to retrieve customer eligibility: " + e.getMessage(), null);
+            return ResponseEntity
+                    .internalServerError()
+                    .body(response);
+        }
+
+
+    }
 
 }

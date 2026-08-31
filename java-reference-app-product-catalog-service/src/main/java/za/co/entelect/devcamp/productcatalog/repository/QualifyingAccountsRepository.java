@@ -9,8 +9,8 @@ import java.util.List;
 @Repository
 public interface QualifyingAccountsRepository extends JpaRepository<QualifyingAccounts, Long> {
 
-    boolean existsByProductIdAndAccountId(
+    boolean existsByProductIdAndAccountIdIn(
             Long productId,
-            Long accountId
+            List<Long> accountIds
     );
 }

@@ -2,8 +2,7 @@ package za.co.entelect.devcamp.productcatalog.service;
 
 import za.co.entelect.devcamp.productcatalog.repository.QualifyingAccountsRepository;
 import za.co.entelect.devcamp.productcatalog.repository.QualifyingCustomerTypesRepository;
-import za.co.entelect.devcamp.productcatalog.requests.CustomerProductEligibilityRequest;
-import za.co.entelect.devcamp.productcatalog.requests.CustomerAccountEligibilityRequest;
+import za.co.entelect.devcamp.productcatalog.requests.CustomerEligibilityRequest;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,20 +18,16 @@ public class ProductEligibilityService implements IProductEligibilityService {
         this.qualifyingAccountsRepository = qualifyingAccountsRepository;
     }
 
-    public boolean isCustomerEligible(CustomerProductEligibilityRequest customerProductEligibilityRequest) {
+    public boolean isCustomerEligible(CustomerEligibilityRequest customerEligibilityRequest)
+    {
+        boolean eligible = qualifyingAccountsRepository.existsByProductIdAndAccountIdIn(
+                customerEligibilityRequest.getProductId(),
+                customerEligibilityRequest.getAccountIds());
+        eligible = eligible && qualifyingCustomerTypesRepository.existsByProductIdAndCustomerTypesId(
+                customerEligibilityRequest.getProductId(),
+                customerEligibilityRequest.getCustomerTypesId());
 
-        return qualifyingCustomerTypesRepository.existsByProductIdAndCustomerTypesId(
-                customerProductEligibilityRequest.getProductId(),
-                customerProductEligibilityRequest.getCustomerTypesId()
-        );
-    }
+        return eligible;
 
-
-    public boolean isCustomerAccountEligible(CustomerAccountEligibilityRequest customerAccountEligibilityRequest) {
-
-        return qualifyingAccountsRepository.existsByProductIdAndAccountId(
-                customerAccountEligibilityRequest.getProductId(),
-                customerAccountEligibilityRequest.getAccountId()
-        );
     }
 }
