@@ -1,17 +1,17 @@
 package za.co.entelect.devcamp.productcatalog.client;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.http.HttpHeaders;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import za.co.entelect.devcamp.productcatalog.responses.ApiResponse;
 import za.co.entelect.devcamp.productcatalog.dto.CustomerDto;
+import za.co.entelect.devcamp.productcatalog.responses.ApiResponse;
 
 @Slf4j
 @Component
