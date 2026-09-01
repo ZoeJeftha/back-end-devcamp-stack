@@ -65,12 +65,25 @@ services:
       - 8085:8080
 
   devcamp-fulfilment-service:
-    # image: harbor.entelectprojects.co.za/internaltraining-devcamp/devcamp-pc-service:latest
+    # image: harbor.entelectprojects.co.za/internaltraining-devcamp/devcamp-fulfilment-service:latest
     build:
       context: java-reference-app-fulfilment-service
     container_name: DevCamp-Fulfilment-Service
     ports:
       - 8086:8080
 
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"   # RabbitMQ broker port
+      - "15672:15672" # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: password
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
 volumes:
   db-data:
+  rabbitmq_data:

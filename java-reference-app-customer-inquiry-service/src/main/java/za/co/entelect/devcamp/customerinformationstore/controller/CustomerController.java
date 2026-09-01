@@ -33,18 +33,20 @@ public class CustomerController {
     }
 
     @GetMapping("/my-profile")
-    public ResponseEntity<ApiResponse<ResponseEntity<CustomerDto>>> getMyProfile(
+    public ResponseEntity<ApiResponse<CustomerDto>> getMyProfile(
             @AuthenticationPrincipal Jwt jwt) {
-        try {
+        try
+        {
             String username = jwt.getSubject();
 
-            ResponseEntity<CustomerDto> customer = customerService.getCustomerByEmailAddress(username);
-            ApiResponse<ResponseEntity<CustomerDto>> response = new ApiResponse<ResponseEntity<CustomerDto>>(true, "Profile retrieved successfully", customer);
+            ResponseEntity<CustomerDto> customerByEmail = customerService.getCustomerByEmailAddress(username);
+            CustomerDto customer = customerByEmail.getBody();
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(true, "Profile retrieved successfully", customer);
             return ResponseEntity.ok(response);
         }
         catch(Exception e)
         {
-            ApiResponse<ResponseEntity<CustomerDto>> response = new ApiResponse<ResponseEntity<CustomerDto>>(false, "Failed to retrieve profile: "+ e.getMessage(), null);
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retrieve profile: "+ e.getMessage(), null);
             return ResponseEntity.internalServerError().body(response);
         }
     }

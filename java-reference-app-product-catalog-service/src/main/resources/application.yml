@@ -19,6 +19,11 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: admin
+    password: password
 pub.key: classpath:app.pub
 springdoc:
   show-actuator: false
