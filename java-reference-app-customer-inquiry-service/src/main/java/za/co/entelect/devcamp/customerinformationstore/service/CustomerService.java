@@ -1,5 +1,9 @@
 package za.co.entelect.devcamp.customerinformationstore.service;
 
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -7,19 +11,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import za.co.entelect.devcamp.authenticationservice.helpers.CustomerHelper;
+import za.co.entelect.devcamp.customerinformationstore.client.ProductApiClient;
 import za.co.entelect.devcamp.customerinformationstore.controller.CustomerApiDelegate;
 import za.co.entelect.devcamp.customerinformationstore.model.*;
 import za.co.entelect.devcamp.customerinformationstore.repository.*;
-import za.co.entelect.devcamp.authenticationservice.helpers.CustomerHelper;
 import za.co.entelect.devcamp.customerinformationstore.requests.CustomerEligibilityRequest;
-import za.co.entelect.devcamp.customerinformationstore.client.ProductApiClient;
-import za.co.entelect.devcamp.customerinformationstore.model.CustomerTypes;
-import za.co.entelect.devcamp.customerinformationstore.model.AccountType;
 import za.co.entelect.devcamp.customerinformationstore.responses.ApiResponse;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import za.co.entelect.devcamp.customerinformationstore.model.AccountType;
+import za.co.entelect.devcamp.customerinformationstore.model.CustomerTypes;
 
 @Slf4j
 @Service

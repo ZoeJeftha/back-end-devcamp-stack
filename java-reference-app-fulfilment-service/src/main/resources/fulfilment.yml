@@ -10,38 +10,9 @@ servers:
   - url: "http://localhost:8086/v1"
 
 paths:
-
   /stuff:
     get:
-      summary: "Get stuff"
-      operationId: getStuff
-      tags:
-        - "stuff"
-      security: []
+      summary: Get stuff
       responses:
-        "200":
-          description: "Expected response"
-          content:
-            text/plain:
-              schema:
-                type: string
-components:
-  schemas:
-    ProductDto:
-      type: object
-      properties:
-        productId:
-          type: integer
-          format: int64
-        name:
-          type: string
-        description:
-          type: string
-        price:
-          type: number
-          format: double
-        imageUrl:
-          type: string
-      required:
-        - name
-        - price
+        '200':
+          description: Successful response
