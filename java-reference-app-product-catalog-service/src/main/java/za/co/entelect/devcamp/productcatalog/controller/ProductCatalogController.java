@@ -25,7 +25,6 @@ import za.co.entelect.devcamp.productcatalog.dto.CustomerDto;
 import za.co.entelect.devcamp.productcatalog.dto.ProductDto;
 import za.co.entelect.devcamp.productcatalog.producer.MessageProducer;
 import za.co.entelect.devcamp.productcatalog.responses.ApiResponse;
-import za.co.entelect.devcamp.productcatalog.requests.CustomerEligibilityRequest;
 import za.co.entelect.devcamp.productcatalog.service.ICustomerService;
 import za.co.entelect.devcamp.productcatalog.service.IProductEligibilityService;
 import za.co.entelect.devcamp.productcatalog.service.IProductService;
@@ -101,12 +100,13 @@ public class ProductCatalogController {
 
     }
 
-    @PostMapping("/customer-eligibility-check")
-    public ResponseEntity<ApiResponse<Boolean>> CustomerTypeEligibilityCheck(@RequestBody CustomerEligibilityRequest customerEligibilityRequest)
+    @GetMapping("/customer-eligibility-check/{productId}")
+    public ResponseEntity<ApiResponse<Boolean>> CustomerTypeEligibilityCheck(@AuthenticationPrincipal Jwt jwt, @PathVariable Long productId)
     {
         log.info("Customer product eligibility request received");
         try {
-            Boolean isEligible = productEligibilityService.isCustomerEligible(customerEligibilityRequest);
+            String token = jwt.getTokenValue();
+            Boolean isEligible = productEligibilityService.isCustomerEligible(token, productId);
             ApiResponse<Boolean> response = new ApiResponse<Boolean>(true, "Customer Eligibility Result Retrieved",isEligible);
             return ResponseEntity.ok(response);
         }
@@ -150,7 +150,23 @@ public class ProductCatalogController {
             ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retrieve my profile: "+ e.getMessage(), null);
             return ResponseEntity.internalServerError().body(response);
         }
-
     }
+//
+//    @GetMapping("/place-order")
+//    public ResponseEntity<ApiResponse<CustomerDto>> GetMyProfile(@AuthenticationPrincipal Jwt jwt)
+//    {
+//        try {
+//            String token = jwt.getTokenValue();
+//            ResponseEntity<ApiResponse<CustomerDto>> customer = customerService.GetMyProfile(token);
+//
+//            return customer;
+//        }
+//        catch(Exception e)
+//        {
+//            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retrieve my profile: "+ e.getMessage(), null);
+//            return ResponseEntity.internalServerError().body(response);
+//        }
+//
+//    }
 
 }

@@ -24,7 +24,7 @@ public class CustomerApiClient {
     }
 
     public ResponseEntity<ApiResponse<CustomerDto>> GetMyProfile(String token) {
-        String url = "http://devcamp-cis-service:8080/v1/my-profile";
+        String url = "http://devcamp-cis-service:8080/v1/my-profile-unmasked";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(token);

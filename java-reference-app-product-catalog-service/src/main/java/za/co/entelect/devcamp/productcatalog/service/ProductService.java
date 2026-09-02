@@ -34,7 +34,8 @@ public class ProductService implements IProductService {
                         product.getName(),
                         product.getDescription(),
                         product.getPrice(),
-                        product.getImageUrl()
+                        product.getImageUrl(),
+                        product.getFulfilmentType()
                 ))
                 .collect(Collectors.toList());
         return productDtoList;
@@ -50,7 +51,8 @@ public class ProductService implements IProductService {
                 product.getName(),
                 product.getDescription(),
                 product.getPrice(),
-                product.getImageUrl()
+                product.getImageUrl(),
+                product.getFulfilmentType()
         );
         return productDto;
     }
@@ -65,7 +67,8 @@ public class ProductService implements IProductService {
                 product.getName(),
                 product.getDescription(),
                 product.getPrice(),
-                product.getImageUrl()
+                product.getImageUrl(),
+                product.getFulfilmentType()
         ));
     }
 }

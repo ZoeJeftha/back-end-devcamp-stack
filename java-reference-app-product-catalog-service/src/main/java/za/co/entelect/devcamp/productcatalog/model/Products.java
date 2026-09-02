@@ -29,4 +29,7 @@ public class Products {
 
     @Column(name="image_url")
     private String imageUrl;
+
+    @Column(name="fulfilment_type")
+    private String fulfilmentType;
 }

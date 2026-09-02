@@ -15,7 +15,6 @@ import za.co.entelect.devcamp.customerinformationstore.responses.ApiResponse;
 import  za.co.entelect.devcamp.customerinformationstore.service.CustomersService;
 import java.util.List;
 import org.springframework.http.HttpStatus;
-import za.co.entelect.devcamp.customerinformationstore.requests.CustomerEligibilityRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -103,26 +102,23 @@ public class CustomerController {
         }
     }
 
-    @GetMapping("/customer-eligibility/{productId}")
-    public ResponseEntity<ApiResponse<Boolean>>  IsCustomerEligibile(
-            @AuthenticationPrincipal Jwt jwt , @PathVariable Long productId) {
-
+    @GetMapping("/my-profile-unmasked")
+    public ResponseEntity<ApiResponse<CustomerDto>> getMyProfileUnmasked(
+            @AuthenticationPrincipal Jwt jwt) {
         try
         {
-            String token = jwt.getTokenValue();
             String username = jwt.getSubject();
-            ResponseEntity<ApiResponse<Boolean>> response = customerService.IsCustomerEligible(token,username, productId);
-            return response;
+
+            ResponseEntity<CustomerDto> customerByEmail = customerService.getCustomerByEmailAddressUnmasked(username);
+            CustomerDto customer = customerByEmail.getBody();
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(true, "Profile retrieved successfully", customer);
+            return ResponseEntity.ok(response);
         }
         catch(Exception e)
         {
-            ApiResponse<Boolean> response = new ApiResponse<Boolean>(false, "Failed to retrieve customer eligibility: " + e.getMessage(), null);
-            return ResponseEntity
-                    .internalServerError()
-                    .body(response);
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retrieve profile: "+ e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
         }
-
-
     }
 
 }
