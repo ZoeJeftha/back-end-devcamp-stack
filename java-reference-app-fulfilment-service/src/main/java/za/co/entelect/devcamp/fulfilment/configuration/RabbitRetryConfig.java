@@ -22,10 +22,8 @@ public class RabbitRetryConfig {
 
         factory.setConnectionFactory(connectionFactory);
 
-        // THIS IS IMPORTANT
         factory.setMessageConverter(converter);
 
-        // Don't put failed messages back onto the original queue
         factory.setDefaultRequeueRejected(false);
 
         RetryOperationsInterceptor interceptor =

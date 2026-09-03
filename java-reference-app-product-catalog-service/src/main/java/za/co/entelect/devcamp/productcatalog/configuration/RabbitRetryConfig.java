@@ -23,10 +23,8 @@ public class RabbitRetryConfig {
 
         factory.setConnectionFactory(connectionFactory);
 
-        // Use JSON conversion for RabbitMQ messages
         factory.setMessageConverter(converter);
 
-        // Don't put the failed message back onto the original queue
         factory.setDefaultRequeueRejected(false);
 
         RetryOperationsInterceptor interceptor =
