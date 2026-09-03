@@ -16,8 +16,18 @@ var keyToRSAParameters = (string key) =>
 {
     var keyBase64 = key
             .Replace("-----BEGIN PUBLIC KEY-----", "")
-            .Replace("-----END PUBLIC KEY-----", "");
+            .Replace("-----END PUBLIC KEY-----", "")
+                .Replace("\r", "")
+                .Replace("\n", "")
+                .Trim();
+    Console.WriteLine($"KEY LENGTH: {key.Length}");
+    Console.WriteLine($"KEY START: {key.Substring(0, Math.Min(50, key.Length))}");
+    Console.WriteLine($"KEY END: {key.Substring(Math.Max(0, key.Length - 50))}");
+
     byte[] keyBytes = Convert.FromBase64String(keyBase64);
+
+    Console.WriteLine($"DECODED KEY LENGTH: {keyBytes.Length}");
+    Console.WriteLine($"FIRST BYTE: {keyBytes[0]:X2}");
 
     using (var rsa = new RSACryptoServiceProvider())
     {
@@ -89,12 +99,12 @@ try
 
 
     var app = builder.Build();
-
-    if (app.Environment.IsDevelopment())
-    {
+//
+//    if (app.Environment.IsDevelopment())
+//    {
         app.UseSwagger();
         app.UseSwaggerUI();
-    }
+    //}
 
     app.UseHttpsRedirection();
     app.UseAuthentication();

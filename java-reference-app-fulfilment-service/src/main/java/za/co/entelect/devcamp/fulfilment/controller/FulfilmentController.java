@@ -7,6 +7,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import za.co.entelect.devcamp.fulfilment.dha.model.DuplicateIDDocumentCheckResponse;
+import za.co.entelect.devcamp.fulfilment.dha.model.LivingStatusResponse;
 import za.co.entelect.devcamp.fulfilment.dto.DuplicateIdStatusDto;
 import za.co.entelect.devcamp.fulfilment.dto.KycDto;
 import za.co.entelect.devcamp.fulfilment.dto.LivingStatusDto;
@@ -47,23 +49,23 @@ public class FulfilmentController {
             return "Exception thrown: "+ e.getMessage();
         }
     }
-
-    @GetMapping("/do-dha-marital-check")
-    public MaritalStatusesDto DoDhaMaritalCheck(@AuthenticationPrincipal Jwt jwt)
-    {
-        try {
-            String token = jwt.getTokenValue();
-            return dhaChecksApiClient.DoMaritalCheck(token, 9001010000081L);
-        }
-        catch(Exception e)
-        {
-            return null;
-                    //"Exception thrown: "+ e.getMessage();
-        }
-    }
+//
+//    @GetMapping("/do-dha-marital-check")
+//    public MaritalStatusesDto DoDhaMaritalCheck(@AuthenticationPrincipal Jwt jwt)
+//    {
+//        try {
+//            String token = jwt.getTokenValue();
+//            return dhaChecksApiClient.DoMaritalCheck(token, 9001010000081L);
+//        }
+//        catch(Exception e)
+//        {
+//            return null;
+//                    //"Exception thrown: "+ e.getMessage();
+//        }
+//    }
 
     @GetMapping("/do-dha-duplicate-id-check")
-    public DuplicateIdStatusDto DoDhaDuplicateIdCheck(@AuthenticationPrincipal Jwt jwt)
+    public DuplicateIDDocumentCheckResponse DoDhaDuplicateIdCheck(@AuthenticationPrincipal Jwt jwt)
     {
         try {
             String token = jwt.getTokenValue();
@@ -71,6 +73,7 @@ public class FulfilmentController {
         }
         catch(Exception e)
         {
+            System.out.println("------------------do-dha-duplicate-id-check " + e.getMessage());
             return null;
             //"Exception thrown: "+ e.getMessage();
         }
@@ -78,7 +81,7 @@ public class FulfilmentController {
 
 
     @GetMapping("/do-dha-living-status-check")
-    public LivingStatusDto DoLivingStatusCheck(@AuthenticationPrincipal Jwt jwt)
+    public LivingStatusResponse DoLivingStatusCheck(@AuthenticationPrincipal Jwt jwt)
     {
         try {
             String token = jwt.getTokenValue();
@@ -86,6 +89,7 @@ public class FulfilmentController {
         }
         catch(Exception e)
         {
+            System.out.println("------------------do-dha-living-status-check " + e.getMessage());
             return null;
             //"Exception thrown: "+ e.getMessage();
         }
@@ -96,7 +100,7 @@ public class FulfilmentController {
     {
         try {
             String token = jwt.getTokenValue();
-            return kycChecksApiClient.DoKycCheck(token, "1");
+            return kycChecksApiClient.DoKycCheck(token, 1L);
         }
         catch(Exception e)
         {

@@ -1,0 +1,343 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Department of Home Affairs Checks",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/status/people": {
+      "get": {
+        "tags": [
+          "DHA"
+        ],
+        "summary": "Gets all People in the DHA \"Database\"",
+        "responses": {
+          "200": {
+            "description": "Returns all current people",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "If there was a server side error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/status/marital/{idNumber}": {
+      "get": {
+        "tags": [
+          "DHA"
+        ],
+        "summary": "Determine the Marital Status of a citizen given that citizens ID Number",
+        "parameters": [
+          {
+            "name": "idNumber",
+            "in": "path",
+            "description": "The national id number of the citizen whose status we want to determine",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the current users marital status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaritalStatusResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "If there was a server side error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "If there was no matching person",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/status/duplicateId/{idNumber}": {
+      "get": {
+        "tags": [
+          "DHA"
+        ],
+        "summary": "Determine if the citizen has a duplicate ID document issued",
+        "parameters": [
+          {
+            "name": "idNumber",
+            "in": "path",
+            "description": "The national id number of the citizen whose status we want to determine",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a response indicating if the current user has a duplicated ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DuplicateIDDocumentCheckResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "If there was a server side error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "If there was no matching person",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/status/living/{idNumber}": {
+      "get": {
+        "tags": [
+          "DHA"
+        ],
+        "summary": "Determine if the citizen is alive or deceased",
+        "parameters": [
+          {
+            "name": "idNumber",
+            "in": "path",
+            "description": "The national id number of the citizen whose status we want to determine",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a response indicating if the current user is alive",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LivingStatusResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "If there was a server side error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "If there was no matching person",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DuplicateIDDocumentCheckResponse": {
+        "type": "object",
+        "properties": {
+          "hasDuplicateId": {
+            "type": "boolean",
+            "description": "Gets or Sets HasDuplicateId",
+            "example": true
+          },
+          "duplicateIdIssueDate": {
+            "type": "string",
+            "description": "Gets or Sets DuplicateIdIssueDate",
+            "nullable": true,
+            "example": "2023-07-25"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "Gets or Sets Code",
+            "format": "int32",
+            "example": 500
+          },
+          "message": {
+            "type": "string",
+            "description": "Gets or Sets Message",
+            "nullable": true,
+            "example": "There was an exception"
+          }
+        },
+        "additionalProperties": false,
+        "description": ""
+      },
+      "LivingStatusResponse": {
+        "type": "object",
+        "properties": {
+          "livingStatus": {
+            "$ref": "#/components/schemas/LivingStatuses"
+          },
+          "deceasedDate": {
+            "type": "string",
+            "description": "Gets or Sets DeceasedDate",
+            "nullable": true,
+            "example":  null
+          }
+        },
+        "additionalProperties": false,
+        "description": ""
+      },
+      "LivingStatuses": {
+        "enum": [
+          "Alive",
+          "Deceased"
+        ],
+        "type": "string"
+      },
+      "MaritalStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/MaritalStatuses"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "description": "Gets or Sets EffectiveFromDate",
+            "nullable": true,
+            "example": "2023-07-24"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "description": "Gets or Sets EffectiveToDate",
+            "nullable": true,
+            "example": "2023-07-25"
+          }
+        },
+        "additionalProperties": false,
+        "description": ""
+      },
+      "MaritalStatusResponse": {
+        "type": "object",
+        "properties": {
+          "currentStatus": {
+            "$ref": "#/components/schemas/MaritalStatusDto"
+          },
+          "previouStatus": {
+            "$ref": "#/components/schemas/MaritalStatusDto"
+          }
+        },
+        "additionalProperties": false,
+        "description": ""
+      },
+      "MaritalStatuses": {
+        "enum": [
+          "0 = Single",
+          "1 = Married",
+          "2 = Divorced",
+          "3 = Widowed"
+        ],
+        "type": "string"
+      },
+      "PersonResponse": {
+        "type": "object",
+        "properties": {
+          "idNumber": {
+            "type": "integer",
+            "description": "Gets or Sets IDNumber",
+            "format": "int64",
+            "example": 9001010000081
+          },
+          "currentStatus": {
+            "$ref": "#/components/schemas/MaritalStatusDto"
+          },
+          "previousStatus": {
+            "$ref": "#/components/schemas/MaritalStatusDto"
+          },
+          "livingStatus": {
+            "$ref": "#/components/schemas/LivingStatuses"
+          },
+          "deceasedDate": {
+            "type": "string",
+            "description": "Gets or Sets DeceasedDate",
+            "format": "date-time",
+            "nullable": true,
+            "example": ""
+          },
+          "hasDuplicatedId": {
+            "type": "boolean",
+            "description": "Gets or Sets HasDuplicatedId",
+            "example": false
+          },
+          "duplicateIDIssueDate": {
+            "type": "string",
+            "description": "Gets or Sets DuplicateIDIssueDate",
+            "format": "date-time",
+            "nullable": true,
+            "example": "2023-04-04"
+          }
+        },
+        "additionalProperties": false,
+        "description": ""
+      }
+    }
+  }
+}

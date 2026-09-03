@@ -22,7 +22,7 @@ namespace DHA.WebApi.Models
         public LivingStatusResponse(LivingStatuses livingStatus, DateTime? deceasedDate)
         {
             LivingStatus = livingStatus;
-            DeceasedDate = deceasedDate?.ToString("yyyy-MM-dd") ?? string.Empty;
+            DeceasedDate = deceasedDate?.ToString("yyyy-MM-dd");
         }
     }
 }

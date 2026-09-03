@@ -22,7 +22,7 @@ public class KycChecksApiClient implements IKycChecksApiClient {
     }
 
     @Override
-    public KycDto DoKycCheck(String token, String customerId) {
+    public KycDto DoKycCheck(String token, Long customerId) {
         String url = "http://devcamp-kyc-service:80/kyc/" + customerId;
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
