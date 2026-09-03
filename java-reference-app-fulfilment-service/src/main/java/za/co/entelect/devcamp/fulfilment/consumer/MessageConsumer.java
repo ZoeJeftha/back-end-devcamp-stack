@@ -6,9 +6,9 @@ import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFacto
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.stereotype.Service;
 import za.co.entelect.devcamp.fulfilment.configuration.RabbitConfig;
-import za.co.entelect.devcamp.fulfilment.dha.model.LivingStatusResponse;
 import za.co.entelect.devcamp.fulfilment.dha.model.DuplicateIDDocumentCheckResponse;
-import za.co.entelect.devcamp.fulfilment.dto.CustomerDto;
+import za.co.entelect.devcamp.fulfilment.dha.model.LivingStatusResponse;
+import za.co.entelect.devcamp.fulfilment.dha.model.MaritalStatusResponse;
 import za.co.entelect.devcamp.fulfilment.dto.KycDto;
 import za.co.entelect.devcamp.fulfilment.dto.DuplicateIdStatusDto;
 import za.co.entelect.devcamp.fulfilment.dto.LivingStatusDto;
@@ -17,6 +17,7 @@ import za.co.entelect.devcamp.fulfilment.interfaces.ICreditChecksApiClient;
 import za.co.entelect.devcamp.fulfilment.interfaces.IDhaChecksApiClient;
 import za.co.entelect.devcamp.fulfilment.interfaces.IKycChecksApiClient;
 import za.co.entelect.devcamp.fulfilment.interfaces.ITokenService;
+import za.co.entelect.devcamp.fulfilment.requests.FulfilmentRequest;
 
 @Service
 public class MessageConsumer {
@@ -37,23 +38,24 @@ public class MessageConsumer {
         this.creditChecksApiClient = creditChecksApiClient;
     }
 
-    @RabbitListener(queues = RabbitConfig.QUEUE)
-    public void receiveMessage(CustomerDto customerDto) {
+    @RabbitListener(queues = RabbitConfig.QUEUE,   containerFactory = "rabbitListenerContainerFactory")
+    public void receiveMessage(FulfilmentRequest fulfilmentRequest) {
         try {
-            System.out.println("Message queue received: " + customerDto);
+            System.out.println("-----------------Message queue received: " + fulfilmentRequest);
             //need fulfilment type
-            String fulfilmentType = "A";
-            String token = tokenService.GetToken(customerDto.getUsername());
+            String token = tokenService.GetToken(fulfilmentRequest.getUsername());
 
-            switch (fulfilmentType) {
+            System.out.println("----------------Message queue received getFulfilmentType: " + fulfilmentRequest.getFulfilmentType());
+
+            switch (fulfilmentRequest.getFulfilmentType()) {
                 case "A":
-                    ProcessFulfilmentTypeA(token, customerDto);
+                    ProcessFulfilmentTypeA(token, fulfilmentRequest);
                     break;
                 case "B":
-                    ProcessFulfilmentTypeB(token, customerDto);
+                    ProcessFulfilmentTypeB(token, fulfilmentRequest);
                     break;
                 case "C":
-                    ProcessFulfilmentTypeC(token, customerDto);
+                    ProcessFulfilmentTypeC(token, fulfilmentRequest);
                     break;
             }
         }
@@ -63,11 +65,11 @@ public class MessageConsumer {
         }
     }
 
-    public void ProcessFulfilmentTypeA(String token, CustomerDto customerDto)
+    public void ProcessFulfilmentTypeA(String token, FulfilmentRequest fulfilmentRequest)
     {
         try
         {
-            KycDto kycCheck = kycChecksApiClient.DoKycCheck(token, customerDto.getId());
+            KycDto kycCheck = kycChecksApiClient.DoKycCheck(token, fulfilmentRequest.getId());
             System.out.println("------------------Fulfilment kycCheck type A " + kycCheck);
         }
         catch(Exception e)
@@ -76,17 +78,17 @@ public class MessageConsumer {
         }
     }
 
-    public void ProcessFulfilmentTypeB(String token, CustomerDto customerDto)
+    public void ProcessFulfilmentTypeB(String token, FulfilmentRequest fulfilmentRequest)
     {
         try
         {
-            KycDto kycCheck = kycChecksApiClient.DoKycCheck(token, customerDto.getId());
+            KycDto kycCheck = kycChecksApiClient.DoKycCheck(token, fulfilmentRequest.getId());
             System.out.println("------------------Fulfilment kycCheck type B" + kycCheck);
             //to do: Add fraud check
-            LivingStatusResponse livingStatus = dhaChecksApiClient.DoLivingStatusCheck(token, Long.parseLong(customerDto.getIdNumber()));
+            LivingStatusResponse livingStatus = dhaChecksApiClient.DoLivingStatusCheck(token, Long.parseLong(fulfilmentRequest.getIdNumber()));
             System.out.println("------------------Fulfilment livingStatusDto type B" + livingStatus);
 
-            DuplicateIDDocumentCheckResponse duplicateIdStatus =dhaChecksApiClient.DoDuplicateIdCheck(token, Long.parseLong(customerDto.getIdNumber()));
+            DuplicateIDDocumentCheckResponse duplicateIdStatus =dhaChecksApiClient.DoDuplicateIdCheck(token, Long.parseLong(fulfilmentRequest.getIdNumber()));
             System.out.println("------------------Fulfilment duplicateIdStatusDto type B" + duplicateIdStatus);
         }
         catch(Exception e)
@@ -96,16 +98,16 @@ public class MessageConsumer {
 
     }
 
-    public void ProcessFulfilmentTypeC(String token, CustomerDto customerDto)
+    public void ProcessFulfilmentTypeC(String token, FulfilmentRequest fulfilmentRequest)
     {
         try {
-            ProcessFulfilmentTypeB(token, customerDto);
+            ProcessFulfilmentTypeB(token, fulfilmentRequest);
 
-           // MaritalStatusesDto maritalStatusesDto = dhaChecksApiClient.DoMaritalCheck(token, Long.parseLong(customerDto.getIdNumber()));
+            MaritalStatusResponse maritalStatus = dhaChecksApiClient.DoMaritalCheck(token, Long.parseLong(fulfilmentRequest.getIdNumber()));
 
-          //  System.out.println("------------------Fulfilment maritalStatusesDto type C" + maritalStatusesDto);
+            System.out.println("------------------Fulfilment maritalStatusesDto type C" + maritalStatus);
 
-            String creditCheck = creditChecksApiClient.DoCreditCheck(customerDto.getId());
+            String creditCheck = creditChecksApiClient.DoCreditCheck(fulfilmentRequest.getId());
 
             System.out.println("------------------Fulfilment creditCheck type C" + creditCheck);
         }

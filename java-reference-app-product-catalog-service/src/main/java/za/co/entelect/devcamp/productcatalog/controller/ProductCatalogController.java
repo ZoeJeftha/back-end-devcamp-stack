@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
+import za.co.entelect.devcamp.productcatalog.client.CustomerApiClient;
 import za.co.entelect.devcamp.productcatalog.dto.CustomerDto;
 import za.co.entelect.devcamp.productcatalog.dto.ProductDto;
 import za.co.entelect.devcamp.productcatalog.producer.MessageProducer;
@@ -28,7 +29,7 @@ import za.co.entelect.devcamp.productcatalog.responses.ApiResponse;
 import za.co.entelect.devcamp.productcatalog.service.ICustomerService;
 import za.co.entelect.devcamp.productcatalog.service.IProductEligibilityService;
 import za.co.entelect.devcamp.productcatalog.service.IProductService;
-import za.co.entelect.devcamp.productcatalog.client.CustomerApiClient;
+import za.co.entelect.devcamp.productcatalog.request.FulfilmentRequest;
 
 @Slf4j
 @RestController
@@ -118,20 +119,47 @@ public class ProductCatalogController {
         }
     }
 
-    @GetMapping("/rabbitmq")
-    public CustomerDto DoRabbitMq(@AuthenticationPrincipal Jwt jwt)
+    @GetMapping("/place-order/{productId}")
+    public ResponseEntity<ApiResponse<FulfilmentRequest>> PlaceOrder(@AuthenticationPrincipal Jwt jwt, @PathVariable Long productId)
     {
-        try {
+        try
+        {
             String token = jwt.getTokenValue();
+            Boolean isEligible = productEligibilityService.isCustomerEligible(token, productId);
+            log.info("---------------Place order-------------- isEligible:" + isEligible);
+            if(!isEligible)
+            {
+                ApiResponse<FulfilmentRequest> response = new ApiResponse<FulfilmentRequest>(true, "Customer ineligible for selected product", null);
+                return ResponseEntity.internalServerError().body(response);
+            }
+
             ResponseEntity<ApiResponse<CustomerDto>> customer = customerService.GetMyProfile(token);
             CustomerDto customerDto = customer.getBody().getResult();
+            log.info("---------------Place order-------------- customerDto:" + customerDto);
 
-            messageProducer.SendMessage(customerDto);
-            return customerDto;
+            FulfilmentRequest fulfilmentRequest = new FulfilmentRequest();
+            fulfilmentRequest.setId(customerDto.getId());
+            fulfilmentRequest.setIdNumber(customerDto.getIdNumber());
+            fulfilmentRequest.setUsername(customerDto.getUsername());
+
+            log.info("---------------Place order-------------- fulfilmentRequest without type:" + fulfilmentRequest);
+
+            ProductDto product = productService.getProductById(productId);
+            fulfilmentRequest.setFulfilmentType(product.getFulfilmentType());
+
+            log.info("---------------Place order-------------- fulfilmentRequest with type:" + fulfilmentRequest);
+
+            messageProducer.SendMessage(fulfilmentRequest);
+            ApiResponse<FulfilmentRequest> response = new ApiResponse<FulfilmentRequest>(true, "Order placed: ",fulfilmentRequest);
+
+            log.info("---------------Place order-------------- order placed");
+            return ResponseEntity.ok(response);
         }
         catch(Exception e)
         {
-            return null;
+            log.info("Failed to place order: " + e.getMessage());
+            ApiResponse<FulfilmentRequest> response = new ApiResponse<FulfilmentRequest>(false, "Failed to place order", null);
+            return ResponseEntity.internalServerError().body(response);
         }
 
     }
@@ -145,9 +173,8 @@ public class ProductCatalogController {
 
             return customer;
         }
-        catch(Exception e)
-        {
-            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retrieve my profile: "+ e.getMessage(), null);
+        catch(Exception e) {
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retrieve my profile: " + e.getMessage(), null);
             return ResponseEntity.internalServerError().body(response);
         }
     }
