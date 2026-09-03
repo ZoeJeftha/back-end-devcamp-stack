@@ -21,7 +21,7 @@ namespace DHA.WebApi.Models
         public DuplicateIDDocumentCheckResponse(bool hasDuplicateId, DateTime? duplicateIdIssueDate)
         {
             HasDuplicateId = hasDuplicateId;
-            DuplicateIdIssueDate =  duplicateIdIssueDate?.ToString("yyyy-MM-dd") ?? string.Empty;
+            DuplicateIdIssueDate =  duplicateIdIssueDate?.ToString("yyyy-MM-dd");
         }
     }
 }

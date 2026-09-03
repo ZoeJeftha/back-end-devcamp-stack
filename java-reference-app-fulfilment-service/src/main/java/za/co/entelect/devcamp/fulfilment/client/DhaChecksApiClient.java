@@ -1,92 +1,90 @@
 package za.co.entelect.devcamp.fulfilment.client;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import za.co.entelect.devcamp.fulfilment.dha.api.DhaApi;
+import za.co.entelect.devcamp.fulfilment.dha.ApiClient;
+import za.co.entelect.devcamp.fulfilment.dha.model.DuplicateIDDocumentCheckResponse;
+import za.co.entelect.devcamp.fulfilment.dha.model.LivingStatusResponse;
+import za.co.entelect.devcamp.fulfilment.dha.model.LivingStatuses;
+//import za.co.entelect.devcamp.fulfilment.dha.model.MaritalStatusResponse;
 import za.co.entelect.devcamp.fulfilment.dto.DuplicateIdStatusDto;
 import za.co.entelect.devcamp.fulfilment.dto.LivingStatusDto;
+import za.co.entelect.devcamp.fulfilment.dto.LivingStatusesDto;
 import za.co.entelect.devcamp.fulfilment.dto.MaritalStatusesDto;
 import za.co.entelect.devcamp.fulfilment.interfaces.IDhaChecksApiClient;
 
 @Slf4j
 @Component
-public class DhaChecksApiClient implements IDhaChecksApiClient
-{
-    private final RestTemplate restTemplate;
+public class DhaChecksApiClient implements IDhaChecksApiClient {
 
-    public DhaChecksApiClient(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+//    @Override
+//    public MaritalStatusResponse DoMaritalCheck(String token, Long idNumber)
+//    {
+//        ApiClient apiClient = new ApiClient();
+//
+//        apiClient.setBasePath("http://devcamp-dha-service:80");
+//
+//        apiClient.addDefaultHeader(
+//                "Authorization",
+//                "Bearer " + token
+//        );
+//
+//        DhaApi dhaApi = new DhaApi(apiClient);
+//
+//        MaritalStatusResponse response =
+//                dhaApi.statusMaritalIdNumberGet(idNumber);
+//
+//        return response;
+//    }
+
+    @Override
+    public DuplicateIDDocumentCheckResponse DoDuplicateIdCheck(String token, Long idNumber) {
+
+        ApiClient apiClient = new ApiClient();
+
+        apiClient.setBasePath("http://devcamp-dha-service:80");
+
+        apiClient.addDefaultHeader(
+                "Authorization",
+                "Bearer " + token
+        );
+
+        DhaApi dhaApi = new DhaApi(apiClient);
+
+        DuplicateIDDocumentCheckResponse response =
+                dhaApi.statusDuplicateIdIdNumberGet(idNumber);
+
+        return response;
     }
 
     @Override
-    public MaritalStatusesDto DoMaritalCheck(String token, Long idNumber)
-    {
-        String url = "http://devcamp-dha-service:80/status/marital/" + idNumber;
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(token);
+    public LivingStatusResponse DoLivingStatusCheck(String token, Long idNumber) {
 
-        HttpEntity<Long> entity =
-                new HttpEntity<>(headers);
+        ApiClient apiClient = new ApiClient();
 
-        ResponseEntity<MaritalStatusesDto> response =
-                restTemplate.exchange(
-                        url,
-                        HttpMethod.GET,
-                        entity,
-                        new ParameterizedTypeReference<MaritalStatusesDto>() {}
-                );
+        apiClient.setBasePath("http://devcamp-dha-service:80");
 
-        return response.getBody();
+        apiClient.addDefaultHeader(
+                "Authorization",
+                "Bearer " + token
+        );
+
+        DhaApi dhaApi = new DhaApi(apiClient);
+
+        LivingStatusResponse response =
+                dhaApi.statusLivingIdNumberGet(idNumber);
+//
+//        LivingStatuses status = response.getLivingStatus();
+//
+//        LivingStatusDto livingStatusDto = new LivingStatusDto();
+//        livingStatusDto.setLivingStatus(status.getValue());
+//
+//        livingStatusDto.setDeceasedDate(
+//                response.getDeceasedDate()
+//        );
+
+        return response;
     }
 
-    @Override
-    public DuplicateIdStatusDto DoDuplicateIdCheck(String token, Long idNumber)
-    {
-        String url = "http://devcamp-dha-service:80/status/duplicateId/" + idNumber;
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(token);
-
-        HttpEntity<Long> entity =
-                new HttpEntity<>(headers);
-
-        ResponseEntity<DuplicateIdStatusDto> response =
-                restTemplate.exchange(
-                        url,
-                        HttpMethod.GET,
-                        entity,
-                        new ParameterizedTypeReference<DuplicateIdStatusDto>() {}
-                );
-
-        return response.getBody();
-    }
-
-    @Override
-    public LivingStatusDto DoLivingStatusCheck(String token, Long idNumber)
-    {
-        String url = "http://devcamp-dha-service:80/status/living/" + idNumber;
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(token);
-
-        HttpEntity<Long> entity =
-                new HttpEntity<>(headers);
-
-        ResponseEntity<LivingStatusDto> response =
-                restTemplate.exchange(
-                        url,
-                        HttpMethod.GET,
-                        entity,
-                        new ParameterizedTypeReference<LivingStatusDto>() {}
-                );
-
-        return response.getBody();
-    }
 }

@@ -4,8 +4,8 @@ package za.co.entelect.devcamp.fulfilment.interfaces;
 import java.io.IOException;
 import za.co.entelect.devcamp.fulfilment.dto.KycDto;
 
-public interface IKycChecksApiClient
+public interface ITokenService
 {
-    KycDto DoKycCheck(String token, Long customerId);
+    String GetToken(String username);
 }
 

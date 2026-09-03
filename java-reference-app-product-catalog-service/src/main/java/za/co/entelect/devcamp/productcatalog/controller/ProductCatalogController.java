@@ -151,19 +151,26 @@ public class ProductCatalogController {
             return ResponseEntity.internalServerError().body(response);
         }
     }
-//
-//    @GetMapping("/place-order")
-//    public ResponseEntity<ApiResponse<CustomerDto>> GetMyProfile(@AuthenticationPrincipal Jwt jwt)
+
+//    @GetMapping("/place-order/{productId}")
+//    public ResponseEntity<ApiResponse<Boolean>> PlaceOrder(@AuthenticationPrincipal Jwt jwt,  @PathVariable Long productId)
 //    {
 //        try {
 //            String token = jwt.getTokenValue();
-//            ResponseEntity<ApiResponse<CustomerDto>> customer = customerService.GetMyProfile(token);
+//            Boolean isEligible = productEligibilityService.isCustomerEligible(token, productId);
+//            if(!isEligible)
+//            {
+//                ApiResponse<Boolean> response = new ApiResponse<Boolean>(success, "Customer ineligible for selected product", null);
+//                return response;
+//            }
 //
-//            return customer;
+//            ApiResponse<Boolean> response = new ApiResponse<Boolean>(success, "Customer ineligible for selected product", null);
+//            return response;
 //        }
 //        catch(Exception e)
 //        {
-//            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retrieve my profile: "+ e.getMessage(), null);
+//            log.info("Failed to check customer eligibility" + e.getMessage());
+//            ApiResponse<Boolean> response = new ApiResponse<Boolean>(false, "Failed to place order: "+ e.getMessage(), null);
 //            return ResponseEntity.internalServerError().body(response);
 //        }
 //
