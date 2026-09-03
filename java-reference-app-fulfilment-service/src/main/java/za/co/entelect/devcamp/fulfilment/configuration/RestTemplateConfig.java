@@ -1,4 +1,4 @@
-package za.co.entelect.devcamp.fulfilment.config;
+package za.co.entelect.devcamp.fulfilment.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

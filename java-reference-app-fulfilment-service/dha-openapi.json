@@ -261,12 +261,14 @@
           },
           "effectiveFrom": {
             "type": "string",
+            "format": "date",
             "description": "Gets or Sets EffectiveFromDate",
             "nullable": true,
             "example": "2023-07-24"
           },
           "effectiveTo": {
             "type": "string",
+            "format": "date",
             "description": "Gets or Sets EffectiveToDate",
             "nullable": true,
             "example": "2023-07-25"
@@ -290,10 +292,10 @@
       },
       "MaritalStatuses": {
         "enum": [
-          "0 = Single",
-          "1 = Married",
-          "2 = Divorced",
-          "3 = Widowed"
+          "Single",
+          "Married",
+          "Divorced",
+          "Widowed"
         ],
         "type": "string"
       },

@@ -6,6 +6,7 @@ import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.Jackson2JavaTypeMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -45,11 +46,17 @@ public class RabbitConfig {
     }
 
     @Bean
-    public Jackson2JsonMessageConverter jackson2JsonMessageConverter()
-    {
-        return new Jackson2JsonMessageConverter();
-    }
+    public Jackson2JsonMessageConverter jackson2JsonMessageConverter() {
 
+        Jackson2JsonMessageConverter converter =
+                new Jackson2JsonMessageConverter();
+
+        converter.setTypePrecedence(
+                Jackson2JavaTypeMapper.TypePrecedence.INFERRED
+        );
+
+        return converter;
+    }
     @Bean
     public Binding deadLetterBinding() {
         return BindingBuilder

@@ -7,7 +7,7 @@ import za.co.entelect.devcamp.fulfilment.dha.ApiClient;
 import za.co.entelect.devcamp.fulfilment.dha.model.DuplicateIDDocumentCheckResponse;
 import za.co.entelect.devcamp.fulfilment.dha.model.LivingStatusResponse;
 import za.co.entelect.devcamp.fulfilment.dha.model.LivingStatuses;
-//import za.co.entelect.devcamp.fulfilment.dha.model.MaritalStatusResponse;
+import za.co.entelect.devcamp.fulfilment.dha.model.MaritalStatusResponse;
 import za.co.entelect.devcamp.fulfilment.dto.DuplicateIdStatusDto;
 import za.co.entelect.devcamp.fulfilment.dto.LivingStatusDto;
 import za.co.entelect.devcamp.fulfilment.dto.LivingStatusesDto;
@@ -18,25 +18,25 @@ import za.co.entelect.devcamp.fulfilment.interfaces.IDhaChecksApiClient;
 @Component
 public class DhaChecksApiClient implements IDhaChecksApiClient {
 
-//    @Override
-//    public MaritalStatusResponse DoMaritalCheck(String token, Long idNumber)
-//    {
-//        ApiClient apiClient = new ApiClient();
-//
-//        apiClient.setBasePath("http://devcamp-dha-service:80");
-//
-//        apiClient.addDefaultHeader(
-//                "Authorization",
-//                "Bearer " + token
-//        );
-//
-//        DhaApi dhaApi = new DhaApi(apiClient);
-//
-//        MaritalStatusResponse response =
-//                dhaApi.statusMaritalIdNumberGet(idNumber);
-//
-//        return response;
-//    }
+    @Override
+    public MaritalStatusResponse DoMaritalCheck(String token, Long idNumber)
+    {
+        ApiClient apiClient = new ApiClient();
+
+        apiClient.setBasePath("http://devcamp-dha-service:80");
+
+        apiClient.addDefaultHeader(
+                "Authorization",
+                "Bearer " + token
+        );
+
+        DhaApi dhaApi = new DhaApi(apiClient);
+
+        MaritalStatusResponse response =
+                dhaApi.statusMaritalIdNumberGet(idNumber);
+
+        return response;
+    }
 
     @Override
     public DuplicateIDDocumentCheckResponse DoDuplicateIdCheck(String token, Long idNumber) {

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import za.co.entelect.devcamp.fulfilment.dha.model.DuplicateIDDocumentCheckResponse;
 import za.co.entelect.devcamp.fulfilment.dha.model.LivingStatusResponse;
+import za.co.entelect.devcamp.fulfilment.dha.model.MaritalStatusResponse;
 import za.co.entelect.devcamp.fulfilment.dto.DuplicateIdStatusDto;
 import za.co.entelect.devcamp.fulfilment.dto.KycDto;
 import za.co.entelect.devcamp.fulfilment.dto.LivingStatusDto;
@@ -49,20 +50,21 @@ public class FulfilmentController {
             return "Exception thrown: "+ e.getMessage();
         }
     }
-//
-//    @GetMapping("/do-dha-marital-check")
-//    public MaritalStatusesDto DoDhaMaritalCheck(@AuthenticationPrincipal Jwt jwt)
-//    {
-//        try {
-//            String token = jwt.getTokenValue();
-//            return dhaChecksApiClient.DoMaritalCheck(token, 9001010000081L);
-//        }
-//        catch(Exception e)
-//        {
-//            return null;
-//                    //"Exception thrown: "+ e.getMessage();
-//        }
-//    }
+
+    @GetMapping("/do-dha-marital-check")
+    public MaritalStatusResponse DoDhaMaritalCheck(@AuthenticationPrincipal Jwt jwt)
+    {
+        try {
+            String token = jwt.getTokenValue();
+            return dhaChecksApiClient.DoMaritalCheck(token, 9001010000081L);
+        }
+        catch(Exception e)
+        {
+            System.out.println("------------------do-dha-marital-check " + e.getMessage());
+            return null;
+                    //"Exception thrown: "+ e.getMessage();
+        }
+    }
 
     @GetMapping("/do-dha-duplicate-id-check")
     public DuplicateIDDocumentCheckResponse DoDhaDuplicateIdCheck(@AuthenticationPrincipal Jwt jwt)

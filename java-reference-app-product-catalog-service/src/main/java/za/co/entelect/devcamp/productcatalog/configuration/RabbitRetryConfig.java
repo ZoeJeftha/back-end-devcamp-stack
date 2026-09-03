@@ -1,8 +1,9 @@
-package za.co.entelect.devcamp.fulfilment.configuration;
+package za.co.entelect.devcamp.productcatalog.configuration;
 
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.Jackson2JavaTypeMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.interceptor.RetryInterceptorBuilder;
@@ -22,10 +23,10 @@ public class RabbitRetryConfig {
 
         factory.setConnectionFactory(connectionFactory);
 
-        // THIS IS IMPORTANT
+        // Use JSON conversion for RabbitMQ messages
         factory.setMessageConverter(converter);
 
-        // Don't put failed messages back onto the original queue
+        // Don't put the failed message back onto the original queue
         factory.setDefaultRequeueRejected(false);
 
         RetryOperationsInterceptor interceptor =
@@ -43,5 +44,4 @@ public class RabbitRetryConfig {
 
         return factory;
     }
-
 }
