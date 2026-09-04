@@ -42,7 +42,6 @@ public class MessageConsumer {
     public void receiveMessage(FulfilmentRequest fulfilmentRequest) {
         try {
             System.out.println("-----------------Message queue received: " + fulfilmentRequest);
-            //need fulfilment type
             String token = tokenService.GetToken(fulfilmentRequest.getUsername());
 
             System.out.println("----------------Message queue received getFulfilmentType: " + fulfilmentRequest.getFulfilmentType());
