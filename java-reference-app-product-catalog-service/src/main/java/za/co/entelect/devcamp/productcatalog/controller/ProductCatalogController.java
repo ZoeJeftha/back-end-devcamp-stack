@@ -29,7 +29,10 @@ import za.co.entelect.devcamp.productcatalog.responses.ApiResponse;
 import za.co.entelect.devcamp.productcatalog.service.ICustomerService;
 import za.co.entelect.devcamp.productcatalog.service.IProductEligibilityService;
 import za.co.entelect.devcamp.productcatalog.service.IProductService;
-import za.co.entelect.devcamp.productcatalog.request.FulfilmentRequest;
+import za.co.entelect.devcamp.productcatalog.service.IOrderService;
+import za.co.entelect.devcamp.productcatalog.requests.FulfilmentRequest;
+import za.co.entelect.devcamp.productcatalog.requests.OrderRequest;
+import za.co.entelect.devcamp.productcatalog.responses.OrderResponse;
 
 @Slf4j
 @RestController
@@ -39,17 +42,20 @@ public class ProductCatalogController {
     public final IProductService productService;
     public final IProductEligibilityService productEligibilityService;
     public final ICustomerService customerService;
+    public final IOrderService orderService;
 
     @Autowired
     private MessageProducer messageProducer;
 
     public ProductCatalogController(IProductService productService,
                                     IProductEligibilityService productEligibilityService,
-                                    ICustomerService customerService)
+                                    ICustomerService customerService,
+                                    IOrderService orderService)
     {
         this.productService = productService;
         this.productEligibilityService = productEligibilityService;
         this.customerService = customerService;
+        this.orderService = orderService;
     }
 
     @GetMapping("/products")
@@ -120,7 +126,7 @@ public class ProductCatalogController {
     }
 
     @GetMapping("/place-order/{productId}")
-    public ResponseEntity<ApiResponse<FulfilmentRequest>> PlaceOrder(@AuthenticationPrincipal Jwt jwt, @PathVariable Long productId)
+    public ResponseEntity<ApiResponse<OrderResponse>> PlaceOrder(@AuthenticationPrincipal Jwt jwt, @PathVariable Long productId)
     {
         try
         {
@@ -129,7 +135,7 @@ public class ProductCatalogController {
             log.info("---------------Place order-------------- isEligible:" + isEligible);
             if(!isEligible)
             {
-                ApiResponse<FulfilmentRequest> response = new ApiResponse<FulfilmentRequest>(true, "Customer ineligible for selected product", null);
+                ApiResponse<OrderResponse> response = new ApiResponse<OrderResponse>(true, "Customer ineligible for selected product", null);
                 return ResponseEntity.internalServerError().body(response);
             }
 
@@ -150,7 +156,16 @@ public class ProductCatalogController {
             log.info("---------------Place order-------------- fulfilmentRequest with type:" + fulfilmentRequest);
 
             messageProducer.SendMessage(fulfilmentRequest);
-            ApiResponse<FulfilmentRequest> response = new ApiResponse<FulfilmentRequest>(true, "Order placed: ",fulfilmentRequest);
+
+            log.info("---------------Place order-------------- :fulfilmentRequest message sent" + fulfilmentRequest);
+
+            OrderRequest orderRequest = new OrderRequest();
+            orderRequest.setCustomerId(customerDto.getId());
+            orderRequest.setStatus("PENDING");
+            orderRequest.setProductId(productId);
+
+            OrderResponse orderResponse = orderService.SaveOrder(orderRequest);
+            ApiResponse<OrderResponse> response = new ApiResponse<OrderResponse>(true, "Order placed",orderResponse);
 
             log.info("---------------Place order-------------- order placed");
             return ResponseEntity.ok(response);
@@ -158,7 +173,7 @@ public class ProductCatalogController {
         catch(Exception e)
         {
             log.info("Failed to place order: " + e.getMessage());
-            ApiResponse<FulfilmentRequest> response = new ApiResponse<FulfilmentRequest>(false, "Failed to place order", null);
+            ApiResponse<OrderResponse> response = new ApiResponse<OrderResponse>(false, "Failed to place order", null);
             return ResponseEntity.internalServerError().body(response);
         }
 

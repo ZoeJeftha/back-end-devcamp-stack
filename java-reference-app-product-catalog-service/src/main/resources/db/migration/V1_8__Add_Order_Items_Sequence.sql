@@ -1,0 +1,1 @@
+CREATE SEQUENCE pc.order_items_sequence MINVALUE 1 START 1 INCREMENT BY 1;

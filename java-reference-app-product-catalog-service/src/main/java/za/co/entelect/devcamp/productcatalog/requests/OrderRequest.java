@@ -9,10 +9,9 @@ import java.math.BigDecimal;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class FulfilmentRequest {
-
-    private Long id;
-    private String idNumber;
-    private String fulfilmentType;
-    private String username;
+public class OrderRequest {
+    private Long customerId;
+    private String status;
+    private String contractUrl;
+    private Long productId;
 }

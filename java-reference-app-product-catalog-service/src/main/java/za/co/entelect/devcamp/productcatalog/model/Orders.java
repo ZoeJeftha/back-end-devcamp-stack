@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 public class Orders {
     @Id
     @Column(name="order_id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "app_user_sequence")
-    @SequenceGenerator(name = "app_user_sequence", sequenceName = "app_user_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "orders_sequence")
+    @SequenceGenerator(name = "orders_sequence", sequenceName = "pc.orders_sequence", allocationSize = 1)
     private Long orderId;
 
     @Column(name="customer_id", nullable = false)
