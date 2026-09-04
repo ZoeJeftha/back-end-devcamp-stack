@@ -151,10 +151,11 @@ public class CustomerService implements CustomerApiDelegate {
         Optional<Customer> customerByEmail = customerRepository.findCustomerByEmail(emailAddress);
         if (customerByEmail.isPresent()) {
             Customer customer = customerByEmail.get();
+            CustomerDto customerDto = customer.toCustomerDto();
             String maskedIdNumber = CustomerHelper.maskIdNumber(customer.getIdNumber());
-            customer.setIdNumber(maskedIdNumber);
+            customerDto.setIdNumber(maskedIdNumber);
 
-            return ResponseEntity.ok(customer.toCustomerDto());
+            return ResponseEntity.ok(customerDto);
         } else {
             return ResponseEntity.notFound().build();
         }
