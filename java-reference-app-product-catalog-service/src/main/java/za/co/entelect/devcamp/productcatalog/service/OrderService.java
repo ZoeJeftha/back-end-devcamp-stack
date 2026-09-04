@@ -2,6 +2,7 @@ package za.co.entelect.devcamp.productcatalog.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,12 +12,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import za.co.entelect.devcamp.productcatalog.dto.ProductDto;
+import za.co.entelect.devcamp.productcatalog.exception.NotFoundException;
 import za.co.entelect.devcamp.productcatalog.model.OrderItems;
 import za.co.entelect.devcamp.productcatalog.model.Orders;
 import za.co.entelect.devcamp.productcatalog.repository.OrderRepository;
 import za.co.entelect.devcamp.productcatalog.repository.OrderItemRepository;
 import za.co.entelect.devcamp.productcatalog.requests.OrderRequest;
 import za.co.entelect.devcamp.productcatalog.responses.OrderResponse;
+import za.co.entelect.devcamp.productcatalog.service.IProductService;
 
 @Slf4j
 @Service
@@ -24,13 +28,16 @@ public class OrderService implements IOrderService
 {
     public final OrderRepository orderRepository;
     public final OrderItemRepository orderItemRepository;
+    public final IProductService productService;
 
     @Autowired
     public OrderService(OrderRepository orderRepository,
-                        OrderItemRepository orderItemRepository)
+                        OrderItemRepository orderItemRepository,
+                        IProductService productService)
     {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
+        this.productService = productService;
     }
 
     public OrderResponse SaveOrder(OrderRequest request) throws Exception
@@ -72,7 +79,50 @@ public class OrderService implements IOrderService
         {
             throw new Exception("Failed to save order to db: "+ e.getMessage());
         }
-
-
     }
+
+    public OrderResponse GetOrder(Long orderId) throws Exception, NotFoundException
+    {
+        try
+        {
+            Optional<Orders> orderOp = orderRepository.findById(orderId);
+
+            if(orderOp.isPresent()) {
+                Orders order = orderOp.get();
+
+                Optional<OrderItems> orderItemOp = orderItemRepository.findByOrderId(orderId);
+
+                if(orderItemOp.isPresent()) {
+                    OrderItems orderItem = orderItemOp.get();
+
+                    OrderResponse orderResponse = new OrderResponse();
+
+                    orderResponse.setOrderId(order.getOrderId());
+                    orderResponse.setStatus(order.getStatus());
+
+                    ProductDto product = productService.getProductById(orderItem.getProductId());
+                    orderResponse.setProduct(product);
+
+                    return orderResponse;
+                }
+                else
+                {
+                    throw new NotFoundException("Order not found");
+                }
+            }
+            else
+            {
+                throw new NotFoundException("Order not found");
+            }
+        }
+        catch(NotFoundException e)
+        {
+            throw new NotFoundException(e.getMessage());
+        }
+        catch(Exception e)
+        {
+            throw new Exception("Failed to get order: "+ e.getMessage());
+        }
+    }
+
 }
