@@ -1,6 +1,7 @@
 package za.co.entelect.devcamp.productcatalog.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import za.co.entelect.devcamp.productcatalog.dto.CustomerDto;
 import za.co.entelect.devcamp.productcatalog.dto.ProductDto;
 import za.co.entelect.devcamp.productcatalog.exception.NotFoundException;
 import za.co.entelect.devcamp.productcatalog.model.OrderItems;
@@ -113,6 +115,38 @@ public class OrderService implements IOrderService
             else
             {
                 throw new NotFoundException("Order not found");
+            }
+        }
+        catch(NotFoundException e)
+        {
+            throw new NotFoundException(e.getMessage());
+        }
+        catch(Exception e)
+        {
+            throw new Exception("Failed to get order: "+ e.getMessage());
+        }
+    }
+
+    public List<OrderResponse> GetMyOrders(CustomerDto customer) throws Exception, NotFoundException
+    {
+        try
+        {
+            Optional<List<Orders>> ordersOp = orderRepository.findByCustomerId(customer.getId());
+
+            if(ordersOp.isPresent())
+            {
+                List<Orders> orders = ordersOp.get();
+                List<OrderResponse> orderResponses = new ArrayList<>();
+                for(Orders order: orders)
+                {
+                    OrderResponse response = GetOrder(order.getOrderId());
+                    orderResponses.add(response);
+                }
+                return orderResponses;
+            }
+            else
+            {
+                throw new NotFoundException("Orders not found");
             }
         }
         catch(NotFoundException e)

@@ -182,7 +182,7 @@ public class ProductCatalogController {
     }
 
     @GetMapping("/order-by-id/{orderId}")
-    public ResponseEntity<ApiResponse<OrderResponse>> GetMyOrder(@AuthenticationPrincipal Jwt jwt, @PathVariable Long orderId)
+    public ResponseEntity<ApiResponse<OrderResponse>> GetOrderById(@PathVariable Long orderId)
     {
         try
         {
@@ -196,10 +196,33 @@ public class ProductCatalogController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
         catch(Exception e) {
-            ApiResponse<OrderResponse> response = new ApiResponse<OrderResponse>(false, "Failed to retrieve my order: " + e.getMessage(), null);
+            ApiResponse<OrderResponse> response = new ApiResponse<OrderResponse>(false, "Failed to retrieve order: " + e.getMessage(), null);
             return ResponseEntity.internalServerError().body(response);
         }
     }
 
+    @GetMapping("/all-orders")
+    public ResponseEntity<ApiResponse<List<OrderResponse>>> GetMyOrders(@AuthenticationPrincipal Jwt jwt)
+    {
+        try
+        {
+            String token = jwt.getTokenValue();
+            ResponseEntity<ApiResponse<CustomerDto>> customerDtoResponse = customerService.GetMyProfile(token);
+            CustomerDto customer = customerDtoResponse.getBody().getResult();
+
+            List<OrderResponse> orderResponse = orderService.GetMyOrders(customer);
+            ApiResponse<List<OrderResponse>> response = new ApiResponse<List<OrderResponse>>(true, "Orders retrieved successfully", orderResponse);
+            return ResponseEntity.ok(response);
+        }
+        catch(NotFoundException e)
+        {
+            ApiResponse<List<OrderResponse>> response = new ApiResponse<List<OrderResponse>>(false, "Orders not found",null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+        catch(Exception e) {
+            ApiResponse<List<OrderResponse>> response = new ApiResponse<List<OrderResponse>>(false, "Failed to retrieve orders: " + e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
 
 }
