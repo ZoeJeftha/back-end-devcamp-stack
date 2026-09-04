@@ -162,7 +162,7 @@ public class ProductCatalogController {
             OrderRequest orderRequest = new OrderRequest();
             orderRequest.setCustomerId(customerDto.getId());
             orderRequest.setStatus("PENDING");
-            orderRequest.setProductId(productId);
+            orderRequest.setProduct(product);
 
             OrderResponse orderResponse = orderService.SaveOrder(orderRequest);
             ApiResponse<OrderResponse> response = new ApiResponse<OrderResponse>(true, "Order placed",orderResponse);

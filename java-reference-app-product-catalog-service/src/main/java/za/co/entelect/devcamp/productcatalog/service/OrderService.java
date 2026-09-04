@@ -53,7 +53,7 @@ public class OrderService implements IOrderService
             log.info("SaveOrder savedOrder: " + savedOrder);
 
             OrderItems orderItems = new OrderItems();
-            orderItems.setProductId(request.getProductId());
+            orderItems.setProductId(request.getProduct().getProductId());
             orderItems.setOrderId(savedOrder.getOrderId());
 
             OrderItems savedOrderItems = orderItemRepository.save(orderItems);
@@ -63,6 +63,7 @@ public class OrderService implements IOrderService
 
             response.setOrderId(order.getOrderId());
             response.setStatus(request.getStatus());
+            response.setProduct(request.getProduct());
 
             log.info("SaveOrder response: " + response);
             return response;
@@ -71,5 +72,7 @@ public class OrderService implements IOrderService
         {
             throw new Exception("Failed to save order to db: "+ e.getMessage());
         }
+
+
     }
 }
