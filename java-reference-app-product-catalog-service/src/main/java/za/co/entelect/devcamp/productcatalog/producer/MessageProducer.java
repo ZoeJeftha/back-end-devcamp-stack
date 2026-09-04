@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import za.co.entelect.devcamp.productcatalog.dto.CustomerDto;
 import za.co.entelect.devcamp.productcatalog.configuration.RabbitConfig;
-import za.co.entelect.devcamp.productcatalog.request.FulfilmentRequest;
+import za.co.entelect.devcamp.productcatalog.requests.FulfilmentRequest;
 
 @Slf4j
 @Service
