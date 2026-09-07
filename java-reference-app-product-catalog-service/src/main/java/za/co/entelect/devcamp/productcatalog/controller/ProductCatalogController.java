@@ -137,6 +137,42 @@ public class ProductCatalogController {
 
     }
 
+
+    @GetMapping("/profiles")
+    public ResponseEntity<ApiResponse<List<CustomerDto>>> getProfiles(@AuthenticationPrincipal Jwt jwt)
+    {
+        log.info("Getting profiles");
+        try {
+            String token = jwt.getTokenValue();
+            String role = jwt.getClaimAsString("role");
+
+            if (!"admin".equals(role)) {
+                ApiResponse<List<CustomerDto>> response = new ApiResponse<>(false, "Not authorised to retrieve profiles", null);
+
+                return ResponseEntity
+                        .status(HttpStatus.UNAUTHORIZED)
+                        .body(response);
+            }
+
+            List<CustomerDto> customerDto = customerService.GetProfiles(token);
+            ApiResponse<List<CustomerDto>> response = new ApiResponse<List<CustomerDto>>(true, "Profile retrieved successfully",customerDto);
+            return ResponseEntity.ok(response);
+        }
+        catch(NotFoundException e)
+        {
+            ApiResponse<List<CustomerDto>> response = new ApiResponse<List<CustomerDto>>(false, "Profile not found",null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+        catch(Exception e)
+        {
+            log.info("Failed to retrieve profile" + e.getMessage());
+            ApiResponse<List<CustomerDto>> response = new ApiResponse<List<CustomerDto>>(false, "Failed to retrieve profile: "+ e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
+        }
+
+    }
+
+
     @GetMapping("/customer-eligibility-check/{productId}")
     public ResponseEntity<ApiResponse<Boolean>> CustomerTypeEligibilityCheck(@AuthenticationPrincipal Jwt jwt, @PathVariable Long productId)
     {

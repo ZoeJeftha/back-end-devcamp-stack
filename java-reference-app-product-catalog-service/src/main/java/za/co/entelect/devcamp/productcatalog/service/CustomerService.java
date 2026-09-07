@@ -37,6 +37,21 @@ public class CustomerService implements ICustomerService {
         return customerDto;
     }
 
+    public List<CustomerDto> GetProfiles(String token) throws NotFoundException, Exception
+    {
+        ResponseEntity<List<CustomerDto>> customers = customerApiClient.GetProfiles(token);
+        List<CustomerDto> customerDtos = customers.getBody();
+
+        List<CustomerDto> maskedCustomers = customerDtos.stream()
+                .map(customer ->
+                {
+                    customer.setIdNumber(maskIdNumber(customer.getIdNumber()));
+                    return customer;
+                }) .collect(Collectors.toList());
+
+        return maskedCustomers;
+    }
+
     private String maskIdNumber(String idNumber) {
 
         if (idNumber == null || idNumber.length() <= 4) {

@@ -1,5 +1,6 @@
 package za.co.entelect.devcamp.productcatalog.client;
 
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -30,8 +31,8 @@ public class CustomerApiClient implements ICustomerApiClient
     public ResponseEntity<CustomerDto> GetMyProfile(String token, String username) throws NotFoundException, Exception
     {
         try {
-            String url = "http://devcamp-cis-service:8080/v1/customer?emailAddress=" + username; //username@gmail.com";
-
+            //String url = "http://devcamp-cis-service:8080/v1/customer?emailAddress=" + username; //username@gmail.com";
+            String url = "http://devcamp-cis-service:8080/v1/customer?emailAddress=username@gmail.com";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(token);
@@ -44,6 +45,42 @@ public class CustomerApiClient implements ICustomerApiClient
                             HttpMethod.GET,
                             entity,
                             new ParameterizedTypeReference<CustomerDto>() {
+                            }
+                    );
+
+            return response;
+        }
+        catch(HttpClientErrorException e)
+        {
+            if(e.getStatusCode() == HttpStatus.NOT_FOUND)
+            {
+                throw new NotFoundException(e.getMessage());
+            }
+            else
+            {
+                throw new Exception(e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public ResponseEntity<List<CustomerDto>> GetProfiles(String token) throws NotFoundException, Exception
+    {
+        try {
+            String url = "http://devcamp-cis-service:8080/v1/customers";
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(token);
+
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+            ResponseEntity<List<CustomerDto>> response =
+                    restTemplate.exchange(
+                            url,
+                            HttpMethod.GET,
+                            entity,
+                            new ParameterizedTypeReference<List<CustomerDto>>() {
                             }
                     );
 
