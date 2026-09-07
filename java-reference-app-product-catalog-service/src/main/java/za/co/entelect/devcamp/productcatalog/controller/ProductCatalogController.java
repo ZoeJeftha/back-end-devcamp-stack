@@ -1,12 +1,14 @@
 package za.co.entelect.devcamp.productcatalog.controller;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -24,6 +26,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import za.co.entelect.devcamp.productcatalog.client.CustomerApiClient;
 import za.co.entelect.devcamp.productcatalog.dto.CustomerDto;
 import za.co.entelect.devcamp.productcatalog.dto.ProductDto;
+import za.co.entelect.devcamp.productcatalog.enums.OrderStatusEnum;
+import  za.co.entelect.devcamp.productcatalog.exception.NotFoundException;
 import za.co.entelect.devcamp.productcatalog.producer.MessageProducer;
 import za.co.entelect.devcamp.productcatalog.responses.ApiResponse;
 import za.co.entelect.devcamp.productcatalog.service.ICustomerService;
@@ -32,6 +36,7 @@ import za.co.entelect.devcamp.productcatalog.service.IProductService;
 import za.co.entelect.devcamp.productcatalog.service.IOrderService;
 import za.co.entelect.devcamp.productcatalog.requests.FulfilmentRequest;
 import za.co.entelect.devcamp.productcatalog.requests.OrderRequest;
+import za.co.entelect.devcamp.productcatalog.requests.OrderStatusUpdateRequest;
 import za.co.entelect.devcamp.productcatalog.responses.OrderResponse;
 
 @Slf4j
@@ -125,7 +130,7 @@ public class ProductCatalogController {
         }
     }
 
-    @GetMapping("/place-order/{productId}")
+    @GetMapping("/order/{productId}")
     public ResponseEntity<ApiResponse<OrderResponse>> PlaceOrder(@AuthenticationPrincipal Jwt jwt, @PathVariable Long productId)
     {
         try
@@ -162,7 +167,7 @@ public class ProductCatalogController {
             OrderRequest orderRequest = new OrderRequest();
             orderRequest.setCustomerId(customerDto.getId());
             orderRequest.setStatus("PENDING");
-            orderRequest.setProductId(productId);
+            orderRequest.setProduct(product);
 
             OrderResponse orderResponse = orderService.SaveOrder(orderRequest);
             ApiResponse<OrderResponse> response = new ApiResponse<OrderResponse>(true, "Order placed",orderResponse);
@@ -179,43 +184,80 @@ public class ProductCatalogController {
 
     }
 
-    @GetMapping("/my-profile")
-    public ResponseEntity<ApiResponse<CustomerDto>> GetMyProfile(@AuthenticationPrincipal Jwt jwt)
+    @GetMapping("/order-by-id/{orderId}")
+    public ResponseEntity<ApiResponse<OrderResponse>> GetOrderById(@PathVariable Long orderId)
     {
-        try {
-            String token = jwt.getTokenValue();
-            ResponseEntity<ApiResponse<CustomerDto>> customer = customerService.GetMyProfile(token);
-
-            return customer;
+        try
+        {
+            OrderResponse orderResponse = orderService.GetOrder(orderId);
+            ApiResponse<OrderResponse> response = new ApiResponse<OrderResponse>(true, "Order retrieved successfully", orderResponse);
+            return ResponseEntity.ok(response);
+        }
+        catch(NotFoundException e)
+        {
+            ApiResponse<OrderResponse> response = new ApiResponse<OrderResponse>(false, "Order not found",null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
         catch(Exception e) {
-            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retrieve my profile: " + e.getMessage(), null);
+            ApiResponse<OrderResponse> response = new ApiResponse<OrderResponse>(false, "Failed to retrieve order: " + e.getMessage(), null);
             return ResponseEntity.internalServerError().body(response);
         }
     }
 
-//    @GetMapping("/place-order/{productId}")
-//    public ResponseEntity<ApiResponse<Boolean>> PlaceOrder(@AuthenticationPrincipal Jwt jwt,  @PathVariable Long productId)
-//    {
-//        try {
-//            String token = jwt.getTokenValue();
-//            Boolean isEligible = productEligibilityService.isCustomerEligible(token, productId);
-//            if(!isEligible)
-//            {
-//                ApiResponse<Boolean> response = new ApiResponse<Boolean>(success, "Customer ineligible for selected product", null);
-//                return response;
-//            }
-//
-//            ApiResponse<Boolean> response = new ApiResponse<Boolean>(success, "Customer ineligible for selected product", null);
-//            return response;
-//        }
-//        catch(Exception e)
-//        {
-//            log.info("Failed to check customer eligibility" + e.getMessage());
-//            ApiResponse<Boolean> response = new ApiResponse<Boolean>(false, "Failed to place order: "+ e.getMessage(), null);
-//            return ResponseEntity.internalServerError().body(response);
-//        }
-//
-//    }
+    @GetMapping("/all-orders")
+    public ResponseEntity<ApiResponse<List<OrderResponse>>> GetMyOrders(@AuthenticationPrincipal Jwt jwt)
+    {
+        try
+        {
+            String token = jwt.getTokenValue();
+            ResponseEntity<ApiResponse<CustomerDto>> customerDtoResponse = customerService.GetMyProfile(token);
+            CustomerDto customer = customerDtoResponse.getBody().getResult();
+
+            List<OrderResponse> orderResponse = orderService.GetMyOrders(customer);
+            ApiResponse<List<OrderResponse>> response = new ApiResponse<List<OrderResponse>>(true, "Orders retrieved successfully", orderResponse);
+            return ResponseEntity.ok(response);
+        }
+        catch(NotFoundException e)
+        {
+            ApiResponse<List<OrderResponse>> response = new ApiResponse<List<OrderResponse>>(false, "Orders not found",null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+        catch(Exception e) {
+            ApiResponse<List<OrderResponse>> response = new ApiResponse<List<OrderResponse>>(false, "Failed to retrieve orders: " + e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+
+    @GetMapping("/order-status-update")
+    public ResponseEntity<ApiResponse<OrderResponse>> UpdateOrderStatus(@AuthenticationPrincipal Jwt jwt,@RequestBody OrderStatusUpdateRequest request)
+    {
+        try
+        {
+            String token = jwt.getTokenValue();
+
+            boolean validStatus = Arrays.stream(OrderStatusEnum.values())
+                    .anyMatch(s -> s.name().equalsIgnoreCase(request.getStatus().toString()));
+
+            if(!validStatus)
+            {
+                ApiResponse<OrderResponse> response = new ApiResponse<OrderResponse>(true, "Invalid status", null);
+                return ResponseEntity.ok(response);
+            }
+
+            OrderResponse orderResponse = orderService.UpdateOrderStatus(request);
+            ApiResponse<OrderResponse> response = new ApiResponse<OrderResponse>(true, "Order updated successfully", orderResponse);
+            return ResponseEntity.ok(response);
+        }
+        catch(NotFoundException e)
+        {
+            ApiResponse<OrderResponse> response = new ApiResponse<OrderResponse>(false, "Order not found",null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+        catch(Exception e) {
+            ApiResponse<OrderResponse> response = new ApiResponse<OrderResponse>(false, e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
 
 }
