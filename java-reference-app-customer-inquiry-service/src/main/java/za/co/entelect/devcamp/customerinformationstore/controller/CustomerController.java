@@ -31,25 +31,6 @@ public class CustomerController {
         this.customersService = customersService;
     }
 
-    @GetMapping("/my-profile")
-    public ResponseEntity<ApiResponse<CustomerDto>> getMyProfile(
-            @AuthenticationPrincipal Jwt jwt) {
-        try
-        {
-            String username = jwt.getSubject();
-
-            ResponseEntity<CustomerDto> customerByEmail = customerService.getCustomerByEmailAddress(username);
-            CustomerDto customer = customerByEmail.getBody();
-            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(true, "Profile retrieved successfully", customer);
-            return ResponseEntity.ok(response);
-        }
-        catch(Exception e)
-        {
-            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retrieve profile: "+ e.getMessage(), null);
-            return ResponseEntity.internalServerError().body(response);
-        }
-    }
-
     @PostMapping("/open-account")
     public ResponseEntity<ApiResponse<CustomerDto>> OpenAccount(
             @AuthenticationPrincipal Jwt jwt , @RequestBody Integer accountTypeId) {
@@ -102,23 +83,5 @@ public class CustomerController {
         }
     }
 
-    @GetMapping("/my-profile-unmasked")
-    public ResponseEntity<ApiResponse<CustomerDto>> getMyProfileUnmasked(
-            @AuthenticationPrincipal Jwt jwt) {
-        try
-        {
-            String username = jwt.getSubject();
-
-            ResponseEntity<CustomerDto> customerByEmail = customerService.getCustomerByEmailAddressUnmasked(username);
-            CustomerDto customer = customerByEmail.getBody();
-            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(true, "Profile retrieved successfully", customer);
-            return ResponseEntity.ok(response);
-        }
-        catch(Exception e)
-        {
-            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retrieve profile: "+ e.getMessage(), null);
-            return ResponseEntity.internalServerError().body(response);
-        }
-    }
 
 }

@@ -18,11 +18,11 @@ import za.co.entelect.devcamp.productcatalog.responses.ApiResponse;
 
 @Slf4j
 @Component
-public class CustomerApiClient implements ICustomerApiClient
+public class AuthApiClient implements IAuthApiClient
 {
     private final RestTemplate restTemplate;
 
-    public CustomerApiClient(RestTemplate restTemplate) {
+    public AuthApiClient(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 

@@ -23,11 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
-import za.co.entelect.devcamp.productcatalog.client.CustomerApiClient;
 import za.co.entelect.devcamp.productcatalog.dto.CustomerDto;
 import za.co.entelect.devcamp.productcatalog.dto.ProductDto;
 import za.co.entelect.devcamp.productcatalog.enums.OrderStatusEnum;
-import  za.co.entelect.devcamp.productcatalog.exception.NotFoundException;
+import za.co.entelect.devcamp.productcatalog.exception.NotFoundException;
 import za.co.entelect.devcamp.productcatalog.producer.MessageProducer;
 import za.co.entelect.devcamp.productcatalog.responses.ApiResponse;
 import za.co.entelect.devcamp.productcatalog.service.ICustomerService;
@@ -112,15 +111,47 @@ public class ProductCatalogController {
 
     }
 
+    @GetMapping("/my-profile")
+    public ResponseEntity<ApiResponse<CustomerDto>> getMyProfile(@AuthenticationPrincipal Jwt jwt)
+    {
+        log.info("Getting my profile");
+        try {
+            String username = jwt.getSubject();
+            String token = jwt.getTokenValue();
+
+            CustomerDto customerDto = customerService.GetMyProfile(token,username);
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(true, "Profile retrieved successfully",customerDto);
+            return ResponseEntity.ok(response);
+        }
+        catch(NotFoundException e)
+        {
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Profile not found",null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+        catch(Exception e)
+        {
+            log.info("Failed to retrieve profile" + e.getMessage());
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retrieve profile: "+ e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
+        }
+
+    }
+
     @GetMapping("/customer-eligibility-check/{productId}")
     public ResponseEntity<ApiResponse<Boolean>> CustomerTypeEligibilityCheck(@AuthenticationPrincipal Jwt jwt, @PathVariable Long productId)
     {
         log.info("Customer product eligibility request received");
         try {
             String token = jwt.getTokenValue();
-            Boolean isEligible = productEligibilityService.isCustomerEligible(token, productId);
+            String username = jwt.getSubject();
+            Boolean isEligible = productEligibilityService.isCustomerEligible(token, username, productId);
             ApiResponse<Boolean> response = new ApiResponse<Boolean>(true, "Customer Eligibility Result Retrieved",isEligible);
             return ResponseEntity.ok(response);
+        }
+        catch(NotFoundException e)
+        {
+            ApiResponse<Boolean> response = new ApiResponse<Boolean>(false, "Customer not found",null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
         catch(Exception e)
         {
@@ -136,7 +167,9 @@ public class ProductCatalogController {
         try
         {
             String token = jwt.getTokenValue();
-            Boolean isEligible = productEligibilityService.isCustomerEligible(token, productId);
+            String username = jwt.getSubject();
+
+            Boolean isEligible = productEligibilityService.isCustomerEligible(token,username, productId);
             log.info("---------------Place order-------------- isEligible:" + isEligible);
             if(!isEligible)
             {
@@ -144,8 +177,8 @@ public class ProductCatalogController {
                 return ResponseEntity.internalServerError().body(response);
             }
 
-            ResponseEntity<ApiResponse<CustomerDto>> customer = customerService.GetMyProfile(token);
-            CustomerDto customerDto = customer.getBody().getResult();
+            CustomerDto customerDto = customerService.GetMyProfile(token, username);
+
             log.info("---------------Place order-------------- customerDto:" + customerDto);
 
             FulfilmentRequest fulfilmentRequest = new FulfilmentRequest();
@@ -174,6 +207,11 @@ public class ProductCatalogController {
 
             log.info("---------------Place order-------------- order placed");
             return ResponseEntity.ok(response);
+        }
+        catch(NotFoundException e)
+        {
+            ApiResponse<OrderResponse> response = new ApiResponse<OrderResponse>(false, "Customer not found",null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
         catch(Exception e)
         {
@@ -210,8 +248,8 @@ public class ProductCatalogController {
         try
         {
             String token = jwt.getTokenValue();
-            ResponseEntity<ApiResponse<CustomerDto>> customerDtoResponse = customerService.GetMyProfile(token);
-            CustomerDto customer = customerDtoResponse.getBody().getResult();
+            String username = jwt.getSubject();
+            CustomerDto customer = customerService.GetMyProfile(token,username);
 
             List<OrderResponse> orderResponse = orderService.GetMyOrders(customer);
             ApiResponse<List<OrderResponse>> response = new ApiResponse<List<OrderResponse>>(true, "Orders retrieved successfully", orderResponse);

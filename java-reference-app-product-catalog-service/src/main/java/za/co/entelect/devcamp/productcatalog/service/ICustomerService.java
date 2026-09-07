@@ -3,11 +3,10 @@ package za.co.entelect.devcamp.productcatalog.service;
 
 import org.springframework.http.ResponseEntity;
 import za.co.entelect.devcamp.productcatalog.dto.CustomerDto;
-import za.co.entelect.devcamp.productcatalog.responses.ApiResponse;
-
+import za.co.entelect.devcamp.productcatalog.exception.NotFoundException;
 
 public interface ICustomerService {
 
-    ResponseEntity<ApiResponse<CustomerDto>> GetMyProfile(String token);
+    CustomerDto GetMyProfile(String token, String username) throws NotFoundException, Exception;
 }
 
