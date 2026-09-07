@@ -5,6 +5,7 @@ import java.util.List;
 import za.co.entelect.devcamp.productcatalog.dto.CustomerDto;
 import za.co.entelect.devcamp.productcatalog.exception.NotFoundException;
 import za.co.entelect.devcamp.productcatalog.requests.OrderRequest;
+import za.co.entelect.devcamp.productcatalog.requests.OrderStatusUpdateRequest;
 import za.co.entelect.devcamp.productcatalog.responses.OrderResponse;
 
 public interface IOrderService
@@ -14,5 +15,7 @@ public interface IOrderService
     OrderResponse GetOrder(Long orderId) throws Exception, NotFoundException;
 
     List<OrderResponse> GetMyOrders(CustomerDto customer) throws Exception, NotFoundException;
+
+    OrderResponse UpdateOrderStatus(OrderStatusUpdateRequest request) throws Exception, NotFoundException;
 }
 

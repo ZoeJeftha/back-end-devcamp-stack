@@ -21,6 +21,7 @@ import za.co.entelect.devcamp.productcatalog.model.Orders;
 import za.co.entelect.devcamp.productcatalog.repository.OrderRepository;
 import za.co.entelect.devcamp.productcatalog.repository.OrderItemRepository;
 import za.co.entelect.devcamp.productcatalog.requests.OrderRequest;
+import za.co.entelect.devcamp.productcatalog.requests.OrderStatusUpdateRequest;
 import za.co.entelect.devcamp.productcatalog.responses.OrderResponse;
 import za.co.entelect.devcamp.productcatalog.service.IProductService;
 
@@ -42,6 +43,7 @@ public class OrderService implements IOrderService
         this.productService = productService;
     }
 
+    @Override
     public OrderResponse SaveOrder(OrderRequest request) throws Exception
     {
         try
@@ -83,6 +85,7 @@ public class OrderService implements IOrderService
         }
     }
 
+    @Override
     public OrderResponse GetOrder(Long orderId) throws Exception, NotFoundException
     {
         try
@@ -127,6 +130,7 @@ public class OrderService implements IOrderService
         }
     }
 
+    @Override
     public List<OrderResponse> GetMyOrders(CustomerDto customer) throws Exception, NotFoundException
     {
         try
@@ -156,6 +160,64 @@ public class OrderService implements IOrderService
         catch(Exception e)
         {
             throw new Exception("Failed to get order: "+ e.getMessage());
+        }
+    }
+
+    @Override
+    public OrderResponse UpdateOrderStatus(OrderStatusUpdateRequest request) throws Exception, NotFoundException
+    {
+        try
+        {
+            log.info("---------------------UpdateOrderStatus OrderStatusUpdateRequest: "+request);
+            Optional<Orders> orderOp = orderRepository.findById(request.getOrderId());
+            log.info("-------------------------Getting orderOp: " + orderOp);
+            if(orderOp.isPresent())
+            {
+                Orders order = orderOp.get();
+                log.info("----------------------Getting order: " + order);
+
+                order.setStatus(request.getStatus().toString());
+
+                log.info("----------------------Getting order after set status: " + order);
+                Orders updatedOrder = orderRepository.save(order);
+                log.info("----------------------Getting updatedOrder: " + updatedOrder);
+
+                Optional<OrderItems> orderItemOp = orderItemRepository.findByOrderId(request.getOrderId());
+                log.info("----------------------Getting orderItemOp: " + orderItemOp);
+
+                if(orderItemOp.isPresent()) {
+                    OrderItems orderItem = orderItemOp.get();
+
+                    log.info("----------------------Getting orderItem: " + orderItem);
+                    OrderResponse orderResponse = new OrderResponse();
+
+                    orderResponse.setOrderId(updatedOrder.getOrderId());
+                    orderResponse.setStatus(updatedOrder.getStatus());
+                    log.info("----------------------Getting orderResponse: " + orderResponse);
+
+                    ProductDto product = productService.getProductById(orderItem.getProductId());
+                    log.info("----------------------Getting product: " + product);
+                    orderResponse.setProduct(product);
+                    log.info("----------------------Getting orderResponse with product: " + orderResponse);
+                    return orderResponse;
+                }
+                else
+                {
+                    throw new NotFoundException("Order not found");
+                }
+            }
+            else
+            {
+                throw new NotFoundException("Orders not found");
+            }
+        }
+        catch(NotFoundException e)
+        {
+            throw new NotFoundException(e.getMessage());
+        }
+        catch(Exception e)
+        {
+            throw new Exception("Failed to update order: "+ e.getMessage());
         }
     }
 

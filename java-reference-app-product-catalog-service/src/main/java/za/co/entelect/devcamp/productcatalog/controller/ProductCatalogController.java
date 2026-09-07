@@ -1,6 +1,7 @@
 package za.co.entelect.devcamp.productcatalog.controller;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import za.co.entelect.devcamp.productcatalog.client.CustomerApiClient;
 import za.co.entelect.devcamp.productcatalog.dto.CustomerDto;
 import za.co.entelect.devcamp.productcatalog.dto.ProductDto;
+import za.co.entelect.devcamp.productcatalog.enums.OrderStatusEnum;
 import  za.co.entelect.devcamp.productcatalog.exception.NotFoundException;
 import za.co.entelect.devcamp.productcatalog.producer.MessageProducer;
 import za.co.entelect.devcamp.productcatalog.responses.ApiResponse;
@@ -34,6 +36,7 @@ import za.co.entelect.devcamp.productcatalog.service.IProductService;
 import za.co.entelect.devcamp.productcatalog.service.IOrderService;
 import za.co.entelect.devcamp.productcatalog.requests.FulfilmentRequest;
 import za.co.entelect.devcamp.productcatalog.requests.OrderRequest;
+import za.co.entelect.devcamp.productcatalog.requests.OrderStatusUpdateRequest;
 import za.co.entelect.devcamp.productcatalog.responses.OrderResponse;
 
 @Slf4j
@@ -221,6 +224,38 @@ public class ProductCatalogController {
         }
         catch(Exception e) {
             ApiResponse<List<OrderResponse>> response = new ApiResponse<List<OrderResponse>>(false, "Failed to retrieve orders: " + e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+
+    @GetMapping("/order-status-update")
+    public ResponseEntity<ApiResponse<OrderResponse>> UpdateOrderStatus(@AuthenticationPrincipal Jwt jwt,@RequestBody OrderStatusUpdateRequest request)
+    {
+        try
+        {
+            String token = jwt.getTokenValue();
+
+            boolean validStatus = Arrays.stream(OrderStatusEnum.values())
+                    .anyMatch(s -> s.name().equalsIgnoreCase(request.getStatus().toString()));
+
+            if(!validStatus)
+            {
+                ApiResponse<OrderResponse> response = new ApiResponse<OrderResponse>(true, "Invalid status", null);
+                return ResponseEntity.ok(response);
+            }
+
+            OrderResponse orderResponse = orderService.UpdateOrderStatus(request);
+            ApiResponse<OrderResponse> response = new ApiResponse<OrderResponse>(true, "Order updated successfully", orderResponse);
+            return ResponseEntity.ok(response);
+        }
+        catch(NotFoundException e)
+        {
+            ApiResponse<OrderResponse> response = new ApiResponse<OrderResponse>(false, "Order not found",null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+        catch(Exception e) {
+            ApiResponse<OrderResponse> response = new ApiResponse<OrderResponse>(false, e.getMessage(), null);
             return ResponseEntity.internalServerError().body(response);
         }
     }
