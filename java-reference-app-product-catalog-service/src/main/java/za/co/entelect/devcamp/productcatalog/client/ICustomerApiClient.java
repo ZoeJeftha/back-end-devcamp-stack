@@ -12,6 +12,6 @@ public interface ICustomerApiClient
 
     ResponseEntity<List<CustomerDto>> GetProfiles(String token) throws NotFoundException, Exception;
 
-    ResponseEntity<CustomerDto> CreateCustomer(String token,CustomerDto customerDto);
+    ResponseEntity<CustomerDto> CreateCustomer(CustomerDto customerDto) throws Exception ;
 }
 

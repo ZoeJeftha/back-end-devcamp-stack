@@ -174,12 +174,11 @@ public class ProductCatalogController {
     }
 
 
-    @GetMapping("/register")
-    public ResponseEntity<ApiResponse<CustomerDto>> Register(@AuthenticationPrincipal Jwt jwt, @RequestBody RegisterRequest request)
+    @PostMapping("/register")
+    public ResponseEntity<ApiResponse<CustomerDto>> Register(@RequestBody RegisterRequest request)
     {
         log.info("Registering user");
         try {
-            String token = jwt.getTokenValue();
 
             CustomerDto customerDto = new CustomerDto();
             customerDto.setUsername(request.getUsername());
@@ -188,7 +187,7 @@ public class ProductCatalogController {
             customerDto.setIdNumber(request.getIdNumber());
             customerDto.setCustomerTypeId(request.getCustomerTypeId());
 
-            CustomerDto createdCustomer = customerService.CreateCustomer(token,customerDto);
+            CustomerDto createdCustomer = customerService.CreateCustomer(customerDto);
             ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(true, "User registered successfully",createdCustomer);
             return ResponseEntity.ok(response);
         }

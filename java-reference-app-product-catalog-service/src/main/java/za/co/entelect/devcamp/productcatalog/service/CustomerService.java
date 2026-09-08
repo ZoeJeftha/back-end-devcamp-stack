@@ -52,14 +52,20 @@ public class CustomerService implements ICustomerService {
         return maskedCustomers;
     }
 
-    public CustomerDto CreateCustomer(String token, CustomerDto request)
+    public CustomerDto CreateCustomer(CustomerDto request) throws Exception
     {
-        ResponseEntity<CustomerDto> customer = customerApiClient.CreateCustomer(token, request);
-        CustomerDto customerDto = customer.getBody();
+        try {
+            ResponseEntity<CustomerDto> customer = customerApiClient.CreateCustomer(request);
+            CustomerDto customerDto = customer.getBody();
 
-        String maskedIdNumber = maskIdNumber(customerDto.getIdNumber());
-        customerDto.setIdNumber(maskedIdNumber);
-        return customerDto;
+            String maskedIdNumber = maskIdNumber(customerDto.getIdNumber());
+            customerDto.setIdNumber(maskedIdNumber);
+            return customerDto;
+        }
+        catch(Exception e)
+        {
+            throw new Exception(e.getMessage());
+        }
 
     }
 

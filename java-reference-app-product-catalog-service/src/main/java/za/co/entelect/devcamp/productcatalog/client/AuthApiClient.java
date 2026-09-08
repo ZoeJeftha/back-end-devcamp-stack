@@ -8,13 +8,14 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import za.co.entelect.devcamp.productcatalog.dto.CustomerDto;
 import za.co.entelect.devcamp.productcatalog.exception.NotFoundException;
-import za.co.entelect.devcamp.productcatalog.responses.ApiResponse;
+import za.co.entelect.devcamp.productcatalog.requests.LoginRequest;
 
 @Slf4j
 @Component
@@ -27,38 +28,34 @@ public class AuthApiClient implements IAuthApiClient
     }
 
     @Override
-    public ResponseEntity<CustomerDto> GetMyProfile(String token, String username) throws NotFoundException, Exception
-    {
+    public String GetSystemToken(LoginRequest request) throws Exception {
         try {
-            String url = "http://devcamp-cis-service:8080/v1/customer?emailAddress=" + username; //username@gmail.com";
-
+            log.info("getting system token");
+            String url = "http://devcamp-auth-service:8080/token";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(token);
 
-            HttpEntity<Void> entity = new HttpEntity<>(headers);
+            headers.setBasicAuth(
+                    request.getUsername(),
+                    request.getPassword()
+            );
 
-            ResponseEntity<CustomerDto> response =
-                    restTemplate.exchange(
-                            url,
-                            HttpMethod.GET,
-                            entity,
-                            new ParameterizedTypeReference<CustomerDto>() {
-                            }
-                    );
+            HttpEntity<Void> entity =
+                    new HttpEntity<>(headers);
 
-            return response;
+            ResponseEntity<String> token = restTemplate.postForEntity(
+                    url,
+                    entity,
+                    String.class
+            );
+
+            log.info("Customer created");
+            return token.getBody();
         }
-        catch(HttpClientErrorException e)
+        catch(Exception e)
         {
-            if(e.getStatusCode() == HttpStatus.NOT_FOUND)
-            {
-                throw new NotFoundException(e.getMessage());
-            }
-            else
-            {
-                throw new Exception(e.getMessage());
-            }
+            System.out.println("--------------------Exception in auth api client: " + e.getMessage());
+            throw new Exception(e.getMessage());
         }
     }
 }

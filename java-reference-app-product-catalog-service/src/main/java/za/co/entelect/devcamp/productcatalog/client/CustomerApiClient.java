@@ -15,17 +15,21 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import za.co.entelect.devcamp.productcatalog.dto.CustomerDto;
 import za.co.entelect.devcamp.productcatalog.exception.NotFoundException;
-import za.co.entelect.devcamp.productcatalog.responses.ApiResponse;
 import za.co.entelect.devcamp.productcatalog.requests.RegisterRequest;
+import za.co.entelect.devcamp.productcatalog.responses.ApiResponse;
+import za.co.entelect.devcamp.productcatalog.service.IAuthService;
 
 @Slf4j
 @Component
 public class CustomerApiClient implements ICustomerApiClient
 {
     private final RestTemplate restTemplate;
+    private final IAuthService authService;
 
-    public CustomerApiClient(RestTemplate restTemplate) {
+    public CustomerApiClient(RestTemplate restTemplate,
+                             IAuthService authService) {
         this.restTemplate = restTemplate;
+        this.authService = authService;
     }
 
     @Override
@@ -100,23 +104,32 @@ public class CustomerApiClient implements ICustomerApiClient
     }
 
     @Override
-    public ResponseEntity<CustomerDto> CreateCustomer(String token,CustomerDto request) {
+    public ResponseEntity<CustomerDto> CreateCustomer(CustomerDto request) throws Exception {
         log.info("Creating customer");
-        String url = "http://devcamp-cis-service:8080/v1/customer";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(token);
+        try {
+            String token = authService.GetSystemToken();
+            System.out.println("-----------Token: " + token);
 
-        HttpEntity<CustomerDto> entity =
-                new HttpEntity<>(request, headers);
+            String url = "http://devcamp-cis-service:8080/v1/customer";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(token);
 
-        ResponseEntity<CustomerDto> customer = restTemplate.postForEntity(
-                url,
-                entity,
-                CustomerDto.class
-        );
+            HttpEntity<CustomerDto> entity =
+                    new HttpEntity<>(request, headers);
 
-        log.info("Customer created");
-        return customer;
+            ResponseEntity<CustomerDto> customer = restTemplate.postForEntity(
+                    url,
+                    entity,
+                    CustomerDto.class
+            );
+
+            log.info("Customer created");
+            return customer;
+        }
+        catch(Exception e)
+        {
+            throw new Exception(e.getMessage());
+        }
     }
 }
