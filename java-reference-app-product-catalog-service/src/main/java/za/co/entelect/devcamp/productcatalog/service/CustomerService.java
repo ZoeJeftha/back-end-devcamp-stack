@@ -52,6 +52,17 @@ public class CustomerService implements ICustomerService {
         return maskedCustomers;
     }
 
+    public CustomerDto CreateCustomer(String token, CustomerDto request)
+    {
+        ResponseEntity<CustomerDto> customer = customerApiClient.CreateCustomer(token, request);
+        CustomerDto customerDto = customer.getBody();
+
+        String maskedIdNumber = maskIdNumber(customerDto.getIdNumber());
+        customerDto.setIdNumber(maskedIdNumber);
+        return customerDto;
+
+    }
+
     private String maskIdNumber(String idNumber) {
 
         if (idNumber == null || idNumber.length() <= 4) {

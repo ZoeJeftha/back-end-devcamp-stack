@@ -16,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import za.co.entelect.devcamp.productcatalog.dto.CustomerDto;
 import za.co.entelect.devcamp.productcatalog.exception.NotFoundException;
 import za.co.entelect.devcamp.productcatalog.responses.ApiResponse;
+import za.co.entelect.devcamp.productcatalog.requests.RegisterRequest;
 
 @Slf4j
 @Component
@@ -31,8 +32,7 @@ public class CustomerApiClient implements ICustomerApiClient
     public ResponseEntity<CustomerDto> GetMyProfile(String token, String username) throws NotFoundException, Exception
     {
         try {
-            //String url = "http://devcamp-cis-service:8080/v1/customer?emailAddress=" + username; //username@gmail.com";
-            String url = "http://devcamp-cis-service:8080/v1/customer?emailAddress=username@gmail.com";
+            String url = "http://devcamp-cis-service:8080/v1/customer?emailAddress=" + username;
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(token);
@@ -97,5 +97,26 @@ public class CustomerApiClient implements ICustomerApiClient
                 throw new Exception(e.getMessage());
             }
         }
+    }
+
+    @Override
+    public ResponseEntity<CustomerDto> CreateCustomer(String token,CustomerDto request) {
+        log.info("Creating customer");
+        String url = "http://devcamp-cis-service:8080/v1/customer";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(token);
+
+        HttpEntity<CustomerDto> entity =
+                new HttpEntity<>(request, headers);
+
+        ResponseEntity<CustomerDto> customer = restTemplate.postForEntity(
+                url,
+                entity,
+                CustomerDto.class
+        );
+
+        log.info("Customer created");
+        return customer;
     }
 }

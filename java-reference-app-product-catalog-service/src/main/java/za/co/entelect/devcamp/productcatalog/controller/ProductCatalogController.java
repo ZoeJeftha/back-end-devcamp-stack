@@ -36,6 +36,7 @@ import za.co.entelect.devcamp.productcatalog.service.IOrderService;
 import za.co.entelect.devcamp.productcatalog.requests.FulfilmentRequest;
 import za.co.entelect.devcamp.productcatalog.requests.OrderRequest;
 import za.co.entelect.devcamp.productcatalog.requests.OrderStatusUpdateRequest;
+import za.co.entelect.devcamp.productcatalog.requests.RegisterRequest;
 import za.co.entelect.devcamp.productcatalog.responses.OrderResponse;
 
 @Slf4j
@@ -167,6 +168,34 @@ public class ProductCatalogController {
         {
             log.info("Failed to retrieve profile" + e.getMessage());
             ApiResponse<List<CustomerDto>> response = new ApiResponse<List<CustomerDto>>(false, "Failed to retrieve profile: "+ e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
+        }
+
+    }
+
+
+    @GetMapping("/register")
+    public ResponseEntity<ApiResponse<CustomerDto>> Register(@AuthenticationPrincipal Jwt jwt, @RequestBody RegisterRequest request)
+    {
+        log.info("Registering user");
+        try {
+            String token = jwt.getTokenValue();
+
+            CustomerDto customerDto = new CustomerDto();
+            customerDto.setUsername(request.getUsername());
+            customerDto.setFirstName(request.getFirstName());
+            customerDto.setLastName(request.getLastName());
+            customerDto.setIdNumber(request.getIdNumber());
+            customerDto.setCustomerTypeId(request.getCustomerTypeId());
+
+            CustomerDto createdCustomer = customerService.CreateCustomer(token,customerDto);
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(true, "User registered successfully",createdCustomer);
+            return ResponseEntity.ok(response);
+        }
+        catch(Exception e)
+        {
+            log.info("Failed to register user" + e.getMessage());
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to register user: "+ e.getMessage(), null);
             return ResponseEntity.internalServerError().body(response);
         }
 

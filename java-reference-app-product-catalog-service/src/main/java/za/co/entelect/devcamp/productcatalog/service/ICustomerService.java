@@ -11,5 +11,7 @@ public interface ICustomerService {
     CustomerDto GetMyProfile(String token, String username) throws NotFoundException, Exception;
 
     List<CustomerDto> GetProfiles(String token) throws NotFoundException, Exception;
+
+    CustomerDto CreateCustomer(String token, CustomerDto request);
 }
 
