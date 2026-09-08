@@ -74,6 +74,9 @@ services:
     container_name: DevCamp-Fulfilment-Service
     ports:
       - 8086:8080
+    environment:
+      SYSTEM_USERNAME: "admin@entelect.co.za"
+      SYSTEM_PASSWORD: "password"
 
   rabbitmq:
     image: rabbitmq:3.12-management

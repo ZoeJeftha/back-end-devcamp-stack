@@ -33,3 +33,6 @@ management:
       base-path: /
       exposure:
         include: health,info,metrics
+auth:
+  system-username: ${SYSTEM_USERNAME}
+  system-password: ${SYSTEM_PASSWORD}

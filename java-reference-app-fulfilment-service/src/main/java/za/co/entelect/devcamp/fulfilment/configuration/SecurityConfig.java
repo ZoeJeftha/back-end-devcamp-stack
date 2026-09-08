@@ -42,7 +42,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .authorizeHttpRequests(requests -> requests
-                        .antMatchers("/v1/products", "/v1/products/{id}", "/health", "/info", "/metrics").permitAll()
+                        .antMatchers("/v1/credit-check", "/v1/dha-marital-check", "/v1/dha-duplicate-id-check", "/v1/dha-living-status-check","/v1/kyc-check", "/health", "/info", "/metrics").permitAll()
                         .anyRequest().authenticated())
                 .csrf().disable()
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -1,4 +1,4 @@
-package za.co.entelect.devcamp.productcatalog.client;
+package za.co.entelect.devcamp.fulfilment.client;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
@@ -13,7 +13,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
-import za.co.entelect.devcamp.productcatalog.requests.LoginRequest;
+import za.co.entelect.devcamp.fulfilment.interfaces.IAuthApiClient;
+import za.co.entelect.devcamp.fulfilment.requests.LoginRequest;
 
 @Slf4j
 @Component

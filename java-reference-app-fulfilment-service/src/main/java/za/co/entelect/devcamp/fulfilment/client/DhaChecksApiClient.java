@@ -18,9 +18,9 @@ import za.co.entelect.devcamp.fulfilment.interfaces.IDhaChecksApiClient;
 @Component
 public class DhaChecksApiClient implements IDhaChecksApiClient {
 
-    @Override
+   @Override
     public MaritalStatusResponse DoMaritalCheck(String token, Long idNumber)
-    {
+    { 
         ApiClient apiClient = new ApiClient();
 
         apiClient.setBasePath("http://devcamp-dha-service:80");
