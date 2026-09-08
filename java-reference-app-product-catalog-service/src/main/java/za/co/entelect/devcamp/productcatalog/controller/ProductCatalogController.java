@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 import za.co.entelect.devcamp.productcatalog.dto.CustomerDto;
 import za.co.entelect.devcamp.productcatalog.dto.ProductDto;
+import za.co.entelect.devcamp.productcatalog.dto.UserDto;
 import za.co.entelect.devcamp.productcatalog.enums.OrderStatusEnum;
 import za.co.entelect.devcamp.productcatalog.exception.NotFoundException;
 import za.co.entelect.devcamp.productcatalog.producer.MessageProducer;
@@ -33,11 +34,14 @@ import za.co.entelect.devcamp.productcatalog.service.ICustomerService;
 import za.co.entelect.devcamp.productcatalog.service.IProductEligibilityService;
 import za.co.entelect.devcamp.productcatalog.service.IProductService;
 import za.co.entelect.devcamp.productcatalog.service.IOrderService;
+import za.co.entelect.devcamp.productcatalog.service.IUserService;
 import za.co.entelect.devcamp.productcatalog.requests.FulfilmentRequest;
 import za.co.entelect.devcamp.productcatalog.requests.OrderRequest;
 import za.co.entelect.devcamp.productcatalog.requests.OrderStatusUpdateRequest;
 import za.co.entelect.devcamp.productcatalog.requests.RegisterRequest;
+import za.co.entelect.devcamp.productcatalog.requests.CreateUserRequest;
 import za.co.entelect.devcamp.productcatalog.responses.OrderResponse;
+import za.co.entelect.devcamp.productcatalog.responses.CreateUserResponse;
 
 @Slf4j
 @RestController
@@ -48,6 +52,7 @@ public class ProductCatalogController {
     public final IProductEligibilityService productEligibilityService;
     public final ICustomerService customerService;
     public final IOrderService orderService;
+    public final IUserService userService;
 
     @Autowired
     private MessageProducer messageProducer;
@@ -55,12 +60,14 @@ public class ProductCatalogController {
     public ProductCatalogController(IProductService productService,
                                     IProductEligibilityService productEligibilityService,
                                     ICustomerService customerService,
-                                    IOrderService orderService)
+                                    IOrderService orderService,
+                                    IUserService userService)
     {
         this.productService = productService;
         this.productEligibilityService = productEligibilityService;
         this.customerService = customerService;
         this.orderService = orderService;
+        this.userService = userService;
     }
 
     @GetMapping("/products")
@@ -175,10 +182,16 @@ public class ProductCatalogController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<CustomerDto>> Register(@RequestBody RegisterRequest request)
+    public ResponseEntity<ApiResponse<CreateUserResponse>> Register(@RequestBody RegisterRequest request)
     {
         log.info("Registering user");
         try {
+            CreateUserRequest createUserRequest = new CreateUserRequest();
+            createUserRequest.setEmail(request.getUsername());
+            createUserRequest.setPassword(request.getPassword());
+            createUserRequest.setRole(request.getRole());
+
+            UserDto createdUser = userService.CreateUser(createUserRequest);
 
             CustomerDto customerDto = new CustomerDto();
             customerDto.setUsername(request.getUsername());
@@ -188,13 +201,18 @@ public class ProductCatalogController {
             customerDto.setCustomerTypeId(request.getCustomerTypeId());
 
             CustomerDto createdCustomer = customerService.CreateCustomer(customerDto);
-            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(true, "User registered successfully",createdCustomer);
+
+            CreateUserResponse createUserResponse = new CreateUserResponse();
+            createUserResponse.setUser(createdUser);
+            createUserResponse.setCustomer(createdCustomer);
+
+            ApiResponse<CreateUserResponse> response = new ApiResponse<CreateUserResponse>(true, "User registered successfully",createUserResponse);
             return ResponseEntity.ok(response);
         }
         catch(Exception e)
         {
             log.info("Failed to register user" + e.getMessage());
-            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to register user: "+ e.getMessage(), null);
+            ApiResponse<CreateUserResponse> response = new ApiResponse<CreateUserResponse>(false, "Failed to register user: "+ e.getMessage(), null);
             return ResponseEntity.internalServerError().body(response);
         }
 
