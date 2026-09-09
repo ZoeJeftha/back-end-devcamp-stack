@@ -16,7 +16,7 @@ import za.co.entelect.devcamp.fulfilment.dto.LivingStatusDto;
 import za.co.entelect.devcamp.fulfilment.dto.MaritalStatusesDto;
 import za.co.entelect.devcamp.fulfilment.interfaces.ICreditCheckService;
 import za.co.entelect.devcamp.fulfilment.interfaces.IDhaService;
-import za.co.entelect.devcamp.fulfilment.interfaces.IKycChecksApiClient;
+import za.co.entelect.devcamp.fulfilment.interfaces.IKycCheckService;
 
 @Slf4j
 @RestController
@@ -25,15 +25,15 @@ public class FulfilmentController {
 
     public final ICreditCheckService creditCheckService;
     public final IDhaService dhaService;
-    public final IKycChecksApiClient kycChecksApiClient;
+    public final IKycCheckService kycCheckService;
 
     public FulfilmentController(ICreditCheckService creditCheckService,
                                 IDhaService dhaService,
-                                IKycChecksApiClient kycChecksApiClient)
+                                IKycCheckService kycCheckService)
     {
         this.creditCheckService = creditCheckService;
         this.dhaService = dhaService;
-        this.kycChecksApiClient = kycChecksApiClient;
+        this.kycCheckService = kycCheckService;
     }
 
     @GetMapping("/credit-check")
@@ -95,11 +95,10 @@ public class FulfilmentController {
     }
 
     @GetMapping("/kyc-check")
-    public KycDto DoKycCheck(@AuthenticationPrincipal Jwt jwt)
+    public KycDto DoKycCheck()
     {
         try {
-            String token = jwt.getTokenValue();
-            return kycChecksApiClient.DoKycCheck(token, 1L);
+            return kycCheckService.DoKycCheck(1L);
         }
         catch(Exception e)
         {
