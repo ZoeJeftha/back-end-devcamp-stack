@@ -6,6 +6,6 @@ import za.co.entelect.devcamp.fulfilment.dto.KycDto;
 
 public interface IKycCheckService
 {
-    KycDto DoKycCheck(Long idNumber) throws Exception;
+    boolean DoKycCheck(Long idNumber) throws Exception;
 }
 

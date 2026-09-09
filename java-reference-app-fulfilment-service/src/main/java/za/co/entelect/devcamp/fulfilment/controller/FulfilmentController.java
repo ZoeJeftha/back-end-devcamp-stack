@@ -95,14 +95,15 @@ public class FulfilmentController {
     }
 
     @GetMapping("/kyc-check")
-    public KycDto DoKycCheck()
+    public boolean DoKycCheck()
     {
         try {
             return kycCheckService.DoKycCheck(1L);
         }
         catch(Exception e)
         {
-            return null;
+            log.info("------------------do-dha-living-status-check " + e.getMessage());
+            return false;
             //"Exception thrown: "+ e.getMessage();
         }
     }

@@ -22,11 +22,16 @@ public class KycCheckService implements IKycCheckService {
     }
 
     @Override
-    public KycDto DoKycCheck(Long idNumber) throws Exception
+    public boolean DoKycCheck(Long idNumber) throws Exception
     {
         try {
             String token = authService.GetSystemToken();
-            return kycChecksApiClient.DoKycCheck(token, idNumber);
+            KycDto kycDto = kycChecksApiClient.DoKycCheck(token, idNumber);
+
+            boolean primaryIndicatorFlag =  kycDto.getPrimaryIndicator() == true;
+            String taxCompliance = kycDto.getTaxCompliance();
+            boolean taxComplianceFlag = taxCompliance.equalsIgnoreCase("AMBER") || taxCompliance.equalsIgnoreCase("GREEN");
+            return primaryIndicatorFlag && taxComplianceFlag;
         }
         catch(Exception e)
         {
@@ -34,4 +39,9 @@ public class KycCheckService implements IKycCheckService {
             throw new Exception(e.getMessage());
         }
     }
+
+
+//    private Boolean primaryIndicator;
+//    private Boolean secondaryIndicator;
+//    private String taxCompliance
 }
