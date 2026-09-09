@@ -380,4 +380,25 @@ public class ProductCatalogController {
         }
     }
 
+    @GetMapping("/user/{email}")
+    public ResponseEntity<ApiResponse<UserDto>> GetUserByEmail(@PathVariable String email)
+    {
+        try
+        {
+            UserDto user = userService.LoadUserByUsername(email);
+            ApiResponse<UserDto> response = new ApiResponse<UserDto>(true, "User found successfully", user);
+            return ResponseEntity.ok(response);
+        }
+        catch(NotFoundException e)
+        {
+            ApiResponse<UserDto> response = new ApiResponse<UserDto>(false, "Order not found",null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+        catch(Exception e) {
+            ApiResponse<UserDto> response = new ApiResponse<UserDto>(false, "Failed to retrieve order: " + e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+
 }

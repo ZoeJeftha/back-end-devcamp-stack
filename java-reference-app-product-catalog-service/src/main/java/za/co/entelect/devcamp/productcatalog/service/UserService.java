@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import za.co.entelect.devcamp.productcatalog.client.IAuthApiClient;
 import za.co.entelect.devcamp.productcatalog.dto.UserDto;
+import za.co.entelect.devcamp.productcatalog.exception.NotFoundException;
 import za.co.entelect.devcamp.productcatalog.model.User;
 import za.co.entelect.devcamp.productcatalog.repository.UserRepository;
 import za.co.entelect.devcamp.productcatalog.requests.CreateUserRequest;
@@ -49,6 +50,19 @@ public class UserService implements IUserService {
             System.out.println("--------------------Exception create user service: " + e.getMessage());
             throw new Exception("Failed to create user: "+ e.getMessage());
         }
+    }
+
+    @Override
+    public UserDto LoadUserByUsername(String username)
+            throws NotFoundException {
+
+        User user = userRepository
+                        .findFirstByEmailIgnoreCase(username)
+                        .orElseThrow(() ->
+                                new NotFoundException(
+                                        "User not found"));
+        return toUserDto(user);
+
     }
 
     public UserDto toUserDto(User user) {

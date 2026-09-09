@@ -10,5 +10,7 @@ import za.co.entelect.devcamp.productcatalog.requests.CreateUserRequest;
 public interface IUserService
 {
     UserDto CreateUser(CreateUserRequest request) throws Exception;
+
+    UserDto LoadUserByUsername(String username) throws NotFoundException;
 }
 
