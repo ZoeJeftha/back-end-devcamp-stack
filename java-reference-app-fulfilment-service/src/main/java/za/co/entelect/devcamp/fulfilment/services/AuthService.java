@@ -20,6 +20,8 @@ public class AuthService implements IAuthService {
     private final String systemUsername;
     private final String systemPassword;
     private final IAuthApiClient authApiClient;
+    private String token;
+    private long tokenExpiryTime;
 
     @Autowired
     public AuthService(
@@ -36,6 +38,30 @@ public class AuthService implements IAuthService {
     public String GetSystemToken() throws Exception
     {
         try {
+
+            long currentTime = System.currentTimeMillis();
+            if (token != null && currentTime < tokenExpiryTime) {
+                return token;
+            }
+            token = RequestToken();
+            long expirySeconds = 3600L;
+            long bufferSeconds = 60L;
+
+            tokenExpiryTime = currentTime
+                    + ((expirySeconds - bufferSeconds) * 1000);
+
+            return token;
+
+        }
+        catch(Exception e)
+        {
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    public String RequestToken() throws Exception
+    {
+        try {
             LoginRequest request = new LoginRequest();
             request.setUsername(systemUsername);
             request.setPassword(systemPassword);
@@ -46,7 +72,6 @@ public class AuthService implements IAuthService {
         }
         catch(Exception e)
         {
-            System.out.println("--------------------Exception in auth api client: " + e.getMessage());
             throw new Exception(e.getMessage());
         }
     }
