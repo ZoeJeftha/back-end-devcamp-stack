@@ -35,17 +35,19 @@ public class FulfilmentController {
     }
 
     @GetMapping("/credit-check")
-    public String DoCreditCheck()
+    public boolean DoCreditCheck()
     {
         try {
             return creditCheckService.DoCreditCheck(1L);
         }
         catch (IOException e) {
-            return "IOException thrown: "+ e.getMessage();
+            log.info("Credit Check failed IOException: " + e.getMessage());
+            return false;
         }
         catch(Exception e)
         {
-            return "Exception thrown: "+ e.getMessage();
+            log.info("Credit Check failed: " + e.getMessage());
+            return false;
         }
     }
 

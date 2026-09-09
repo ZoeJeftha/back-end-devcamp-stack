@@ -21,10 +21,11 @@ public class CreditCheckService implements ICreditCheckService
     }
 
     @Override
-    public String DoCreditCheck(Long customerId) throws IOException, Exception
+    public boolean DoCreditCheck(Long customerId) throws IOException, Exception
     {
         try {
-            return creditChecksApiClient.DoCreditCheck(customerId);
+            String creditCheck = creditChecksApiClient.DoCreditCheck(customerId);
+            return creditCheck.equalsIgnoreCase("AMBER") || creditCheck.equalsIgnoreCase("GREEN");
         }
         catch (IOException e) {
             throw new IOException(e.getMessage());

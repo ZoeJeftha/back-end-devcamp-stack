@@ -5,6 +5,6 @@ import java.io.IOException;
 
 public interface ICreditCheckService
 {
-    String DoCreditCheck(Long customerId) throws IOException, Exception;
+    boolean DoCreditCheck(Long customerId) throws IOException, Exception;
 }
 
