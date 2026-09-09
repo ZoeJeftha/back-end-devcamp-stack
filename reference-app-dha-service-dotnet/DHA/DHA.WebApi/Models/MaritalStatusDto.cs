@@ -37,7 +37,7 @@ namespace DHA.WebApi.Models
         {
             MaritalStatus = maritalStatus.Status;
             EffectiveFromDate = maritalStatus.EffectiveFromDate.ToString("yyyy-MM-dd");
-            EffectiveToDate = maritalStatus.EffectiveToDate?.ToString("yyyy-MM-dd") ?? string.Empty;
+            EffectiveToDate = maritalStatus.EffectiveToDate?.ToString("yyyy-MM-dd");
         }
     }
 

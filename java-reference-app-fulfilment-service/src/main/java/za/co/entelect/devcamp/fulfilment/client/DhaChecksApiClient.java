@@ -2,27 +2,29 @@ package za.co.entelect.devcamp.fulfilment.client;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 import za.co.entelect.devcamp.fulfilment.dha.api.DhaApi;
 import za.co.entelect.devcamp.fulfilment.dha.ApiClient;
 import za.co.entelect.devcamp.fulfilment.dha.model.DuplicateIDDocumentCheckResponse;
 import za.co.entelect.devcamp.fulfilment.dha.model.LivingStatusResponse;
 import za.co.entelect.devcamp.fulfilment.dha.model.LivingStatuses;
 import za.co.entelect.devcamp.fulfilment.dha.model.MaritalStatusResponse;
-import za.co.entelect.devcamp.fulfilment.dto.DuplicateIdStatusDto;
-import za.co.entelect.devcamp.fulfilment.dto.LivingStatusDto;
-import za.co.entelect.devcamp.fulfilment.dto.LivingStatusesDto;
-import za.co.entelect.devcamp.fulfilment.dto.MaritalStatusesDto;
 import za.co.entelect.devcamp.fulfilment.interfaces.IDhaChecksApiClient;
 
 @Slf4j
 @Component
-public class DhaChecksApiClient implements IDhaChecksApiClient {
+public class DhaChecksApiClient implements IDhaChecksApiClient
+{
+    private final ApiClient apiClient;
 
-    @Override
-    public MaritalStatusResponse DoMaritalCheck(String token, Long idNumber)
+    public DhaChecksApiClient(RestTemplate dhaRestTemplate)
     {
-        ApiClient apiClient = new ApiClient();
+        this.apiClient = new ApiClient(dhaRestTemplate);
+    }
 
+   @Override
+    public MaritalStatusResponse DoMaritalCheck(String token, Long idNumber)
+    { 
         apiClient.setBasePath("http://devcamp-dha-service:80");
 
         apiClient.addDefaultHeader(
@@ -39,10 +41,8 @@ public class DhaChecksApiClient implements IDhaChecksApiClient {
     }
 
     @Override
-    public DuplicateIDDocumentCheckResponse DoDuplicateIdCheck(String token, Long idNumber) {
-
-        ApiClient apiClient = new ApiClient();
-
+    public DuplicateIDDocumentCheckResponse DoDuplicateIdCheck(String token, Long idNumber)
+    {
         apiClient.setBasePath("http://devcamp-dha-service:80");
 
         apiClient.addDefaultHeader(
@@ -59,10 +59,8 @@ public class DhaChecksApiClient implements IDhaChecksApiClient {
     }
 
     @Override
-    public LivingStatusResponse DoLivingStatusCheck(String token, Long idNumber) {
-
-        ApiClient apiClient = new ApiClient();
-
+    public LivingStatusResponse DoLivingStatusCheck(String token, Long idNumber)
+    {
         apiClient.setBasePath("http://devcamp-dha-service:80");
 
         apiClient.addDefaultHeader(
@@ -74,15 +72,6 @@ public class DhaChecksApiClient implements IDhaChecksApiClient {
 
         LivingStatusResponse response =
                 dhaApi.statusLivingIdNumberGet(idNumber);
-//
-//        LivingStatuses status = response.getLivingStatus();
-//
-//        LivingStatusDto livingStatusDto = new LivingStatusDto();
-//        livingStatusDto.setLivingStatus(status.getValue());
-//
-//        livingStatusDto.setDeceasedDate(
-//                response.getDeceasedDate()
-//        );
 
         return response;
     }

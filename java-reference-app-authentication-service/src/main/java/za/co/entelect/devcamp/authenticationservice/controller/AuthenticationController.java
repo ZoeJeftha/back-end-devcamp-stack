@@ -36,42 +36,18 @@ public class AuthenticationController {
         this.applicationUserDetailsService = applicationUserDetailsService;
     }
 
+
     @PostMapping("/token")
-    public ResponseEntity<RegisterOrLoginResponse> token(@RequestBody LoginRequest loginRequest) {
-        log.info("Log in request recieved");
-        RegisterOrLoginResponse response = null;
-        try
-        {
-            log.info("Validating username and password");
-            ValidationResult validationResult = applicationUserDetailsService.validateUsernameAndPassword(loginRequest);
-
-            if(validationResult.getValid()) {
-                Instant now = Instant.now();
-                Long expiry = 3600L;
-                JwtClaimsSet claims = JwtClaimsSet.builder()
-                        .issuer("self")
-                        .issuedAt(now)
-                        .expiresAt(now.plusSeconds(expiry))
-                        .subject(loginRequest.getUsername())
-                        .claim("role", validationResult.getRole())
-                        .build();
-                String token = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
-
-                response = new RegisterOrLoginResponse(true, "Logged in successfully", token);
-                return ResponseEntity.ok(response);
-            }
-            else
-            {
-                response = new RegisterOrLoginResponse(false, "Incorrect username or password", "");
-                return ResponseEntity.ok(response);
-            }
-        }
-        catch(Exception e)
-        {
-            response = new RegisterOrLoginResponse(false, "Login failed: " + e.getMessage(), "");
-            return ResponseEntity.internalServerError()
-                    .body(response);
-        }
+    public String token(Authentication authentication) {
+        Instant now = Instant.now();
+        Long expiry = 3600L;
+        JwtClaimsSet claims = JwtClaimsSet.builder()
+                .issuer("self")
+                .issuedAt(now)
+                .expiresAt(now.plusSeconds(expiry))
+                .subject(authentication.getName())
+                .build();
+        return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
     }
 
     @PostMapping("/register")

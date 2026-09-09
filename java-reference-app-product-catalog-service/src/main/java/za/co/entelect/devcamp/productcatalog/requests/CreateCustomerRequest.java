@@ -7,10 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class FulfilmentRequest {
-
-    private Long id;
-    private String idNumber;
-    private String fulfilmentType;
+public class CreateCustomerRequest {
     private String username;
+    private String firstName;
+    private String lastName;
+    private String idNumber;
+    private int customerTypeId;
 }

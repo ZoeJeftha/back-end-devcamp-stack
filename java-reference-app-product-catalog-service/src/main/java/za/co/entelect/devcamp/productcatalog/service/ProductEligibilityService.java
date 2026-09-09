@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import za.co.entelect.devcamp.productcatalog.dto.AccountsDto;
 import za.co.entelect.devcamp.productcatalog.dto.CustomerDto;
+import za.co.entelect.devcamp.productcatalog.exception.NotFoundException;
 import za.co.entelect.devcamp.productcatalog.repository.QualifyingAccountsRepository;
 import za.co.entelect.devcamp.productcatalog.repository.QualifyingCustomerTypesRepository;
 import za.co.entelect.devcamp.productcatalog.responses.ApiResponse;
@@ -26,11 +27,9 @@ public class ProductEligibilityService implements IProductEligibilityService {
         this.customerService = customerService;
     }
 
-    public boolean isCustomerEligible(String token, Long productId)
+    public boolean isCustomerEligible(String token, String username, Long productId) throws NotFoundException, Exception
     {
-        ResponseEntity<ApiResponse<CustomerDto>> customerResponse = customerService.GetMyProfile(token);
-
-        CustomerDto customer = customerResponse.getBody().getResult();
+        CustomerDto customer = customerService.GetMyProfile(token,username);
 
         List<AccountsDto> accounts = customer.getCustomerAccounts();
 

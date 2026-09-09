@@ -7,10 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class FulfilmentRequest {
+public class LoginRequest {
 
-    private Long id;
-    private String idNumber;
-    private String fulfilmentType;
     private String username;
+    private String password;
 }

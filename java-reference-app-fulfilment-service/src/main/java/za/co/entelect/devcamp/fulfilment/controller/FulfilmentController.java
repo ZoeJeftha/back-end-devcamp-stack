@@ -12,101 +12,96 @@ import za.co.entelect.devcamp.fulfilment.dha.model.LivingStatusResponse;
 import za.co.entelect.devcamp.fulfilment.dha.model.MaritalStatusResponse;
 import za.co.entelect.devcamp.fulfilment.dto.DuplicateIdStatusDto;
 import za.co.entelect.devcamp.fulfilment.dto.KycDto;
-import za.co.entelect.devcamp.fulfilment.dto.LivingStatusDto;
-import za.co.entelect.devcamp.fulfilment.dto.MaritalStatusesDto;
-import za.co.entelect.devcamp.fulfilment.interfaces.ICreditChecksApiClient;
-import za.co.entelect.devcamp.fulfilment.interfaces.IDhaChecksApiClient;
-import za.co.entelect.devcamp.fulfilment.interfaces.IKycChecksApiClient;
+import za.co.entelect.devcamp.fulfilment.interfaces.ICreditCheckService;
+import za.co.entelect.devcamp.fulfilment.interfaces.IDhaService;
+import za.co.entelect.devcamp.fulfilment.interfaces.IKycCheckService;
 
 @Slf4j
 @RestController
 @RequestMapping("/v1")
 public class FulfilmentController {
 
-    public final ICreditChecksApiClient creditChecksApiClient;
-    public final IDhaChecksApiClient dhaChecksApiClient;
-    public final IKycChecksApiClient kycChecksApiClient;
+    public final ICreditCheckService creditCheckService;
+    public final IDhaService dhaService;
+    public final IKycCheckService kycCheckService;
 
-    public FulfilmentController(ICreditChecksApiClient creditChecksApiClient,
-                                IDhaChecksApiClient dhaChecksApiClient,
-                                IKycChecksApiClient kycChecksApiClient)
+    public FulfilmentController(ICreditCheckService creditCheckService,
+                                IDhaService dhaService,
+                                IKycCheckService kycCheckService)
     {
-        this.creditChecksApiClient = creditChecksApiClient;
-        this.dhaChecksApiClient = dhaChecksApiClient;
-        this.kycChecksApiClient = kycChecksApiClient;
+        this.creditCheckService = creditCheckService;
+        this.dhaService = dhaService;
+        this.kycCheckService = kycCheckService;
     }
 
-    @GetMapping("/do-credit-check")
-    public String DoCreditCheck()
+    @GetMapping("/credit-check")
+    public boolean DoCreditCheck()
     {
         try {
-            return creditChecksApiClient.DoCreditCheck(1L);
+            return creditCheckService.DoCreditCheck(1L);
         }
         catch (IOException e) {
-            return "IOException thrown: "+ e.getMessage();
+            log.info("Credit Check failed IOException: " + e.getMessage());
+            return false;
         }
         catch(Exception e)
         {
-            return "Exception thrown: "+ e.getMessage();
+            log.info("Credit Check failed: " + e.getMessage());
+            return false;
         }
     }
 
-    @GetMapping("/do-dha-marital-check")
-    public MaritalStatusResponse DoDhaMaritalCheck(@AuthenticationPrincipal Jwt jwt)
+    @GetMapping("/dha-marital-check")
+    public boolean DoDhaMaritalCheck()
     {
-        try {
-            String token = jwt.getTokenValue();
-            return dhaChecksApiClient.DoMaritalCheck(token, 9001010000081L);
+        try
+        {
+            return dhaService.DoMaritalCheck(9001010000081L);
         }
         catch(Exception e)
         {
-            System.out.println("------------------do-dha-marital-check " + e.getMessage());
-            return null;
-                    //"Exception thrown: "+ e.getMessage();
+            log.info("Marital Status Check failed: " + e.getMessage());
+            return false;
         }
     }
 
-    @GetMapping("/do-dha-duplicate-id-check")
-    public DuplicateIDDocumentCheckResponse DoDhaDuplicateIdCheck(@AuthenticationPrincipal Jwt jwt)
+    @GetMapping("/dha-duplicate-id-check")
+    public boolean DoDhaDuplicateIdCheck()
     {
         try {
-            String token = jwt.getTokenValue();
-            return dhaChecksApiClient.DoDuplicateIdCheck(token, 9001010000081L);
+            return dhaService.DoDuplicateIdCheck(9001010000081L);
         }
         catch(Exception e)
         {
-            System.out.println("------------------do-dha-duplicate-id-check " + e.getMessage());
-            return null;
-            //"Exception thrown: "+ e.getMessage();
+            log.info("Duplicate id check failed: " + e.getMessage());
+            return false;
         }
     }
 
 
-    @GetMapping("/do-dha-living-status-check")
-    public LivingStatusResponse DoLivingStatusCheck(@AuthenticationPrincipal Jwt jwt)
+    @GetMapping("/dha-living-status-check")
+    public boolean DoLivingStatusCheck()
     {
         try {
-            String token = jwt.getTokenValue();
-            return dhaChecksApiClient.DoLivingStatusCheck(token, 9001010000081L);
+            return dhaService.DoLivingStatusCheck(9001010000081L);
         }
         catch(Exception e)
         {
-            System.out.println("------------------do-dha-living-status-check " + e.getMessage());
-            return null;
-            //"Exception thrown: "+ e.getMessage();
+            log.info("Living status check failed: " + e.getMessage());
+            return false;
         }
     }
 
-    @GetMapping("/do-kyc-check")
-    public KycDto DoKycCheck(@AuthenticationPrincipal Jwt jwt)
+    @GetMapping("/kyc-check")
+    public boolean DoKycCheck()
     {
         try {
-            String token = jwt.getTokenValue();
-            return kycChecksApiClient.DoKycCheck(token, 1L);
+            return kycCheckService.DoKycCheck(1L);
         }
         catch(Exception e)
         {
-            return null;
+            log.info("Kyc Check failed: " + e.getMessage());
+            return false;
             //"Exception thrown: "+ e.getMessage();
         }
     }

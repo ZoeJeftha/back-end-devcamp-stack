@@ -5,9 +5,6 @@ import java.io.IOException;
 import za.co.entelect.devcamp.fulfilment.dha.model.DuplicateIDDocumentCheckResponse;
 import za.co.entelect.devcamp.fulfilment.dha.model.LivingStatusResponse;
 import za.co.entelect.devcamp.fulfilment.dha.model.MaritalStatusResponse;
-import za.co.entelect.devcamp.fulfilment.dto.DuplicateIdStatusDto;
-import za.co.entelect.devcamp.fulfilment.dto.LivingStatusDto;
-import za.co.entelect.devcamp.fulfilment.dto.MaritalStatusesDto;
 
 public interface IDhaChecksApiClient
 {

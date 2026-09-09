@@ -23,21 +23,25 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
-import za.co.entelect.devcamp.productcatalog.client.CustomerApiClient;
 import za.co.entelect.devcamp.productcatalog.dto.CustomerDto;
 import za.co.entelect.devcamp.productcatalog.dto.ProductDto;
+import za.co.entelect.devcamp.productcatalog.dto.UserDto;
 import za.co.entelect.devcamp.productcatalog.enums.OrderStatusEnum;
-import  za.co.entelect.devcamp.productcatalog.exception.NotFoundException;
+import za.co.entelect.devcamp.productcatalog.exception.NotFoundException;
 import za.co.entelect.devcamp.productcatalog.producer.MessageProducer;
 import za.co.entelect.devcamp.productcatalog.responses.ApiResponse;
 import za.co.entelect.devcamp.productcatalog.service.ICustomerService;
 import za.co.entelect.devcamp.productcatalog.service.IProductEligibilityService;
 import za.co.entelect.devcamp.productcatalog.service.IProductService;
 import za.co.entelect.devcamp.productcatalog.service.IOrderService;
+import za.co.entelect.devcamp.productcatalog.service.IUserService;
 import za.co.entelect.devcamp.productcatalog.requests.FulfilmentRequest;
 import za.co.entelect.devcamp.productcatalog.requests.OrderRequest;
 import za.co.entelect.devcamp.productcatalog.requests.OrderStatusUpdateRequest;
+import za.co.entelect.devcamp.productcatalog.requests.RegisterRequest;
+import za.co.entelect.devcamp.productcatalog.requests.CreateUserRequest;
 import za.co.entelect.devcamp.productcatalog.responses.OrderResponse;
+import za.co.entelect.devcamp.productcatalog.responses.CreateUserResponse;
 
 @Slf4j
 @RestController
@@ -48,6 +52,7 @@ public class ProductCatalogController {
     public final IProductEligibilityService productEligibilityService;
     public final ICustomerService customerService;
     public final IOrderService orderService;
+    public final IUserService userService;
 
     @Autowired
     private MessageProducer messageProducer;
@@ -55,12 +60,14 @@ public class ProductCatalogController {
     public ProductCatalogController(IProductService productService,
                                     IProductEligibilityService productEligibilityService,
                                     ICustomerService customerService,
-                                    IOrderService orderService)
+                                    IOrderService orderService,
+                                    IUserService userService)
     {
         this.productService = productService;
         this.productEligibilityService = productEligibilityService;
         this.customerService = customerService;
         this.orderService = orderService;
+        this.userService = userService;
     }
 
     @GetMapping("/products")
@@ -112,15 +119,121 @@ public class ProductCatalogController {
 
     }
 
+    @GetMapping("/my-profile")
+    public ResponseEntity<ApiResponse<CustomerDto>> getMyProfile(@AuthenticationPrincipal Jwt jwt)
+    {
+        log.info("Getting my profile");
+        try {
+            String username = jwt.getSubject();
+            String token = jwt.getTokenValue();
+
+            CustomerDto customerDto = customerService.GetMyProfile(token,username);
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(true, "Profile retrieved successfully",customerDto);
+            return ResponseEntity.ok(response);
+        }
+        catch(NotFoundException e)
+        {
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Profile not found",null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+        catch(Exception e)
+        {
+            log.info("Failed to retrieve profile" + e.getMessage());
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retrieve profile: "+ e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
+        }
+
+    }
+
+
+    @GetMapping("/profiles")
+    public ResponseEntity<ApiResponse<List<CustomerDto>>> getProfiles(@AuthenticationPrincipal Jwt jwt)
+    {
+        log.info("Getting profiles");
+        try {
+            String token = jwt.getTokenValue();
+            String role = jwt.getClaimAsString("role");
+
+            if (!"admin".equals(role)) {
+                ApiResponse<List<CustomerDto>> response = new ApiResponse<>(false, "Not authorised to retrieve profiles", null);
+
+                return ResponseEntity
+                        .status(HttpStatus.UNAUTHORIZED)
+                        .body(response);
+            }
+
+            List<CustomerDto> customerDto = customerService.GetProfiles(token);
+            ApiResponse<List<CustomerDto>> response = new ApiResponse<List<CustomerDto>>(true, "Profile retrieved successfully",customerDto);
+            return ResponseEntity.ok(response);
+        }
+        catch(NotFoundException e)
+        {
+            ApiResponse<List<CustomerDto>> response = new ApiResponse<List<CustomerDto>>(false, "Profile not found",null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+        catch(Exception e)
+        {
+            log.info("Failed to retrieve profile" + e.getMessage());
+            ApiResponse<List<CustomerDto>> response = new ApiResponse<List<CustomerDto>>(false, "Failed to retrieve profile: "+ e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
+        }
+
+    }
+
+
+    @PostMapping("/register")
+    public ResponseEntity<ApiResponse<CreateUserResponse>> Register(@RequestBody RegisterRequest request)
+    {
+        log.info("Registering user");
+        try {
+            CreateUserRequest createUserRequest = new CreateUserRequest();
+            createUserRequest.setEmail(request.getUsername());
+            createUserRequest.setPassword(request.getPassword());
+            createUserRequest.setRole(request.getRole());
+
+            UserDto createdUser = userService.CreateUser(createUserRequest);
+
+            CustomerDto customerDto = new CustomerDto();
+            customerDto.setUsername(request.getUsername());
+            customerDto.setFirstName(request.getFirstName());
+            customerDto.setLastName(request.getLastName());
+            customerDto.setIdNumber(request.getIdNumber());
+            customerDto.setCustomerTypeId(request.getCustomerTypeId());
+
+            CustomerDto createdCustomer = customerService.CreateCustomer(customerDto);
+
+            CreateUserResponse createUserResponse = new CreateUserResponse();
+            createUserResponse.setUser(createdUser);
+            createUserResponse.setCustomer(createdCustomer);
+
+            ApiResponse<CreateUserResponse> response = new ApiResponse<CreateUserResponse>(true, "User registered successfully",createUserResponse);
+            return ResponseEntity.ok(response);
+        }
+        catch(Exception e)
+        {
+            log.info("Failed to register user" + e.getMessage());
+            ApiResponse<CreateUserResponse> response = new ApiResponse<CreateUserResponse>(false, "Failed to register user: "+ e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
+        }
+
+    }
+
+
     @GetMapping("/customer-eligibility-check/{productId}")
     public ResponseEntity<ApiResponse<Boolean>> CustomerTypeEligibilityCheck(@AuthenticationPrincipal Jwt jwt, @PathVariable Long productId)
     {
         log.info("Customer product eligibility request received");
         try {
             String token = jwt.getTokenValue();
-            Boolean isEligible = productEligibilityService.isCustomerEligible(token, productId);
+            String username = jwt.getSubject();
+            Boolean isEligible = productEligibilityService.isCustomerEligible(token, username, productId);
             ApiResponse<Boolean> response = new ApiResponse<Boolean>(true, "Customer Eligibility Result Retrieved",isEligible);
             return ResponseEntity.ok(response);
+        }
+        catch(NotFoundException e)
+        {
+            ApiResponse<Boolean> response = new ApiResponse<Boolean>(false, "Customer not found",null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
         catch(Exception e)
         {
@@ -136,7 +249,9 @@ public class ProductCatalogController {
         try
         {
             String token = jwt.getTokenValue();
-            Boolean isEligible = productEligibilityService.isCustomerEligible(token, productId);
+            String username = jwt.getSubject();
+
+            Boolean isEligible = productEligibilityService.isCustomerEligible(token,username, productId);
             log.info("---------------Place order-------------- isEligible:" + isEligible);
             if(!isEligible)
             {
@@ -144,8 +259,8 @@ public class ProductCatalogController {
                 return ResponseEntity.internalServerError().body(response);
             }
 
-            ResponseEntity<ApiResponse<CustomerDto>> customer = customerService.GetMyProfile(token);
-            CustomerDto customerDto = customer.getBody().getResult();
+            CustomerDto customerDto = customerService.GetMyProfile(token, username);
+
             log.info("---------------Place order-------------- customerDto:" + customerDto);
 
             FulfilmentRequest fulfilmentRequest = new FulfilmentRequest();
@@ -174,6 +289,11 @@ public class ProductCatalogController {
 
             log.info("---------------Place order-------------- order placed");
             return ResponseEntity.ok(response);
+        }
+        catch(NotFoundException e)
+        {
+            ApiResponse<OrderResponse> response = new ApiResponse<OrderResponse>(false, "Customer not found",null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
         catch(Exception e)
         {
@@ -210,8 +330,8 @@ public class ProductCatalogController {
         try
         {
             String token = jwt.getTokenValue();
-            ResponseEntity<ApiResponse<CustomerDto>> customerDtoResponse = customerService.GetMyProfile(token);
-            CustomerDto customer = customerDtoResponse.getBody().getResult();
+            String username = jwt.getSubject();
+            CustomerDto customer = customerService.GetMyProfile(token,username);
 
             List<OrderResponse> orderResponse = orderService.GetMyOrders(customer);
             ApiResponse<List<OrderResponse>> response = new ApiResponse<List<OrderResponse>>(true, "Orders retrieved successfully", orderResponse);
