@@ -26,44 +26,51 @@ public class DhaService implements IDhaService {
     }
 
     @Override
-    public MaritalStatusResponse DoMaritalCheck(Long idNumber) throws Exception
+    public boolean DoMaritalCheck(Long idNumber) throws Exception
     {
         try {
             String token = authService.GetSystemToken();
-            return dhaChecksApiClient.DoMaritalCheck(token, idNumber);
+            MaritalStatusResponse response = dhaChecksApiClient.DoMaritalCheck(token, idNumber);
+
+            String status = response.getCurrentStatus().getStatus().name();
+            return status.equalsIgnoreCase("married");
         }
         catch(Exception e)
         {
-            System.out.println("------------------dha-marital-check dha service" + e.getMessage());
+            log.info("Marital check failed: " + e.getMessage());
             throw new Exception(e.getMessage());
         }
     }
 
     @Override
-    public DuplicateIDDocumentCheckResponse DoDuplicateIdCheck(Long idNumber) throws Exception
+    public boolean DoDuplicateIdCheck(Long idNumber) throws Exception
     {
         try
         {
             String token = authService.GetSystemToken();
-            return dhaChecksApiClient.DoDuplicateIdCheck(token, idNumber);
+            DuplicateIDDocumentCheckResponse response = dhaChecksApiClient.DoDuplicateIdCheck(token, idNumber);
+            return response.getHasDuplicateId();
         }
         catch(Exception e)
         {
-            System.out.println("------------------dha-marital-check dha service" + e.getMessage());
+            log.info("Duplicate Id check failed" + e.getMessage());
             throw new Exception(e.getMessage());
         }
     }
 
     @Override
-    public LivingStatusResponse DoLivingStatusCheck(Long idNumber) throws Exception
+    public boolean DoLivingStatusCheck(Long idNumber) throws Exception
     {
         try {
             String token = authService.GetSystemToken();
-            return dhaChecksApiClient.DoLivingStatusCheck(token, idNumber);
+            LivingStatusResponse response = dhaChecksApiClient.DoLivingStatusCheck(token, idNumber);
+
+            String livingStatus = response.getLivingStatus().name();
+            return livingStatus.equalsIgnoreCase("Alive");
         }
         catch(Exception e)
         {
-            System.out.println("------------------dha-marital-check dha service" + e.getMessage());
+            log.info("Living status check failed: " + e.getMessage());
             throw new Exception(e.getMessage());
         }
     }

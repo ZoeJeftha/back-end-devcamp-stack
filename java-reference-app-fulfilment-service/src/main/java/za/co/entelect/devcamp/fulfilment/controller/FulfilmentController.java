@@ -12,8 +12,6 @@ import za.co.entelect.devcamp.fulfilment.dha.model.LivingStatusResponse;
 import za.co.entelect.devcamp.fulfilment.dha.model.MaritalStatusResponse;
 import za.co.entelect.devcamp.fulfilment.dto.DuplicateIdStatusDto;
 import za.co.entelect.devcamp.fulfilment.dto.KycDto;
-import za.co.entelect.devcamp.fulfilment.dto.LivingStatusDto;
-import za.co.entelect.devcamp.fulfilment.dto.MaritalStatusesDto;
 import za.co.entelect.devcamp.fulfilment.interfaces.ICreditCheckService;
 import za.co.entelect.devcamp.fulfilment.interfaces.IDhaService;
 import za.co.entelect.devcamp.fulfilment.interfaces.IKycCheckService;
@@ -52,45 +50,43 @@ public class FulfilmentController {
     }
 
     @GetMapping("/dha-marital-check")
-    public MaritalStatusResponse DoDhaMaritalCheck()
+    public boolean DoDhaMaritalCheck()
     {
-        try {
+        try
+        {
             return dhaService.DoMaritalCheck(9001010000081L);
         }
         catch(Exception e)
         {
-            System.out.println("------------------do-dha-marital-check " + e.getMessage());
-            return null;
-                    //"Exception thrown: "+ e.getMessage();
+            log.info("Marital Status Check failed: " + e.getMessage());
+            return false;
         }
     }
 
     @GetMapping("/dha-duplicate-id-check")
-    public DuplicateIDDocumentCheckResponse DoDhaDuplicateIdCheck()
+    public boolean DoDhaDuplicateIdCheck()
     {
         try {
             return dhaService.DoDuplicateIdCheck(9001010000081L);
         }
         catch(Exception e)
         {
-            System.out.println("------------------do-dha-duplicate-id-check " + e.getMessage());
-            return null;
-            //"Exception thrown: "+ e.getMessage();
+            log.info("Duplicate id check failed: " + e.getMessage());
+            return false;
         }
     }
 
 
     @GetMapping("/dha-living-status-check")
-    public LivingStatusResponse DoLivingStatusCheck()
+    public boolean DoLivingStatusCheck()
     {
         try {
             return dhaService.DoLivingStatusCheck(9001010000081L);
         }
         catch(Exception e)
         {
-            System.out.println("------------------do-dha-living-status-check " + e.getMessage());
-            return null;
-            //"Exception thrown: "+ e.getMessage();
+            log.info("Living status check failed: " + e.getMessage());
+            return false;
         }
     }
 
@@ -102,7 +98,7 @@ public class FulfilmentController {
         }
         catch(Exception e)
         {
-            log.info("------------------do-dha-living-status-check " + e.getMessage());
+            log.info("Kyc Check failed: " + e.getMessage());
             return false;
             //"Exception thrown: "+ e.getMessage();
         }

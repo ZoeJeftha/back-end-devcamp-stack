@@ -7,10 +7,10 @@ import za.co.entelect.devcamp.fulfilment.dha.model.MaritalStatusResponse;
 
 public interface IDhaService
 {
-    MaritalStatusResponse DoMaritalCheck(Long idNumber) throws Exception ;
+    boolean DoMaritalCheck(Long idNumber) throws Exception ;
 
-    DuplicateIDDocumentCheckResponse DoDuplicateIdCheck(Long idNumber) throws Exception ;
+    boolean DoDuplicateIdCheck(Long idNumber) throws Exception ;
 
-    LivingStatusResponse DoLivingStatusCheck(Long idNumber) throws Exception ;
+    boolean DoLivingStatusCheck(Long idNumber) throws Exception ;
 }
 

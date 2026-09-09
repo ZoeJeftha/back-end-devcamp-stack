@@ -10,9 +10,6 @@ import za.co.entelect.devcamp.fulfilment.dha.model.DuplicateIDDocumentCheckRespo
 import za.co.entelect.devcamp.fulfilment.dha.model.LivingStatusResponse;
 import za.co.entelect.devcamp.fulfilment.dha.model.MaritalStatusResponse;
 import za.co.entelect.devcamp.fulfilment.dto.KycDto;
-import za.co.entelect.devcamp.fulfilment.dto.DuplicateIdStatusDto;
-import za.co.entelect.devcamp.fulfilment.dto.LivingStatusDto;
-import za.co.entelect.devcamp.fulfilment.dto.MaritalStatusesDto;
 import za.co.entelect.devcamp.fulfilment.interfaces.ICreditChecksApiClient;
 import za.co.entelect.devcamp.fulfilment.interfaces.IDhaChecksApiClient;
 import za.co.entelect.devcamp.fulfilment.interfaces.IKycChecksApiClient;
