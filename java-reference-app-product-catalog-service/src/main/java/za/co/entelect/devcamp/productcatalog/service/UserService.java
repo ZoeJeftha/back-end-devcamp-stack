@@ -2,6 +2,7 @@ package za.co.entelect.devcamp.productcatalog.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -17,7 +18,10 @@ import za.co.entelect.devcamp.productcatalog.exception.NotFoundException;
 import za.co.entelect.devcamp.productcatalog.model.User;
 import za.co.entelect.devcamp.productcatalog.repository.UserRepository;
 import za.co.entelect.devcamp.productcatalog.requests.CreateUserRequest;
+import za.co.entelect.devcamp.productcatalog.requests.LoginRequest;
+import za.co.entelect.devcamp.productcatalog.responses.ValidationResult;
 
+@Slf4j
 @Service
 public class UserService implements IUserService {
 
@@ -47,15 +51,14 @@ public class UserService implements IUserService {
         }
         catch(Exception e)
         {
-            System.out.println("--------------------Exception create user service: " + e.getMessage());
+            log.info("Exception create user service: " + e.getMessage());
             throw new Exception("Failed to create user: "+ e.getMessage());
         }
     }
 
     @Override
-    public UserDto LoadUserByUsername(String username)
-            throws NotFoundException {
-
+    public UserDto LoadUserByUsername(String username) throws NotFoundException
+    {
         User user = userRepository
                         .findFirstByEmailIgnoreCase(username)
                         .orElseThrow(() ->
@@ -71,5 +74,26 @@ public class UserService implements IUserService {
                 user.getEmail(),
                 user.getRole()
         );
+    }
+
+    @Override
+    public ValidationResult validateUsernameAndPassword(LoginRequest request) throws Exception, NotFoundException
+    {
+        User user = userRepository
+                .findFirstByEmailIgnoreCase(request.getUsername())
+                .orElseThrow(() ->
+                        new NotFoundException(
+                                "User not found"));
+
+            String enteredPassword = request.getPassword();
+            String storedPassword = user.getPassword();
+
+            if (passwordEncoder.matches(enteredPassword, storedPassword)) {
+                return new ValidationResult(true, user.getRole());
+            }
+            else {
+                log.info("Incorrect username or password");
+                throw new Exception("Incorrect username or password");
+            }
     }
 }
