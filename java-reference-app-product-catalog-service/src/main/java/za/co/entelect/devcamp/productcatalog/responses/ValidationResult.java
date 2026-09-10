@@ -1,4 +1,4 @@
-package za.co.entelect.devcamp.authenticationservice.responses;
+package za.co.entelect.devcamp.productcatalog.responses;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

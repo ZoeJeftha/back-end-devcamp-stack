@@ -35,13 +35,15 @@ import za.co.entelect.devcamp.productcatalog.service.IProductEligibilityService;
 import za.co.entelect.devcamp.productcatalog.service.IProductService;
 import za.co.entelect.devcamp.productcatalog.service.IOrderService;
 import za.co.entelect.devcamp.productcatalog.service.IUserService;
+import za.co.entelect.devcamp.productcatalog.requests.CreateUserRequest;
 import za.co.entelect.devcamp.productcatalog.requests.FulfilmentRequest;
+import za.co.entelect.devcamp.productcatalog.requests.LoginRequest;
 import za.co.entelect.devcamp.productcatalog.requests.OrderRequest;
 import za.co.entelect.devcamp.productcatalog.requests.OrderStatusUpdateRequest;
 import za.co.entelect.devcamp.productcatalog.requests.RegisterRequest;
-import za.co.entelect.devcamp.productcatalog.requests.CreateUserRequest;
 import za.co.entelect.devcamp.productcatalog.responses.OrderResponse;
 import za.co.entelect.devcamp.productcatalog.responses.CreateUserResponse;
+import za.co.entelect.devcamp.productcatalog.responses.ValidationResult;
 
 @Slf4j
 @RestController
@@ -53,6 +55,7 @@ public class ProductCatalogController {
     public final ICustomerService customerService;
     public final IOrderService orderService;
     public final IUserService userService;
+    public final JwtEncoder jwtEncoder;
 
     @Autowired
     private MessageProducer messageProducer;
@@ -61,13 +64,15 @@ public class ProductCatalogController {
                                     IProductEligibilityService productEligibilityService,
                                     ICustomerService customerService,
                                     IOrderService orderService,
-                                    IUserService userService)
+                                    IUserService userService,
+                                    JwtEncoder jwtEncoder)
     {
         this.productService = productService;
         this.productEligibilityService = productEligibilityService;
         this.customerService = customerService;
         this.orderService = orderService;
         this.userService = userService;
+        this.jwtEncoder = jwtEncoder;
     }
 
     @GetMapping("/products")
@@ -376,6 +381,80 @@ public class ProductCatalogController {
         }
         catch(Exception e) {
             ApiResponse<OrderResponse> response = new ApiResponse<OrderResponse>(false, e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    @GetMapping("/user/{email}")
+    public ResponseEntity<ApiResponse<UserDto>> GetUserByEmail(@PathVariable String email)
+    {
+        try
+        {
+            UserDto user = userService.LoadUserByUsername(email);
+            ApiResponse<UserDto> response = new ApiResponse<UserDto>(true, "User found successfully", user);
+            return ResponseEntity.ok(response);
+        }
+        catch(NotFoundException e)
+        {
+            ApiResponse<UserDto> response = new ApiResponse<UserDto>(false, "Order not found",null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+        catch(Exception e) {
+            ApiResponse<UserDto> response = new ApiResponse<UserDto>(false, "Failed to retrieve order: " + e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    @PostMapping("/token")
+    public ResponseEntity<String> token(@RequestBody LoginRequest loginRequest) {
+        log.info("Log in request recieved");
+        try
+        {
+            log.info("Validating username and password");
+            ValidationResult validationResult = userService.validateUsernameAndPassword(loginRequest);
+
+            if(validationResult.getValid()) {
+                Instant now = Instant.now();
+                Long expiry = 3600L;
+                JwtClaimsSet claims = JwtClaimsSet.builder()
+                        .issuer("self")
+                        .issuedAt(now)
+                        .expiresAt(now.plusSeconds(expiry))
+                        .subject(loginRequest.getUsername())
+                        .claim("role", validationResult.getRole())
+                        .build();
+                String token = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+
+                return ResponseEntity.ok(token);
+            }
+            else
+            {
+                return ResponseEntity.internalServerError()
+                        .body("Invalid username or password");
+            }
+        }
+        catch(Exception e)
+        {
+            return ResponseEntity.internalServerError()
+                    .body("Invalid username or password");
+        }
+    }
+
+    @PostMapping("/open-account")
+    public ResponseEntity<ApiResponse<CustomerDto>> OpenAccount(
+            @AuthenticationPrincipal Jwt jwt , @RequestBody Integer accountTypeId) {
+
+        try {
+            String username = jwt.getSubject();
+            String token = jwt.getTokenValue();
+
+            CustomerDto customer = customerService.OpenAccount(token, username, accountTypeId);
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(true, "Account opened successfully", customer);
+            return ResponseEntity.ok(response);
+        }
+        catch(Exception e)
+        {
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to open account: "+ e.getMessage(), null);
             return ResponseEntity.internalServerError().body(response);
         }
     }

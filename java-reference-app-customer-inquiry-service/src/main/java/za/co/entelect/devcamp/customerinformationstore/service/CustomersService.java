@@ -8,7 +8,6 @@ import za.co.entelect.devcamp.customerinformationstore.controller.CustomersApiDe
 import za.co.entelect.devcamp.customerinformationstore.model.Customer;
 import za.co.entelect.devcamp.customerinformationstore.model.CustomerDto;
 import za.co.entelect.devcamp.customerinformationstore.repository.CustomerRepository;
-import za.co.entelect.devcamp.authenticationservice.helpers.CustomerHelper;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,12 +26,8 @@ public class CustomersService implements CustomersApiDelegate {
     public ResponseEntity<List<CustomerDto>> getCustomers() {
         List<Customer> allCustomers = customerRepository.findAll();
         List<CustomerDto> customerDtoList = allCustomers.stream()
-                .map(customer ->
-                {
-                    CustomerDto dto = customer.toCustomerDto();
-                    dto.setIdNumber(CustomerHelper.maskIdNumber(customer.getIdNumber()));
-                    return dto;
-                }) .collect(Collectors.toList());
+                .map(Customer::toCustomerDto)
+                .collect(Collectors.toList());
         return new ResponseEntity<>(customerDtoList, HttpStatus.OK);
     }
 

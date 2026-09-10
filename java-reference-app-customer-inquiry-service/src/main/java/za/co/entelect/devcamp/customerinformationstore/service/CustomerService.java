@@ -1,9 +1,5 @@
 package za.co.entelect.devcamp.customerinformationstore.service;
 
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,14 +7,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import za.co.entelect.devcamp.authenticationservice.helpers.CustomerHelper;
 import za.co.entelect.devcamp.customerinformationstore.controller.CustomerApiDelegate;
 import za.co.entelect.devcamp.customerinformationstore.model.*;
 import za.co.entelect.devcamp.customerinformationstore.repository.*;
-import za.co.entelect.devcamp.customerinformationstore.requests.CustomerEligibilityRequest;
-import za.co.entelect.devcamp.customerinformationstore.responses.ApiResponse;
-import za.co.entelect.devcamp.customerinformationstore.model.AccountType;
-import za.co.entelect.devcamp.customerinformationstore.model.CustomerTypes;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -33,12 +28,7 @@ public class CustomerService implements CustomerApiDelegate {
     private final CustomerAccountsRepository customerAccountsRepository;
 
     @Autowired
-    public CustomerService(CustomerRepository customerRepository,
-                           CustomerTypesRepository customerTypesRepository,
-                           CustomerDocumentRepository customerDocumentRepository,
-                           DocumentRepository documentRepository,
-                           AccountRepository accountRepository,
-                           CustomerAccountsRepository customerAccountsRepository) {
+    public CustomerService(CustomerRepository customerRepository, CustomerTypesRepository customerTypesRepository, CustomerDocumentRepository customerDocumentRepository, DocumentRepository documentRepository, AccountRepository accountRepository, CustomerAccountsRepository customerAccountsRepository) {
         this.customerRepository = customerRepository;
         this.customerTypesRepository = customerTypesRepository;
         this.customerDocumentRepository = customerDocumentRepository;
@@ -152,38 +142,6 @@ public class CustomerService implements CustomerApiDelegate {
         if (customerByEmail.isPresent()) {
             return ResponseEntity.ok(customerByEmail.get().toCustomerDto());
         } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-    
-    public CustomerDto OpenAccount(String emailAddress, Integer accountTypeId) throws Exception
-    {
-        try {
-            Optional<Customer> customerByEmail = customerRepository.findCustomerByEmail(emailAddress);
-            if (customerByEmail.isPresent()) {
-                addCustomerAccountsToCustomerById(Math.toIntExact(customerByEmail.get().getCustomerId()), accountTypeId);
-                ResponseEntity<CustomerDto> customer = getCustomerByEmailAddress(emailAddress);
-                return customer.getBody();
-            } else {
-                throw new Exception("Customer not found");
-            }
-        }
-        catch(Exception e)
-        {
-            throw new Exception("Error occurred while trying to open account", e);
-        }
-    }
-
-    public ResponseEntity<CustomerDto> getCustomerByEmailAddressUnmasked(String emailAddress)
-    {
-        Optional<Customer> customerByEmail = customerRepository.findCustomerByEmail(emailAddress);
-        if (customerByEmail.isPresent())
-        {
-            Customer customer = customerByEmail.get();
-            return ResponseEntity.ok(customer.toCustomerDto());
-        }
-        else
-        {
             return ResponseEntity.notFound().build();
         }
     }

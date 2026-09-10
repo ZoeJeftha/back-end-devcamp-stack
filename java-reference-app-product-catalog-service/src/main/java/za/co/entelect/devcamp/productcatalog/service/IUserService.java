@@ -6,9 +6,15 @@ import org.springframework.http.ResponseEntity;
 import za.co.entelect.devcamp.productcatalog.dto.UserDto;
 import za.co.entelect.devcamp.productcatalog.exception.NotFoundException;
 import za.co.entelect.devcamp.productcatalog.requests.CreateUserRequest;
+import za.co.entelect.devcamp.productcatalog.requests.LoginRequest;
+import za.co.entelect.devcamp.productcatalog.responses.ValidationResult;
 
 public interface IUserService
 {
     UserDto CreateUser(CreateUserRequest request) throws Exception;
+
+    UserDto LoadUserByUsername(String username) throws NotFoundException;
+
+    ValidationResult validateUsernameAndPassword(LoginRequest request) throws Exception, NotFoundException;
 }
 

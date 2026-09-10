@@ -46,10 +46,8 @@ public class CreditChecksApiClient implements ICreditChecksApiClient {
 
         InputStream responseStream = connection.getInputStream();
         String responseXml = new String(responseStream.readAllBytes());
-        System.out.println("Raw SOAP Response: " + responseXml);
 
         String result = responseXml.replaceAll("(?s).*<CreditCheckResult>(.*?)</CreditCheckResult>.*", "$1");
-        System.out.println("CreditCheck returned: " + result);
         return result;
     }
 }

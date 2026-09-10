@@ -62,7 +62,7 @@ services:
       context: java-reference-app-product-catalog-service
     container_name: DevCamp-PC-Service
     ports:
-      - 8085:8080
+      - 8087:8080
     environment:
       SYSTEM_USERNAME: "admin@entelect.co.za"
       SYSTEM_PASSWORD: "password"

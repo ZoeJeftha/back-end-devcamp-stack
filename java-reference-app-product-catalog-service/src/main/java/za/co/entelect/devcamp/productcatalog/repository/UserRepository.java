@@ -9,4 +9,5 @@ import za.co.entelect.devcamp.productcatalog.model.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long>
 {
+    Optional<User> findFirstByEmailIgnoreCase(String username);
 }
