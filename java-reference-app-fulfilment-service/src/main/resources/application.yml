@@ -36,3 +36,5 @@ management:
 auth:
   system-username: ${SYSTEM_USERNAME}
   system-password: ${SYSTEM_PASSWORD}
+fraud-check:
+  url: ${FRAUD_CHECK_URL}

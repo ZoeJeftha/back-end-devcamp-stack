@@ -1,19 +1,25 @@
 package za.co.entelect.devcamp.fulfilment.controller;
 
 import java.io.IOException;
+import localhost._8085.fraudcheck.FraudCheckRequest;
+import localhost._8085.fraudcheck.FraudCheckResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import za.co.entelect.devcamp.fulfilment.dha.model.DuplicateIDDocumentCheckResponse;
+import za.co.entelect.devcamp.fulfilment.dto.FraudCheckResponseDto;
 import za.co.entelect.devcamp.fulfilment.dha.model.LivingStatusResponse;
 import za.co.entelect.devcamp.fulfilment.dha.model.MaritalStatusResponse;
 import za.co.entelect.devcamp.fulfilment.dto.DuplicateIdStatusDto;
 import za.co.entelect.devcamp.fulfilment.dto.KycDto;
 import za.co.entelect.devcamp.fulfilment.interfaces.ICreditCheckService;
 import za.co.entelect.devcamp.fulfilment.interfaces.IDhaService;
+import za.co.entelect.devcamp.fulfilment.interfaces.IFraudCheckService;
 import za.co.entelect.devcamp.fulfilment.interfaces.IKycCheckService;
 
 @Slf4j
@@ -24,14 +30,17 @@ public class FulfilmentController {
     public final ICreditCheckService creditCheckService;
     public final IDhaService dhaService;
     public final IKycCheckService kycCheckService;
+    public final IFraudCheckService fraudCheckService;
 
     public FulfilmentController(ICreditCheckService creditCheckService,
                                 IDhaService dhaService,
-                                IKycCheckService kycCheckService)
+                                IKycCheckService kycCheckService,
+                                IFraudCheckService fraudCheckService)
     {
         this.creditCheckService = creditCheckService;
         this.dhaService = dhaService;
         this.kycCheckService = kycCheckService;
+        this.fraudCheckService = fraudCheckService;
     }
 
     @GetMapping("/credit-check")
@@ -102,7 +111,24 @@ public class FulfilmentController {
         {
             log.info("Kyc Check failed: " + e.getMessage());
             return false;
-            //"Exception thrown: "+ e.getMessage();
+        }
+    }
+
+    @PostMapping("/fraud-check")
+    public boolean DoFraudCheck()
+    {
+        try {
+            return fraudCheckService.DoFraudCheck(1L, "9808030138082L");
+        }
+        catch(IOException e)
+        {
+            log.info("Fraud Check failed: " + e.getMessage());
+            return false;
+        }
+        catch(Exception e)
+        {
+            log.info("Fraud Check failed: " + e.getMessage());
+            return false;
         }
     }
 }

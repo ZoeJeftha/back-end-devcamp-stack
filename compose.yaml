@@ -77,6 +77,7 @@ services:
     environment:
       SYSTEM_USERNAME: "admin@entelect.co.za"
       SYSTEM_PASSWORD: "password"
+      FRAUD_CHECK_URL: "http://devcamp-mock-fraud-check-service:8085/FraudCheck"
 
   devcamp-mock-fraud-check-service:
     # image: harbor.entelectprojects.co.za/internaltraining-devcamp/devcamp-mock-fraud-check-service:latest
