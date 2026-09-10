@@ -108,7 +108,6 @@ public class CustomerApiClient implements ICustomerApiClient
         log.info("Creating customer");
         try {
             String token = authService.GetSystemToken();
-            System.out.println("-----------Token: " + token);
 
             String url = "http://devcamp-cis-service:8080/v1/customer";
             HttpHeaders headers = new HttpHeaders();
@@ -126,6 +125,45 @@ public class CustomerApiClient implements ICustomerApiClient
 
             log.info("Customer created");
             return customer;
+        }
+        catch(Exception e)
+        {
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    @Override
+    public ResponseEntity<CustomerDto> OpenAccount(String token2, String username, Integer accountTypeId) throws Exception {
+        log.info("Open Account");
+        try
+        {
+            String token = authService.GetSystemToken();
+            log.info("customer "+ username+ " accountTypeId" +accountTypeId + "token"+ token);
+
+            ResponseEntity<CustomerDto> customerDto = GetMyProfile(token, username);
+            CustomerDto customer = customerDto.getBody();
+            log.info("customer "+ customer);
+            log.info("customer.getId() "+ customer.getId());
+
+            String url = "http://devcamp-cis-service:8080/v1/customer/"
+                    + customer.getId()
+                    + "/accounts/"
+                    + accountTypeId;
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(token);
+
+            HttpEntity<Void> entity =
+                    new HttpEntity<>(headers);
+
+            ResponseEntity<Void> savedCustomer = restTemplate.postForEntity(
+                    url,
+                    entity,
+                    Void.class
+            );
+            token = authService.GetSystemToken();
+            return GetMyProfile(token, username);
         }
         catch(Exception e)
         {

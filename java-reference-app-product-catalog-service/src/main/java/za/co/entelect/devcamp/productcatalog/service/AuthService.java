@@ -8,7 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import za.co.entelect.devcamp.productcatalog.client.IAuthApiClient;
 import za.co.entelect.devcamp.productcatalog.requests.LoginRequest;

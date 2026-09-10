@@ -440,5 +440,23 @@ public class ProductCatalogController {
         }
     }
 
+    @PostMapping("/open-account")
+    public ResponseEntity<ApiResponse<CustomerDto>> OpenAccount(
+            @AuthenticationPrincipal Jwt jwt , @RequestBody Integer accountTypeId) {
+
+        try {
+            String username = jwt.getSubject();
+            String token = jwt.getTokenValue();
+
+            CustomerDto customer = customerService.OpenAccount(token, username, accountTypeId);
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(true, "Account opened successfully", customer);
+            return ResponseEntity.ok(response);
+        }
+        catch(Exception e)
+        {
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to open account: "+ e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
 
 }

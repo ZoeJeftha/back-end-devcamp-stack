@@ -2,6 +2,7 @@ package za.co.entelect.devcamp.productcatalog.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,7 @@ import za.co.entelect.devcamp.productcatalog.exception.NotFoundException;
 import za.co.entelect.devcamp.productcatalog.responses.ApiResponse;
 import za.co.entelect.devcamp.productcatalog.service.ICustomerService;
 
+@Slf4j
 @Service
 public class CustomerService implements ICustomerService {
     private final ICustomerApiClient customerApiClient;
@@ -67,6 +69,19 @@ public class CustomerService implements ICustomerService {
             throw new Exception(e.getMessage());
         }
 
+    }
+
+    public CustomerDto OpenAccount(String token, String username, Integer accountTypeId) throws Exception
+    {
+        ResponseEntity<CustomerDto> customer = customerApiClient.OpenAccount(token, username, accountTypeId);
+        log.info("customer in customer service: " + customer);
+        CustomerDto customerDto = customer.getBody();
+        log.info("customerDto in customer service: " + customerDto);
+
+        String maskedIdNumber = maskIdNumber(customerDto.getIdNumber());
+        customerDto.setIdNumber(maskedIdNumber);
+
+        return customerDto;
     }
 
     private String maskIdNumber(String idNumber) {
