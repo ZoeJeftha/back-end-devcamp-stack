@@ -17,10 +17,14 @@ import za.co.entelect.devcamp.fulfilment.dha.model.LivingStatusResponse;
 import za.co.entelect.devcamp.fulfilment.dha.model.MaritalStatusResponse;
 import za.co.entelect.devcamp.fulfilment.dto.DuplicateIdStatusDto;
 import za.co.entelect.devcamp.fulfilment.dto.KycDto;
+import za.co.entelect.devcamp.fulfilment.enums.OrderStatusEnum;
 import za.co.entelect.devcamp.fulfilment.interfaces.ICreditCheckService;
 import za.co.entelect.devcamp.fulfilment.interfaces.IDhaService;
 import za.co.entelect.devcamp.fulfilment.interfaces.IFraudCheckService;
 import za.co.entelect.devcamp.fulfilment.interfaces.IKycCheckService;
+import za.co.entelect.devcamp.fulfilment.interfaces.IProductService;
+import za.co.entelect.devcamp.productcatalog.requests.OrderStatusUpdateRequest;
+import za.co.entelect.devcamp.fulfilment.responses.OrderResponse;
 
 @Slf4j
 @RestController
@@ -31,16 +35,19 @@ public class FulfilmentController {
     public final IDhaService dhaService;
     public final IKycCheckService kycCheckService;
     public final IFraudCheckService fraudCheckService;
+    public final IProductService productService;
 
     public FulfilmentController(ICreditCheckService creditCheckService,
                                 IDhaService dhaService,
                                 IKycCheckService kycCheckService,
-                                IFraudCheckService fraudCheckService)
+                                IFraudCheckService fraudCheckService,
+                                IProductService productService)
     {
         this.creditCheckService = creditCheckService;
         this.dhaService = dhaService;
         this.kycCheckService = kycCheckService;
         this.fraudCheckService = fraudCheckService;
+        this.productService = productService;
     }
 
     @GetMapping("/credit-check")
@@ -129,6 +136,23 @@ public class FulfilmentController {
         {
             log.info("Fraud Check failed: " + e.getMessage());
             return false;
+        }
+    }
+
+    @PostMapping("/update-order")
+    public OrderResponse UpdateOrder()
+    {
+        try {
+            OrderStatusUpdateRequest request = new OrderStatusUpdateRequest();
+            request.setStatus(OrderStatusEnum.PENDING);
+            request.setOrderId(6L);
+
+            return productService.UpdateOrder(request);
+        }
+        catch(Exception e)
+        {
+            log.info("Update order failed: " + e.getMessage());
+            return null;
         }
     }
 }
