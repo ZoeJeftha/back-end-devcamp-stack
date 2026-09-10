@@ -29,7 +29,6 @@ public class AuthApiClient implements IAuthApiClient
     @Override
     public String GetSystemToken(LoginRequest request) throws Exception {
         try {
-            log.info("getting system token");
             String url = "http://devcamp-auth-service:8080/token";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -52,7 +51,7 @@ public class AuthApiClient implements IAuthApiClient
         }
         catch(Exception e)
         {
-            System.out.println("--------------------Exception in auth api client: " + e.getMessage());
+            log.info("Error in auth api client: " + e.getMessage());
             throw new Exception(e.getMessage());
         }
     }

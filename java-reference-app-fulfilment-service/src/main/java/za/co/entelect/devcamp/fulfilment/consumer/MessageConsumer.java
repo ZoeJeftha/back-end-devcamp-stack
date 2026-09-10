@@ -1,121 +1,138 @@
 package za.co.entelect.devcamp.fulfilment.consumer;
 
 import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.stereotype.Service;
 import za.co.entelect.devcamp.fulfilment.configuration.RabbitConfig;
-import za.co.entelect.devcamp.fulfilment.dha.model.DuplicateIDDocumentCheckResponse;
-import za.co.entelect.devcamp.fulfilment.dha.model.LivingStatusResponse;
-import za.co.entelect.devcamp.fulfilment.dha.model.MaritalStatusResponse;
-import za.co.entelect.devcamp.fulfilment.dto.KycDto;
-import za.co.entelect.devcamp.fulfilment.interfaces.ICreditChecksApiClient;
-import za.co.entelect.devcamp.fulfilment.interfaces.IDhaChecksApiClient;
-import za.co.entelect.devcamp.fulfilment.interfaces.IKycChecksApiClient;
-import za.co.entelect.devcamp.fulfilment.interfaces.ITokenService;
+import za.co.entelect.devcamp.fulfilment.interfaces.ICreditCheckService;
+import za.co.entelect.devcamp.fulfilment.interfaces.IDhaService;
+import za.co.entelect.devcamp.fulfilment.interfaces.IFraudCheckService;
+import za.co.entelect.devcamp.fulfilment.interfaces.IKycCheckService;
 import za.co.entelect.devcamp.fulfilment.requests.FulfilmentRequest;
 
+@Slf4j
 @Service
 public class MessageConsumer {
 
-    public final ICreditChecksApiClient creditChecksApiClient;
-    public final IKycChecksApiClient kycChecksApiClient;
-    public final ITokenService tokenService;
-    public final IDhaChecksApiClient dhaChecksApiClient;
+    public final ICreditCheckService creditCheckService;
+    public final IDhaService dhaService;
+    public final IKycCheckService kycCheckService;
+    public final IFraudCheckService fraudCheckService;
 
-    public MessageConsumer(IKycChecksApiClient kycChecksApiClient,
-                           ITokenService tokenService,
-                           IDhaChecksApiClient dhaChecksApiClient,
-                           ICreditChecksApiClient creditChecksApiClient)
+    public MessageConsumer(ICreditCheckService creditCheckService,
+                           IDhaService dhaService,
+                           IKycCheckService kycCheckService,
+                           IFraudCheckService fraudCheckService)
     {
-        this.kycChecksApiClient = kycChecksApiClient;
-        this.tokenService = tokenService;
-        this.dhaChecksApiClient = dhaChecksApiClient;
-        this.creditChecksApiClient = creditChecksApiClient;
+        this.creditCheckService = creditCheckService;
+        this.dhaService = dhaService;
+        this.kycCheckService = kycCheckService;
+        this.fraudCheckService = fraudCheckService;
     }
 
     @RabbitListener(queues = RabbitConfig.QUEUE,   containerFactory = "rabbitListenerContainerFactory")
     public void receiveMessage(FulfilmentRequest fulfilmentRequest) {
         try {
-            System.out.println("-----------------Message queue received: " + fulfilmentRequest);
-            String token = tokenService.GetToken(fulfilmentRequest.getUsername());
-
-            System.out.println("----------------Message queue received getFulfilmentType: " + fulfilmentRequest.getFulfilmentType());
+            log.info("Message queue received: " + fulfilmentRequest);
+            boolean passed = false;
 
             switch (fulfilmentRequest.getFulfilmentType()) {
                 case "A":
-                    ProcessFulfilmentTypeA(token, fulfilmentRequest);
+                    passed = ProcessFulfilmentTypeA(fulfilmentRequest);
                     break;
                 case "B":
-                    ProcessFulfilmentTypeB(token, fulfilmentRequest);
+                    passed = ProcessFulfilmentTypeB(fulfilmentRequest);
                     break;
                 case "C":
-                    ProcessFulfilmentTypeC(token, fulfilmentRequest);
+                    passed =ProcessFulfilmentTypeC(fulfilmentRequest);
                     break;
             }
+            log.info("ALL CHECKS DONE, RESULT: "+ passed);
         }
         catch(Exception e)
         {
-            System.out.println("Message queue received, failed to process: " + e.getMessage());
+            log.info("Message queue received, failed to process: " + e.getMessage());
         }
     }
 
-    public void ProcessFulfilmentTypeA(String token, FulfilmentRequest fulfilmentRequest)
+    public boolean ProcessFulfilmentTypeA(FulfilmentRequest fulfilmentRequest)
     {
         try
         {
-            KycDto kycCheck = kycChecksApiClient.DoKycCheck(token, fulfilmentRequest.getId());
-            System.out.println("------------------Fulfilment kycCheck type A " + kycCheck);
+            boolean kycCheck = kycCheckService.DoKycCheck(fulfilmentRequest.getId());
+            log.info("Fulfilment kyc check: " + kycCheck);
+            return kycCheck;
         }
         catch(Exception e)
         {
-            System.out.println("------------------Fulfilment Exception type A " + e.getMessage());
+            log.info("Fulfilment Exception type A: " + e.getMessage());
+            //to do: handle errors properly
+            return false;
         }
     }
 
-    public void ProcessFulfilmentTypeB(String token, FulfilmentRequest fulfilmentRequest)
+    public boolean ProcessFulfilmentTypeB(FulfilmentRequest fulfilmentRequest)
     {
         try
         {
-            KycDto kycCheck = kycChecksApiClient.DoKycCheck(token, fulfilmentRequest.getId());
-            System.out.println("------------------Fulfilment kycCheck type B" + kycCheck);
-            //to do: Add fraud check
-            LivingStatusResponse livingStatus = dhaChecksApiClient.DoLivingStatusCheck(token, Long.parseLong(fulfilmentRequest.getIdNumber()));
-            System.out.println("------------------Fulfilment livingStatusDto type B" + livingStatus);
+            boolean kycCheck = kycCheckService.DoKycCheck(fulfilmentRequest.getId());
+            log.info("Fulfilment kyc check: " + kycCheck);
 
-            DuplicateIDDocumentCheckResponse duplicateIdStatus =dhaChecksApiClient.DoDuplicateIdCheck(token, Long.parseLong(fulfilmentRequest.getIdNumber()));
-            System.out.println("------------------Fulfilment duplicateIdStatusDto type B" + duplicateIdStatus);
+            boolean fraudCheck = fraudCheckService.DoFraudCheck(fulfilmentRequest.getId(),fulfilmentRequest.getIdNumber());
+            log.info("Fulfilment fraud check: " + kycCheck);
+
+            boolean livingStatus = dhaService.DoLivingStatusCheck(Long.parseLong(fulfilmentRequest.getIdNumber()));
+            log.info("Fulfilment living status check: " + kycCheck);
+
+            boolean duplicateIdStatus = dhaService.DoDuplicateIdCheck(Long.parseLong(fulfilmentRequest.getIdNumber()));
+            log.info("Fulfilment duplicate id status check: " + duplicateIdStatus);
+
+            log.info("ProcessFulfilmentTypeB: "+ (kycCheck && fraudCheck && livingStatus && duplicateIdStatus));
+
+            return kycCheck && fraudCheck && livingStatus && duplicateIdStatus;
         }
         catch(Exception e)
         {
-            System.out.println("------------------Fulfilment Exception type B" + e.getMessage());
+            log.info("Fulfilment Exception type B" + e.getMessage());
+            //to do: handle errors properly
+            return false;
         }
 
     }
 
-    public void ProcessFulfilmentTypeC(String token, FulfilmentRequest fulfilmentRequest)
+    public boolean ProcessFulfilmentTypeC(FulfilmentRequest fulfilmentRequest)
     {
         try {
-            ProcessFulfilmentTypeB(token, fulfilmentRequest);
+            boolean processBFlag = ProcessFulfilmentTypeB(fulfilmentRequest);
 
-            MaritalStatusResponse maritalStatus = dhaChecksApiClient.DoMaritalCheck(token, Long.parseLong(fulfilmentRequest.getIdNumber()));
+            log.info("Fulfilment processBFlag: " + processBFlag);
 
-            System.out.println("------------------Fulfilment maritalStatusesDto type C" + maritalStatus);
+            boolean maritalStatus = dhaService.DoMaritalCheck(Long.parseLong(fulfilmentRequest.getIdNumber()));
 
-            String creditCheck = creditChecksApiClient.DoCreditCheck(fulfilmentRequest.getId());
+            log.info("Fulfilment marital statuses check: " + maritalStatus);
 
-            System.out.println("------------------Fulfilment creditCheck type C" + creditCheck);
+            boolean creditCheck = creditCheckService.DoCreditCheck(fulfilmentRequest.getId());
+
+            log.info("Fulfilment credit check" + creditCheck);
+
+            log.info("ProcessFulfilmentTypeC check: " + (processBFlag && maritalStatus && creditCheck));
+
+            return processBFlag && maritalStatus && creditCheck;
         }
         catch (IOException e) {
-            System.out.println("------------------Fulfilment IOException type C" + e.getMessage());
+            log.info("Fulfilment IOException type C: " + e.getMessage());
+            //to do: handle errors properly
+            return false;
         }
         catch(Exception e)
         {
-            System.out.println("------------------Fulfilment Exception type C" + e.getMessage());
+            log.info("Fulfilment Exception type C: " + e.getMessage());
+            //to do: handle errors properly
+            return false;
         }
     }
-
-
 
 }

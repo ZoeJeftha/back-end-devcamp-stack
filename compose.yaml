@@ -77,6 +77,15 @@ services:
     environment:
       SYSTEM_USERNAME: "admin@entelect.co.za"
       SYSTEM_PASSWORD: "password"
+      FRAUD_CHECK_URL: "http://devcamp-mock-fraud-check-service:8085/FraudCheck"
+
+  devcamp-mock-fraud-check-service:
+    # image: harbor.entelectprojects.co.za/internaltraining-devcamp/devcamp-mock-fraud-check-service:latest
+    build:
+      context: java-reference-app-mock-fraud-check-service
+    container_name: DevCamp-Mock-Fraud-Check-Service
+    ports:
+      - 8085:8085
 
   rabbitmq:
     image: rabbitmq:3.12-management

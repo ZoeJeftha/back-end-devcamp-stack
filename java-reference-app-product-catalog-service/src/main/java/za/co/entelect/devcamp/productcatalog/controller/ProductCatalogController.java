@@ -354,7 +354,7 @@ public class ProductCatalogController {
     }
 
 
-    @GetMapping("/order-status-update")
+    @PostMapping("/order-status-update")
     public ResponseEntity<ApiResponse<OrderResponse>> UpdateOrderStatus(@AuthenticationPrincipal Jwt jwt,@RequestBody OrderStatusUpdateRequest request)
     {
         try
