@@ -11,7 +11,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import za.co.entelect.devcamp.fulfilment.dto.KycDto;
 import za.co.entelect.devcamp.fulfilment.interfaces.IProductServiceApiClient;
-import za.co.entelect.devcamp.productcatalog.requests.OrderStatusUpdateRequest;
+import za.co.entelect.devcamp.fulfilment.responses.ApiResponse;
+import za.co.entelect.devcamp.fulfilment.requests.OrderStatusUpdateRequest;
 import za.co.entelect.devcamp.fulfilment.responses.OrderResponse;
 
 @Slf4j
@@ -25,7 +26,7 @@ public class ProductServiceApiClient implements IProductServiceApiClient
     }
 
     @Override
-    public ResponseEntity<OrderResponse> UpdateOrder(String token, OrderStatusUpdateRequest request) {
+    public OrderResponse UpdateOrder(String token, OrderStatusUpdateRequest request) {
         String url = "http://devcamp-pc-service:8080/v1/order-status-update/";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -35,16 +36,17 @@ public class ProductServiceApiClient implements IProductServiceApiClient
         HttpEntity<OrderStatusUpdateRequest> entity =
                 new HttpEntity<>(request,headers);
 
-        ResponseEntity<OrderResponse> response =
+        ResponseEntity<ApiResponse<OrderResponse>> response =
                 restTemplate.exchange(
                         url,
                         HttpMethod.POST,
                         entity,
-                        OrderResponse.class
+                        new ParameterizedTypeReference<ApiResponse<OrderResponse>>() {}
                 );
 
-        log.info("fulfilment response: "+ response)
-        return response.getBody();
+        log.info("fulfilment response: "+ response);
+        log.info("fulfilment response  response.getBody().getResult(): "+  response.getBody().getResult());
+        return response.getBody().getResult();
     }
 
 }

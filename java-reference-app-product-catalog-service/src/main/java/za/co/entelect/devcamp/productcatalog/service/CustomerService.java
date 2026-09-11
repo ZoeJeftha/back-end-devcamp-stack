@@ -39,6 +39,15 @@ public class CustomerService implements ICustomerService {
         return customerDto;
     }
 
+    @Override
+    public CustomerDto GetMyUnmaskedProfile(String token, String username) throws NotFoundException, Exception
+    {
+        ResponseEntity<CustomerDto> customer = customerApiClient.GetMyProfile(token, username);
+        CustomerDto customerDto = customer.getBody();
+
+        return customerDto;
+    }
+
     public List<CustomerDto> GetProfiles(String token) throws NotFoundException, Exception
     {
         ResponseEntity<List<CustomerDto>> customers = customerApiClient.GetProfiles(token);

@@ -15,5 +15,7 @@ public interface ICustomerService {
     CustomerDto CreateCustomer(CustomerDto request) throws Exception;
 
     CustomerDto OpenAccount(String token, String username, Integer accountTypeId) throws Exception;
+
+    CustomerDto GetMyUnmaskedProfile(String token, String username) throws NotFoundException, Exception;
 }
 

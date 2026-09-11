@@ -48,7 +48,6 @@ public class OrderService implements IOrderService
     {
         try
         {
-            log.info("SaveOrder");
             Orders order = new Orders();
             order.setCustomerId(request.getCustomerId());
             order.setStatus(request.getStatus());
@@ -57,18 +56,13 @@ public class OrderService implements IOrderService
             LocalDateTime now = LocalDateTime.now();
             order.setCreatedAt(now);
 
-            log.info("SaveOrder order: " + order);
-
             Orders savedOrder = orderRepository.save(order);
-
-            log.info("SaveOrder savedOrder: " + savedOrder);
 
             OrderItems orderItems = new OrderItems();
             orderItems.setProductId(request.getProduct().getProductId());
             orderItems.setOrderId(savedOrder.getOrderId());
 
             OrderItems savedOrderItems = orderItemRepository.save(orderItems);
-            log.info("SaveOrder savedOrderItems: " + orderItems);
 
             OrderResponse response = new OrderResponse();
 
@@ -76,7 +70,6 @@ public class OrderService implements IOrderService
             response.setStatus(request.getStatus());
             response.setProduct(request.getProduct());
 
-            log.info("SaveOrder response: " + response);
             return response;
         }
         catch(Exception e)
@@ -168,37 +161,27 @@ public class OrderService implements IOrderService
     {
         try
         {
-            log.info("---------------------UpdateOrderStatus OrderStatusUpdateRequest: "+request);
+            log.info("UpdateOrderStatus OrderStatusUpdateRequest: "+request);
             Optional<Orders> orderOp = orderRepository.findById(request.getOrderId());
-            log.info("-------------------------Getting orderOp: " + orderOp);
             if(orderOp.isPresent())
             {
                 Orders order = orderOp.get();
-                log.info("----------------------Getting order: " + order);
-
                 order.setStatus(request.getStatus().toString());
 
-                log.info("----------------------Getting order after set status: " + order);
                 Orders updatedOrder = orderRepository.save(order);
-                log.info("----------------------Getting updatedOrder: " + updatedOrder);
 
                 Optional<OrderItems> orderItemOp = orderItemRepository.findByOrderId(request.getOrderId());
-                log.info("----------------------Getting orderItemOp: " + orderItemOp);
 
                 if(orderItemOp.isPresent()) {
                     OrderItems orderItem = orderItemOp.get();
-
-                    log.info("----------------------Getting orderItem: " + orderItem);
                     OrderResponse orderResponse = new OrderResponse();
 
                     orderResponse.setOrderId(updatedOrder.getOrderId());
                     orderResponse.setStatus(updatedOrder.getStatus());
-                    log.info("----------------------Getting orderResponse: " + orderResponse);
 
                     ProductDto product = productService.getProductById(orderItem.getProductId());
-                    log.info("----------------------Getting product: " + product);
                     orderResponse.setProduct(product);
-                    log.info("----------------------Getting orderResponse with product: " + orderResponse);
+                    log.info("Order updated: " + orderResponse);
                     return orderResponse;
                 }
                 else

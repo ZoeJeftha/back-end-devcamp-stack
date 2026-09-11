@@ -23,12 +23,8 @@ public class FraudCheckApiClient implements IFraudCheckApiClient {
     private String fraudCheckUrl;
 
     @Override
-    public FraudCheckResponseDto DoFraudCheck(Long customerId, String idNumber) throws IOException {
-
-        log.info("FraudCheckApiClient customerId: {}", customerId);
-        log.info("FraudCheckApiClient idNumber: {}", idNumber);
-        log.info("FraudCheckApiClient fraudCheckUrl: {}", fraudCheckUrl);
-
+    public FraudCheckResponseDto DoFraudCheck(Long customerId, String idNumber) throws IOException
+    {
         String xmlInput =
                 "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
                         + "<soap:Envelope "
@@ -66,8 +62,6 @@ public class FraudCheckApiClient implements IFraudCheckApiClient {
 
         int responseCode = connection.getResponseCode();
 
-        log.info("FraudCheck response code: {}", responseCode);
-
         InputStream responseStream;
 
         if (responseCode >= 200 && responseCode < 300) {
@@ -77,8 +71,6 @@ public class FraudCheckApiClient implements IFraudCheckApiClient {
         }
 
         String responseXml = new String(responseStream.readAllBytes());
-
-        log.info("FraudCheck response: {}", responseXml);
 
         return parseFraudCheckResponse(responseXml);
     }

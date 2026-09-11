@@ -1,4 +1,4 @@
-package za.co.entelect.devcamp.productcatalog.requests;
+package za.co.entelect.devcamp.fulfilment.requests;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

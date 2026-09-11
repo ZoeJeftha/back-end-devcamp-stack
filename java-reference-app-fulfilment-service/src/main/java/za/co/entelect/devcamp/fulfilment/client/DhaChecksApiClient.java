@@ -15,16 +15,17 @@ import za.co.entelect.devcamp.fulfilment.interfaces.IDhaChecksApiClient;
 @Component
 public class DhaChecksApiClient implements IDhaChecksApiClient
 {
-    private final ApiClient apiClient;
+    private final RestTemplate dhaRestTemplate;
 
     public DhaChecksApiClient(RestTemplate dhaRestTemplate)
     {
-        this.apiClient = new ApiClient(dhaRestTemplate);
+        this.dhaRestTemplate = dhaRestTemplate;
     }
 
-   @Override
-    public MaritalStatusResponse DoMaritalCheck(String token, Long idNumber)
-    { 
+    private DhaApi createDhaApi(String token)
+    {
+        ApiClient apiClient = new ApiClient(dhaRestTemplate);
+
         apiClient.setBasePath("http://devcamp-dha-service:80");
 
         apiClient.addDefaultHeader(
@@ -32,7 +33,13 @@ public class DhaChecksApiClient implements IDhaChecksApiClient
                 "Bearer " + token
         );
 
-        DhaApi dhaApi = new DhaApi(apiClient);
+        return new DhaApi(apiClient);
+    }
+
+   @Override
+    public MaritalStatusResponse DoMaritalCheck(String token, Long idNumber)
+    {
+        DhaApi dhaApi = createDhaApi(token);
 
         MaritalStatusResponse response =
                 dhaApi.statusMaritalIdNumberGet(idNumber);
@@ -43,14 +50,7 @@ public class DhaChecksApiClient implements IDhaChecksApiClient
     @Override
     public DuplicateIDDocumentCheckResponse DoDuplicateIdCheck(String token, Long idNumber)
     {
-        apiClient.setBasePath("http://devcamp-dha-service:80");
-
-        apiClient.addDefaultHeader(
-                "Authorization",
-                "Bearer " + token
-        );
-
-        DhaApi dhaApi = new DhaApi(apiClient);
+        DhaApi dhaApi = createDhaApi(token);
 
         DuplicateIDDocumentCheckResponse response =
                 dhaApi.statusDuplicateIdIdNumberGet(idNumber);
@@ -61,14 +61,7 @@ public class DhaChecksApiClient implements IDhaChecksApiClient
     @Override
     public LivingStatusResponse DoLivingStatusCheck(String token, Long idNumber)
     {
-        apiClient.setBasePath("http://devcamp-dha-service:80");
-
-        apiClient.addDefaultHeader(
-                "Authorization",
-                "Bearer " + token
-        );
-
-        DhaApi dhaApi = new DhaApi(apiClient);
+        DhaApi dhaApi = createDhaApi(token);
 
         LivingStatusResponse response =
                 dhaApi.statusLivingIdNumberGet(idNumber);
