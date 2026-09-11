@@ -15,4 +15,5 @@ public class FulfilmentRequest {
     private String idNumber;
     private String fulfilmentType;
     private String username;
+    private Long orderId;
 }

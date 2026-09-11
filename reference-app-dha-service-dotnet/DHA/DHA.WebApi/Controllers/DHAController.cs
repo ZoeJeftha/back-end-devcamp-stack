@@ -119,6 +119,7 @@ namespace DHA.WebApi.Controllers
         [ServiceFilter(typeof(IDQueryParamValidationActionFilter))]
         public async Task<IActionResult> GetLivingStatusById(long idNumber)
         {
+            Console.WriteLine($"*** GET LIVING STATUS HIT: {idNumber} ***");
             var person = await _peopleService.GetPersonWithId(idNumber);
 
             if (person == null)

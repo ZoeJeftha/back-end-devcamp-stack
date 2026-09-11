@@ -264,25 +264,11 @@ public class ProductCatalogController {
                 return ResponseEntity.internalServerError().body(response);
             }
 
-            CustomerDto customerDto = customerService.GetMyProfile(token, username);
+            CustomerDto customerDto = customerService.GetMyUnmaskedProfile(token, username);
 
             log.info("---------------Place order-------------- customerDto:" + customerDto);
 
-            FulfilmentRequest fulfilmentRequest = new FulfilmentRequest();
-            fulfilmentRequest.setId(customerDto.getId());
-            fulfilmentRequest.setIdNumber(customerDto.getIdNumber());
-            fulfilmentRequest.setUsername(customerDto.getUsername());
-
-            log.info("---------------Place order-------------- fulfilmentRequest without type:" + fulfilmentRequest);
-
             ProductDto product = productService.getProductById(productId);
-            fulfilmentRequest.setFulfilmentType(product.getFulfilmentType());
-
-            log.info("---------------Place order-------------- fulfilmentRequest with type:" + fulfilmentRequest);
-
-            messageProducer.SendMessage(fulfilmentRequest);
-
-            log.info("---------------Place order-------------- :fulfilmentRequest message sent" + fulfilmentRequest);
 
             OrderRequest orderRequest = new OrderRequest();
             orderRequest.setCustomerId(customerDto.getId());
@@ -290,9 +276,22 @@ public class ProductCatalogController {
             orderRequest.setProduct(product);
 
             OrderResponse orderResponse = orderService.SaveOrder(orderRequest);
-            ApiResponse<OrderResponse> response = new ApiResponse<OrderResponse>(true, "Order placed",orderResponse);
+
+            FulfilmentRequest fulfilmentRequest = new FulfilmentRequest();
+            fulfilmentRequest.setId(customerDto.getId());
+            fulfilmentRequest.setIdNumber(customerDto.getIdNumber());
+            fulfilmentRequest.setUsername(customerDto.getUsername());
+            fulfilmentRequest.setOrderId(orderResponse.getOrderId());
+            fulfilmentRequest.setFulfilmentType(product.getFulfilmentType());
+
+            log.info("---------------Place order-------------- fulfilmentRequest without type:" + fulfilmentRequest);
+
+            messageProducer.SendMessage(fulfilmentRequest);
+
+            log.info("---------------Place order-------------- :fulfilmentRequest message sent" + fulfilmentRequest);
 
             log.info("---------------Place order-------------- order placed");
+            ApiResponse<OrderResponse> response = new ApiResponse<OrderResponse>(true, "Order placed",orderResponse);
             return ResponseEntity.ok(response);
         }
         catch(NotFoundException e)

@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +24,7 @@ import za.co.entelect.devcamp.fulfilment.interfaces.IDhaService;
 import za.co.entelect.devcamp.fulfilment.interfaces.IFraudCheckService;
 import za.co.entelect.devcamp.fulfilment.interfaces.IKycCheckService;
 import za.co.entelect.devcamp.fulfilment.interfaces.IProductService;
-import za.co.entelect.devcamp.productcatalog.requests.OrderStatusUpdateRequest;
+import za.co.entelect.devcamp.fulfilment.requests.OrderStatusUpdateRequest;
 import za.co.entelect.devcamp.fulfilment.responses.OrderResponse;
 
 @Slf4j
@@ -139,12 +140,23 @@ public class FulfilmentController {
         }
     }
 
-    @PostMapping("/update-order")
-    public OrderResponse UpdateOrder()
+    @PostMapping("/update-order/{status}")
+    public OrderResponse UpdateOrder(@PathVariable int status)
     {
         try {
             OrderStatusUpdateRequest request = new OrderStatusUpdateRequest();
-            request.setStatus(OrderStatusEnum.PENDING);
+
+            if(status == 1) {
+                request.setStatus(OrderStatusEnum.ACCEPTED);
+            }
+            else if(status == 2)
+            {
+            request.setStatus(OrderStatusEnum.REJECTED);
+            }
+            else
+            {
+                request.setStatus(OrderStatusEnum.PENDING);
+            }
             request.setOrderId(6L);
 
             return productService.UpdateOrder(request);

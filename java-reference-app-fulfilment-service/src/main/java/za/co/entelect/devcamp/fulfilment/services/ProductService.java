@@ -6,7 +6,7 @@ import za.co.entelect.devcamp.fulfilment.dto.KycDto;
 import za.co.entelect.devcamp.fulfilment.interfaces.IAuthService;
 import za.co.entelect.devcamp.fulfilment.interfaces.IProductService;
 import za.co.entelect.devcamp.fulfilment.interfaces.IProductServiceApiClient;
-import za.co.entelect.devcamp.productcatalog.requests.OrderStatusUpdateRequest;
+import za.co.entelect.devcamp.fulfilment.requests.OrderStatusUpdateRequest;
 import za.co.entelect.devcamp.fulfilment.responses.OrderResponse;
 
 @Slf4j

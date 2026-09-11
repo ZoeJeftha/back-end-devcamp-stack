@@ -49,7 +49,7 @@ public class DhaService implements IDhaService {
         {
             String token = authService.GetSystemToken();
             DuplicateIDDocumentCheckResponse response = dhaChecksApiClient.DoDuplicateIdCheck(token, idNumber);
-            return response.getHasDuplicateId();
+            return !response.getHasDuplicateId();
         }
         catch(Exception e)
         {
