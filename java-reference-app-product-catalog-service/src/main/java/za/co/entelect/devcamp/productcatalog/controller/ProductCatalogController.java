@@ -12,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -488,7 +490,7 @@ public class ProductCatalogController {
         }
     }
 
-    @GetMapping("document")
+    @PostMapping("/document")
     public ResponseEntity<byte[]> CreateDocument(@AuthenticationPrincipal Jwt jwt)
     {
         try
@@ -522,4 +524,29 @@ public class ProductCatalogController {
         }
     }
 
+
+    @GetMapping("/document")
+    public ResponseEntity<byte[]> getOrderDocument(@AuthenticationPrincipal Jwt jwt)
+    {
+        try {
+            String username = jwt.getSubject();
+            String token = jwt.getTokenValue();
+            CustomerDto customer = customerService.GetMyProfile(token, username);
+
+            byte[] pdf = documentService.GetOrderDocument(customer.getId());
+
+            return ResponseEntity.ok()
+                    .header(
+                            HttpHeaders.CONTENT_DISPOSITION,
+                            "inline; filename=\"order_document.pdf\""
+                    )
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(pdf);
+        }
+        catch(Exception e)
+        {
+            log.info("failed to get document");
+            return null;
+        }
+    }
 }

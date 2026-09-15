@@ -32,6 +32,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import za.co.entelect.devcamp.productcatalog.dto.CustomerDto;
+import za.co.entelect.devcamp.productcatalog.model.OrderDocument;
+import  za.co.entelect.devcamp.productcatalog.repository.OrderDocumentRepository;
 import za.co.entelect.devcamp.productcatalog.responses.CustomerChecksResponse;
 import za.co.entelect.devcamp.productcatalog.responses.OrderResponse;
 
@@ -39,16 +41,19 @@ import za.co.entelect.devcamp.productcatalog.responses.OrderResponse;
 @Service
 public class DocumentService implements IDocumentService {
 
+    public final OrderDocumentRepository orderDocumentRepository;
     @Autowired
-    public DocumentService()
+    public DocumentService(OrderDocumentRepository orderDocumentRepository)
     {
+        this.orderDocumentRepository = orderDocumentRepository;
     }
 
+    @Override
     public ResponseEntity<byte[]> CreateDocument(List<OrderResponse> orders, CustomerDto customer) throws FileNotFoundException,DocumentException,IOException,Exception
     {
         try {
             Document document = new Document();
-            PdfWriter.getInstance(document, new FileOutputStream("iTextHelloWorld.pdf"));
+            PdfWriter.getInstance(document, new FileOutputStream("OrderDocument.pdf"));
             log.info("---------------------------document: "+ document);
             document.open();
 
@@ -98,18 +103,18 @@ public class DocumentService implements IDocumentService {
 
             document.close();
 
-            log.info("---------------------File(\"iTextHelloWorld.pdf\").getAbsolutePath()"+ new File("iTextHelloWorld.pdf").getAbsolutePath());
-            Path path = Paths.get("/opt/app/iTextHelloWorld.pdf");
+            Path path = Paths.get("/opt/app/OrderDocument.pdf");
             byte[] document2 = Files.readAllBytes(path);
+
+            saveDocument(document2 , customer.getId());
 
             return ResponseEntity.ok()
                     .header(
                             HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=\"iTextHelloWorld.pdf\""
+                            "attachment; filename=\"OrderDocument.pdf\""
                     )
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(document2);
-
         }
         catch(FileNotFoundException e)
         {
@@ -129,16 +134,14 @@ public class DocumentService implements IDocumentService {
         }
     }
 
-//    private void addTableHeader(PdfPTable table) {
-//        Stream.of("column header 1", "column header 2", "column header 3")
-//                .forEach(columnTitle -> {
-//                    PdfPCell header = new PdfPCell();
-//                    header.setBackgroundColor(BaseColor.LIGHT_GRAY);
-//                    header.setBorderWidth(2);
-//                    header.setPhrase(new Phrase(columnTitle));
-//                    table.addCell(header);
-//                });
-//    }
+    @Override
+    public byte[] GetOrderDocument(Long customerId)
+    {
+        OrderDocument document = orderDocumentRepository.findByCustomerId(customerId)
+                .orElseThrow(() -> new RuntimeException("Document not found"));
+
+        return document.getDocument();
+    }
 
     private void addRows(PdfPTable table, CustomerDto customer, List<OrderResponse> orders) {
         Stream.of("Order Number", "Product Name", "Status")
@@ -196,5 +199,13 @@ public class DocumentService implements IDocumentService {
         {
             throw new DocumentException(e.getMessage());
         }
+    }
+
+    private void saveDocument(byte[] document ,Long customerId)
+    {
+        OrderDocument orderDocument = new OrderDocument();
+        orderDocument.setDocument(document);
+        orderDocument.setCustomerId(customerId);
+        orderDocumentRepository.save(orderDocument);
     }
 }
