@@ -1,5 +1,8 @@
 package za.co.entelect.devcamp.productcatalog.controller;
 
+import com.itextpdf.text.DocumentException;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -32,6 +35,7 @@ import za.co.entelect.devcamp.productcatalog.producer.MessageProducer;
 import za.co.entelect.devcamp.productcatalog.responses.ApiResponse;
 import za.co.entelect.devcamp.productcatalog.service.ICustomerChecksService;
 import za.co.entelect.devcamp.productcatalog.service.ICustomerService;
+import za.co.entelect.devcamp.productcatalog.service.IDocumentService;
 import za.co.entelect.devcamp.productcatalog.service.IProductEligibilityService;
 import za.co.entelect.devcamp.productcatalog.service.IProductService;
 import za.co.entelect.devcamp.productcatalog.service.IOrderService;
@@ -60,6 +64,7 @@ public class ProductCatalogController {
     public final IUserService userService;
     public final JwtEncoder jwtEncoder;
     public final ICustomerChecksService customerChecksService;
+    public final IDocumentService documentService;
 
     @Autowired
     private MessageProducer messageProducer;
@@ -70,7 +75,8 @@ public class ProductCatalogController {
                                     IOrderService orderService,
                                     IUserService userService,
                                     JwtEncoder jwtEncoder,
-                                    ICustomerChecksService customerChecksService)
+                                    ICustomerChecksService customerChecksService,
+                                    IDocumentService documentService)
     {
         this.productService = productService;
         this.productEligibilityService = productEligibilityService;
@@ -79,6 +85,7 @@ public class ProductCatalogController {
         this.userService = userService;
         this.jwtEncoder = jwtEncoder;
         this.customerChecksService = customerChecksService;
+        this.documentService = documentService;
     }
 
     @GetMapping("/products")
@@ -479,4 +486,29 @@ public class ProductCatalogController {
             return ResponseEntity.internalServerError().body(response);
         }
     }
+
+    @GetMapping("create-document")
+    public ResponseEntity<byte[]> CreateDocument()
+    {
+        try
+        {
+            return documentService.CreateDocument();
+        }
+        catch(FileNotFoundException e)
+        {
+            log.info("---------------------CreateDocument FileNotFoundException: "+ e.getMessage());
+            return null;
+        }
+        catch(DocumentException e)
+        {
+            log.info("------------------------CreateDocument DocumentException: "+ e.getMessage());
+            return null;
+        }
+        catch(IOException e)
+        {
+            log.info("------------------------CreateDocument IOException: "+ e.getMessage());
+            return null;
+        }
+    }
+
 }
