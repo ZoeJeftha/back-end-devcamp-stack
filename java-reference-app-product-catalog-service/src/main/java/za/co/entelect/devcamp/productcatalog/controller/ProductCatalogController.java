@@ -30,17 +30,20 @@ import za.co.entelect.devcamp.productcatalog.enums.OrderStatusEnum;
 import za.co.entelect.devcamp.productcatalog.exception.NotFoundException;
 import za.co.entelect.devcamp.productcatalog.producer.MessageProducer;
 import za.co.entelect.devcamp.productcatalog.responses.ApiResponse;
+import za.co.entelect.devcamp.productcatalog.service.ICustomerChecksService;
 import za.co.entelect.devcamp.productcatalog.service.ICustomerService;
 import za.co.entelect.devcamp.productcatalog.service.IProductEligibilityService;
 import za.co.entelect.devcamp.productcatalog.service.IProductService;
 import za.co.entelect.devcamp.productcatalog.service.IOrderService;
 import za.co.entelect.devcamp.productcatalog.service.IUserService;
+import za.co.entelect.devcamp.productcatalog.model.OrderCustomerChecks;
 import za.co.entelect.devcamp.productcatalog.requests.CreateUserRequest;
 import za.co.entelect.devcamp.productcatalog.requests.FulfilmentRequest;
 import za.co.entelect.devcamp.productcatalog.requests.LoginRequest;
 import za.co.entelect.devcamp.productcatalog.requests.OrderRequest;
 import za.co.entelect.devcamp.productcatalog.requests.OrderStatusUpdateRequest;
 import za.co.entelect.devcamp.productcatalog.requests.RegisterRequest;
+import za.co.entelect.devcamp.productcatalog.requests.SaveCustomerChecksRequest;
 import za.co.entelect.devcamp.productcatalog.responses.OrderResponse;
 import za.co.entelect.devcamp.productcatalog.responses.CreateUserResponse;
 import za.co.entelect.devcamp.productcatalog.responses.ValidationResult;
@@ -56,6 +59,7 @@ public class ProductCatalogController {
     public final IOrderService orderService;
     public final IUserService userService;
     public final JwtEncoder jwtEncoder;
+    public final ICustomerChecksService customerChecksService;
 
     @Autowired
     private MessageProducer messageProducer;
@@ -65,7 +69,8 @@ public class ProductCatalogController {
                                     ICustomerService customerService,
                                     IOrderService orderService,
                                     IUserService userService,
-                                    JwtEncoder jwtEncoder)
+                                    JwtEncoder jwtEncoder,
+                                    ICustomerChecksService customerChecksService)
     {
         this.productService = productService;
         this.productEligibilityService = productEligibilityService;
@@ -73,6 +78,7 @@ public class ProductCatalogController {
         this.orderService = orderService;
         this.userService = userService;
         this.jwtEncoder = jwtEncoder;
+        this.customerChecksService = customerChecksService;
     }
 
     @GetMapping("/products")
@@ -458,4 +464,19 @@ public class ProductCatalogController {
         }
     }
 
+    @PostMapping("/customer-checks")
+    public ResponseEntity<ApiResponse<List<OrderCustomerChecks>>> SaveCustomerChecks(@RequestBody List<SaveCustomerChecksRequest> customerChecks)
+    {
+        try
+        {
+            List<OrderCustomerChecks> customerChecksList =  customerChecksService.SaveCustomerChecks(customerChecks);
+            ApiResponse<List<OrderCustomerChecks>> response = new ApiResponse<List<OrderCustomerChecks>>(true, "Customer checks saved successfully", customerChecksList);
+            return ResponseEntity.ok(response);
+        }
+        catch(Exception e)
+        {
+            ApiResponse<List<OrderCustomerChecks>> response = new ApiResponse<List<OrderCustomerChecks>>(false, "Failed to save customer checks: "+ e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
 }

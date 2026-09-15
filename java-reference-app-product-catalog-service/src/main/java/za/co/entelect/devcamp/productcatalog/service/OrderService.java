@@ -16,14 +16,17 @@ import org.springframework.stereotype.Service;
 import za.co.entelect.devcamp.productcatalog.dto.CustomerDto;
 import za.co.entelect.devcamp.productcatalog.dto.ProductDto;
 import za.co.entelect.devcamp.productcatalog.exception.NotFoundException;
+import za.co.entelect.devcamp.productcatalog.model.OrderCustomerChecks;
 import za.co.entelect.devcamp.productcatalog.model.OrderItems;
 import za.co.entelect.devcamp.productcatalog.model.Orders;
 import za.co.entelect.devcamp.productcatalog.repository.OrderRepository;
 import za.co.entelect.devcamp.productcatalog.repository.OrderItemRepository;
 import za.co.entelect.devcamp.productcatalog.requests.OrderRequest;
 import za.co.entelect.devcamp.productcatalog.requests.OrderStatusUpdateRequest;
+import za.co.entelect.devcamp.productcatalog.responses.CustomerChecksResponse;
 import za.co.entelect.devcamp.productcatalog.responses.OrderResponse;
 import za.co.entelect.devcamp.productcatalog.service.IProductService;
+import za.co.entelect.devcamp.productcatalog.service.ICustomerChecksService;
 
 @Slf4j
 @Service
@@ -32,15 +35,18 @@ public class OrderService implements IOrderService
     public final OrderRepository orderRepository;
     public final OrderItemRepository orderItemRepository;
     public final IProductService productService;
+    public final ICustomerChecksService customerChecksService;
 
     @Autowired
     public OrderService(OrderRepository orderRepository,
                         OrderItemRepository orderItemRepository,
-                        IProductService productService)
+                        IProductService productService,
+                        ICustomerChecksService customerChecksService)
     {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.productService = productService;
+        this.customerChecksService = customerChecksService;
     }
 
     @Override
@@ -101,6 +107,8 @@ public class OrderService implements IOrderService
                     ProductDto product = productService.getProductById(orderItem.getProductId());
                     orderResponse.setProduct(product);
 
+                    List<CustomerChecksResponse> checks = customerChecksService.getCustomerChecks(order.getOrderId());
+                    orderResponse.setCustomerChecks(checks);
                     return orderResponse;
                 }
                 else
@@ -182,6 +190,8 @@ public class OrderService implements IOrderService
                     ProductDto product = productService.getProductById(orderItem.getProductId());
                     orderResponse.setProduct(product);
                     log.info("Order updated: " + orderResponse);
+
+                    customerChecksService.SaveCustomerChecks(request.getSaveCustomerChecks());
                     return orderResponse;
                 }
                 else

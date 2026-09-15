@@ -1,5 +1,8 @@
 package za.co.entelect.devcamp.fulfilment.consumer;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -8,6 +11,7 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.retry.support.RetrySynchronizationManager;
 import org.springframework.stereotype.Service;
 import za.co.entelect.devcamp.fulfilment.configuration.RabbitConfig;
+import za.co.entelect.devcamp.fulfilment.enums.CustomerChecksEnum;
 import za.co.entelect.devcamp.fulfilment.enums.OrderStatusEnum;
 import za.co.entelect.devcamp.fulfilment.interfaces.ICreditCheckService;
 import za.co.entelect.devcamp.fulfilment.interfaces.IDhaService;
@@ -16,7 +20,9 @@ import za.co.entelect.devcamp.fulfilment.interfaces.IKycCheckService;
 import za.co.entelect.devcamp.fulfilment.interfaces.IProductService;
 import za.co.entelect.devcamp.fulfilment.requests.FulfilmentRequest;
 import za.co.entelect.devcamp.fulfilment.requests.OrderStatusUpdateRequest;
+import za.co.entelect.devcamp.fulfilment.requests.SaveCustomerChecksRequest;
 import za.co.entelect.devcamp.fulfilment.responses.OrderResponse;
+
 @Slf4j
 @Service
 public class MessageConsumer {
@@ -26,6 +32,7 @@ public class MessageConsumer {
     public final IKycCheckService kycCheckService;
     public final IFraudCheckService fraudCheckService;
     public final IProductService productService;
+    private  List<SaveCustomerChecksRequest> saveCustomerChecksRequestList;
 
     public MessageConsumer(ICreditCheckService creditCheckService,
                            IDhaService dhaService,
@@ -38,6 +45,7 @@ public class MessageConsumer {
         this.kycCheckService = kycCheckService;
         this.fraudCheckService = fraudCheckService;
         this.productService = productService;
+        this.saveCustomerChecksRequestList = new ArrayList<>();
     }
 
     @RabbitListener(queues = RabbitConfig.QUEUE,   containerFactory = "rabbitListenerContainerFactory")
@@ -50,6 +58,7 @@ public class MessageConsumer {
             log.info("-------------Processing FulfilmentRequest - Attempt: " + (retryCount + 1));
 
             log.info("----------Fulfilment Checks---------------");
+
             boolean passed = false;
 
             switch (fulfilmentRequest.getFulfilmentType()) {
@@ -66,6 +75,7 @@ public class MessageConsumer {
             log.info("ALL CHECKS DONE, RESULT: "+ passed);
             OrderStatusUpdateRequest request = new OrderStatusUpdateRequest();
             request.setOrderId(fulfilmentRequest.getOrderId());
+            request.setSaveCustomerChecks(saveCustomerChecksRequestList);
             if(passed)
             {
                 request.setStatus(OrderStatusEnum.ACCEPTED);
@@ -90,6 +100,14 @@ public class MessageConsumer {
         {
             boolean kycCheck = kycCheckService.DoKycCheck(fulfilmentRequest.getId());
             log.info("Fulfilment kyc check: " + kycCheck);
+
+            SaveCustomerChecksRequest saveCustomerChecksRequest = new SaveCustomerChecksRequest();
+            saveCustomerChecksRequest.setCustomerCheck(CustomerChecksEnum.KYC_CHECK);
+            saveCustomerChecksRequest.setOrderId(fulfilmentRequest.getOrderId());
+            saveCustomerChecksRequest.setHasPassed(kycCheck);
+            saveCustomerChecksRequestList.add(saveCustomerChecksRequest);
+
+            log.info("Customer Checks A: "+ saveCustomerChecksRequestList);
             return kycCheck;
         }
         catch(Exception e)
@@ -106,16 +124,41 @@ public class MessageConsumer {
             boolean kycCheck = kycCheckService.DoKycCheck(fulfilmentRequest.getId());
             log.info("Fulfilment kyc check: " + kycCheck);
 
+            SaveCustomerChecksRequest saveCustomerChecksRequest = new SaveCustomerChecksRequest();
+            saveCustomerChecksRequest.setCustomerCheck(CustomerChecksEnum.KYC_CHECK);
+            saveCustomerChecksRequest.setOrderId(fulfilmentRequest.getOrderId());
+            saveCustomerChecksRequest.setHasPassed(kycCheck);
+            saveCustomerChecksRequestList.add(saveCustomerChecksRequest);
+
             boolean fraudCheck = fraudCheckService.DoFraudCheck(fulfilmentRequest.getId(),fulfilmentRequest.getIdNumber());
             log.info("Fulfilment fraud check: " + fraudCheck);
+
+            SaveCustomerChecksRequest saveCustomerChecksRequest2 = new SaveCustomerChecksRequest();
+            saveCustomerChecksRequest2.setCustomerCheck(CustomerChecksEnum.FRAUD_CHECK);
+            saveCustomerChecksRequest2.setOrderId(fulfilmentRequest.getOrderId());
+            saveCustomerChecksRequest2.setHasPassed(fraudCheck);
+            saveCustomerChecksRequestList.add(saveCustomerChecksRequest2);
 
             boolean livingStatus = dhaService.DoLivingStatusCheck(Long.parseLong(fulfilmentRequest.getIdNumber()));
             log.info("Fulfilment living status check: " + livingStatus);
 
+            SaveCustomerChecksRequest saveCustomerChecksRequest3 = new SaveCustomerChecksRequest();
+            saveCustomerChecksRequest3.setCustomerCheck(CustomerChecksEnum.LIVING_STATUS_CHECK);
+            saveCustomerChecksRequest3.setOrderId(fulfilmentRequest.getOrderId());
+            saveCustomerChecksRequest3.setHasPassed(livingStatus);
+            saveCustomerChecksRequestList.add(saveCustomerChecksRequest3);
+
             boolean duplicateIdStatus = dhaService.DoDuplicateIdCheck(Long.parseLong(fulfilmentRequest.getIdNumber()));
             log.info("Fulfilment duplicate id status check: " + duplicateIdStatus);
 
+            SaveCustomerChecksRequest saveCustomerChecksRequest4 = new SaveCustomerChecksRequest();
+            saveCustomerChecksRequest4.setCustomerCheck(CustomerChecksEnum.DUPLICATE_ID_STATUS_CHECK);
+            saveCustomerChecksRequest4.setOrderId(fulfilmentRequest.getOrderId());
+            saveCustomerChecksRequest4.setHasPassed(duplicateIdStatus);
+            saveCustomerChecksRequestList.add(saveCustomerChecksRequest4);
+
             log.info("ProcessFulfilmentTypeB: "+ (kycCheck && fraudCheck && livingStatus && duplicateIdStatus));
+            log.info("Customer Checks B: "+ saveCustomerChecksRequestList);
 
             return kycCheck && fraudCheck && livingStatus && duplicateIdStatus;
         }
@@ -136,14 +179,26 @@ public class MessageConsumer {
 
             boolean maritalStatus = dhaService.DoMaritalCheck(Long.parseLong(fulfilmentRequest.getIdNumber()));
 
+            SaveCustomerChecksRequest saveCustomerChecksRequest = new SaveCustomerChecksRequest();
+            saveCustomerChecksRequest.setCustomerCheck(CustomerChecksEnum.MARITAL_STATUS_CHECK);
+            saveCustomerChecksRequest.setOrderId(fulfilmentRequest.getOrderId());
+            saveCustomerChecksRequest.setHasPassed(maritalStatus);
+            saveCustomerChecksRequestList.add(saveCustomerChecksRequest);
+
             log.info("Fulfilment marital statuses check: " + maritalStatus);
 
             boolean creditCheck = creditCheckService.DoCreditCheck(fulfilmentRequest.getId());
 
+            SaveCustomerChecksRequest saveCustomerChecksRequest2 = new SaveCustomerChecksRequest();
+            saveCustomerChecksRequest2.setCustomerCheck(CustomerChecksEnum.CREDIT_CHECK);
+            saveCustomerChecksRequest2.setOrderId(fulfilmentRequest.getOrderId());
+            saveCustomerChecksRequest2.setHasPassed(creditCheck);
+            saveCustomerChecksRequestList.add(saveCustomerChecksRequest2);
+
             log.info("Fulfilment credit check" + creditCheck);
 
             log.info("ProcessFulfilmentTypeC check: " + (processBFlag && maritalStatus && creditCheck));
-
+            log.info("Customer Checks C: "+ saveCustomerChecksRequestList);
             return processBFlag && maritalStatus && creditCheck;
         }
         catch (IOException e) {

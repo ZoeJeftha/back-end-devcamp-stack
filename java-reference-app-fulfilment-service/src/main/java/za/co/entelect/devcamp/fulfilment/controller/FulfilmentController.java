@@ -25,6 +25,7 @@ import za.co.entelect.devcamp.fulfilment.interfaces.IFraudCheckService;
 import za.co.entelect.devcamp.fulfilment.interfaces.IKycCheckService;
 import za.co.entelect.devcamp.fulfilment.interfaces.IProductService;
 import za.co.entelect.devcamp.fulfilment.requests.OrderStatusUpdateRequest;
+import za.co.entelect.devcamp.fulfilment.requests.OrderStatusUpdateRequest;
 import za.co.entelect.devcamp.fulfilment.responses.OrderResponse;
 
 @Slf4j
