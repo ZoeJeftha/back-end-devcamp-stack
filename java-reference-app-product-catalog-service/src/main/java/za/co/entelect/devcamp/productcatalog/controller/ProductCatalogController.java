@@ -467,7 +467,6 @@ public class ProductCatalogController {
     @PostMapping("/customer-checks")
     public ResponseEntity<ApiResponse<List<OrderCustomerChecks>>> SaveCustomerChecks(@RequestBody List<SaveCustomerChecksRequest> customerChecks)
     {
-
         try
         {
             List<OrderCustomerChecks> customerChecksList =  customerChecksService.SaveCustomerChecks(customerChecks);
@@ -480,5 +479,4 @@ public class ProductCatalogController {
             return ResponseEntity.internalServerError().body(response);
         }
     }
-
 }
