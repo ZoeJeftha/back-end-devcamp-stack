@@ -3,6 +3,7 @@ package za.co.entelect.devcamp.productcatalog.controller;
 import com.itextpdf.text.DocumentException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -487,12 +488,17 @@ public class ProductCatalogController {
         }
     }
 
-    @GetMapping("create-document")
-    public ResponseEntity<byte[]> CreateDocument()
+    @GetMapping("document")
+    public ResponseEntity<byte[]> CreateDocument(@AuthenticationPrincipal Jwt jwt)
     {
         try
         {
-            return documentService.CreateDocument();
+            String token = jwt.getTokenValue();
+            String username = jwt.getSubject();
+            CustomerDto customer = customerService.GetMyProfile(token,username);
+
+            List<OrderResponse> orderResponse = orderService.GetMyOrders(customer);
+            return documentService.CreateDocument(orderResponse, customer);
         }
         catch(FileNotFoundException e)
         {
@@ -507,6 +513,11 @@ public class ProductCatalogController {
         catch(IOException e)
         {
             log.info("------------------------CreateDocument IOException: "+ e.getMessage());
+            return null;
+        }
+        catch(Exception e)
+        {
+            log.info("------------------------CreateDocument Exception: "+ e.getMessage());
             return null;
         }
     }
