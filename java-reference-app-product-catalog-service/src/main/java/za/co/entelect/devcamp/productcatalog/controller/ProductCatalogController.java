@@ -12,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -419,7 +421,7 @@ public class ProductCatalogController {
     }
 
     @PostMapping("/token")
-    public ResponseEntity<String> token(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> token(@RequestBody LoginRequest loginRequest) {
         log.info("Log in request recieved");
         try
         {
@@ -442,14 +444,16 @@ public class ProductCatalogController {
             }
             else
             {
+                ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Invalid username or password", null);
                 return ResponseEntity.internalServerError()
-                        .body("Invalid username or password");
+                        .body(response);
             }
         }
         catch(Exception e)
         {
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Invalid username or password", null);
             return ResponseEntity.internalServerError()
-                    .body("Invalid username or password");
+                    .body(response);
         }
     }
 
@@ -488,8 +492,8 @@ public class ProductCatalogController {
         }
     }
 
-    @GetMapping("document")
-    public ResponseEntity<byte[]> CreateDocument(@AuthenticationPrincipal Jwt jwt)
+    @PostMapping("/document")
+    public ResponseEntity<?> CreateDocument(@AuthenticationPrincipal Jwt jwt)
     {
         try
         {
@@ -502,24 +506,58 @@ public class ProductCatalogController {
         }
         catch(FileNotFoundException e)
         {
-            log.info("---------------------CreateDocument FileNotFoundException: "+ e.getMessage());
-            return null;
+            log.info("CreateDocument FileNotFoundException: "+ e.getMessage());
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retreve document, file not found: "+ e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
         catch(DocumentException e)
         {
-            log.info("------------------------CreateDocument DocumentException: "+ e.getMessage());
-            return null;
+            log.info("CreateDocument DocumentException: "+ e.getMessage());
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retreve document, DocumentException thrown: "+ e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
         }
         catch(IOException e)
         {
-            log.info("------------------------CreateDocument IOException: "+ e.getMessage());
-            return null;
+            log.info("CreateDocument IOException: "+ e.getMessage());
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retreve document, IOException thrown: "+ e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
         }
         catch(Exception e)
         {
-            log.info("------------------------CreateDocument Exception: "+ e.getMessage());
-            return null;
+            log.info("CreateDocument Exception: "+ e.getMessage());
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to create document: "+ e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
         }
     }
 
+
+    @GetMapping("/document")
+    public ResponseEntity<?> getOrderDocument(@AuthenticationPrincipal Jwt jwt)
+    {
+        try {
+            String username = jwt.getSubject();
+            String token = jwt.getTokenValue();
+            CustomerDto customer = customerService.GetMyProfile(token, username);
+
+            byte[] pdf = documentService.GetOrderDocument(customer.getId());
+
+            return ResponseEntity.ok()
+                    .header(
+                            HttpHeaders.CONTENT_DISPOSITION,
+                            "inline; filename=\"order_document.pdf\""
+                    )
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(pdf);
+        }
+        catch(NotFoundException e)
+        {
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retreve document: "+ e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+        catch(Exception e)
+        {
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retreve document: "+ e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
 }
