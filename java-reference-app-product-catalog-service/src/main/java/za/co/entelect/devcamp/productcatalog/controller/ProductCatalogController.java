@@ -421,7 +421,7 @@ public class ProductCatalogController {
     }
 
     @PostMapping("/token")
-    public ResponseEntity<String> token(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> token(@RequestBody LoginRequest loginRequest) {
         log.info("Log in request recieved");
         try
         {
@@ -444,14 +444,16 @@ public class ProductCatalogController {
             }
             else
             {
+                ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Invalid username or password", null);
                 return ResponseEntity.internalServerError()
-                        .body("Invalid username or password");
+                        .body(response);
             }
         }
         catch(Exception e)
         {
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Invalid username or password", null);
             return ResponseEntity.internalServerError()
-                    .body("Invalid username or password");
+                    .body(response);
         }
     }
 
@@ -491,7 +493,7 @@ public class ProductCatalogController {
     }
 
     @PostMapping("/document")
-    public ResponseEntity<byte[]> CreateDocument(@AuthenticationPrincipal Jwt jwt)
+    public ResponseEntity<?> CreateDocument(@AuthenticationPrincipal Jwt jwt)
     {
         try
         {
@@ -504,29 +506,33 @@ public class ProductCatalogController {
         }
         catch(FileNotFoundException e)
         {
-            log.info("---------------------CreateDocument FileNotFoundException: "+ e.getMessage());
-            return null;
+            log.info("CreateDocument FileNotFoundException: "+ e.getMessage());
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retreve document, file not found: "+ e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
         catch(DocumentException e)
         {
-            log.info("------------------------CreateDocument DocumentException: "+ e.getMessage());
-            return null;
+            log.info("CreateDocument DocumentException: "+ e.getMessage());
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retreve document, DocumentException thrown: "+ e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
         }
         catch(IOException e)
         {
-            log.info("------------------------CreateDocument IOException: "+ e.getMessage());
-            return null;
+            log.info("CreateDocument IOException: "+ e.getMessage());
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retreve document, IOException thrown: "+ e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
         }
         catch(Exception e)
         {
-            log.info("------------------------CreateDocument Exception: "+ e.getMessage());
-            return null;
+            log.info("CreateDocument Exception: "+ e.getMessage());
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to create document: "+ e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
         }
     }
 
 
     @GetMapping("/document")
-    public ResponseEntity<byte[]> getOrderDocument(@AuthenticationPrincipal Jwt jwt)
+    public ResponseEntity<?> getOrderDocument(@AuthenticationPrincipal Jwt jwt)
     {
         try {
             String username = jwt.getSubject();
@@ -543,10 +549,15 @@ public class ProductCatalogController {
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(pdf);
         }
+        catch(NotFoundException e)
+        {
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retreve document: "+ e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
         catch(Exception e)
         {
-            log.info("failed to get document");
-            return null;
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retreve document: "+ e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
         }
     }
 }

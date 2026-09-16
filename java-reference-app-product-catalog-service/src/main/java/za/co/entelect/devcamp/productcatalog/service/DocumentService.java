@@ -32,6 +32,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import za.co.entelect.devcamp.productcatalog.dto.CustomerDto;
+import za.co.entelect.devcamp.productcatalog.exception.NotFoundException;
 import za.co.entelect.devcamp.productcatalog.model.OrderDocument;
 import  za.co.entelect.devcamp.productcatalog.repository.OrderDocumentRepository;
 import za.co.entelect.devcamp.productcatalog.responses.CustomerChecksResponse;
@@ -138,7 +139,7 @@ public class DocumentService implements IDocumentService {
     public byte[] GetOrderDocument(Long customerId)
     {
         OrderDocument document = orderDocumentRepository.findByCustomerId(customerId)
-                .orElseThrow(() -> new RuntimeException("Document not found"));
+                .orElseThrow(() -> new NotFoundException("Document not found"));
 
         return document.getDocument();
     }
