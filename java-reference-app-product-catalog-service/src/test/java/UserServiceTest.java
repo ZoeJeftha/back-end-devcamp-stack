@@ -32,7 +32,10 @@ import za.co.entelect.devcamp.productcatalog.requests.CreateUserRequest;
 import za.co.entelect.devcamp.productcatalog.service.UserService;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceTest {
+public class UserServiceTest
+{
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @Mock
     private UserRepository userRepository;
