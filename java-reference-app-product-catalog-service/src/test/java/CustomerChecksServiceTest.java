@@ -1,5 +1,6 @@
 package za.co.entelect.devcamp.productcatalog.service;
 
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.verify;
@@ -66,7 +68,7 @@ public class CustomerChecksServiceTest {
 
         assertEquals(1, result.size());
         assertEquals(100L, result.get(0).getOrderId());
-        assertEquals(true, result.get(0).isHasPassed());
+        assertEquals(true, result.get(0).getHasPassed());
         assertEquals(1L, result.get(0).getCustomerChecksId());
 
         verify(orderCustomerChecksRepository).saveAll(anyList());
