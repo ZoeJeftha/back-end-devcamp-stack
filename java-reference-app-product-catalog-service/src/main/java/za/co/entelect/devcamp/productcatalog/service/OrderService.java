@@ -72,7 +72,7 @@ public class OrderService implements IOrderService
 
             OrderResponse response = new OrderResponse();
 
-            response.setOrderId(order.getOrderId());
+            response.setOrderId(savedOrder.getOrderId());
             response.setStatus(request.getStatus());
             response.setProduct(request.getProduct());
 
