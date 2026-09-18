@@ -1,5 +1,9 @@
 package za.co.entelect.devcamp.productcatalog.controller;
 
+import com.itextpdf.text.DocumentException;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -8,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -32,6 +38,7 @@ import za.co.entelect.devcamp.productcatalog.producer.MessageProducer;
 import za.co.entelect.devcamp.productcatalog.responses.ApiResponse;
 import za.co.entelect.devcamp.productcatalog.service.ICustomerChecksService;
 import za.co.entelect.devcamp.productcatalog.service.ICustomerService;
+import za.co.entelect.devcamp.productcatalog.service.IDocumentService;
 import za.co.entelect.devcamp.productcatalog.service.IProductEligibilityService;
 import za.co.entelect.devcamp.productcatalog.service.IProductService;
 import za.co.entelect.devcamp.productcatalog.service.IOrderService;
@@ -60,6 +67,7 @@ public class ProductCatalogController {
     public final IUserService userService;
     public final JwtEncoder jwtEncoder;
     public final ICustomerChecksService customerChecksService;
+    public final IDocumentService documentService;
 
     @Autowired
     private MessageProducer messageProducer;
@@ -70,7 +78,8 @@ public class ProductCatalogController {
                                     IOrderService orderService,
                                     IUserService userService,
                                     JwtEncoder jwtEncoder,
-                                    ICustomerChecksService customerChecksService)
+                                    ICustomerChecksService customerChecksService,
+                                    IDocumentService documentService)
     {
         this.productService = productService;
         this.productEligibilityService = productEligibilityService;
@@ -79,6 +88,7 @@ public class ProductCatalogController {
         this.userService = userService;
         this.jwtEncoder = jwtEncoder;
         this.customerChecksService = customerChecksService;
+        this.documentService = documentService;
     }
 
     @GetMapping("/products")
@@ -411,7 +421,7 @@ public class ProductCatalogController {
     }
 
     @PostMapping("/token")
-    public ResponseEntity<String> token(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> token(@RequestBody LoginRequest loginRequest) {
         log.info("Log in request recieved");
         try
         {
@@ -434,14 +444,16 @@ public class ProductCatalogController {
             }
             else
             {
+                ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Invalid username or password", null);
                 return ResponseEntity.internalServerError()
-                        .body("Invalid username or password");
+                        .body(response);
             }
         }
         catch(Exception e)
         {
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Invalid username or password", null);
             return ResponseEntity.internalServerError()
-                    .body("Invalid username or password");
+                    .body(response);
         }
     }
 
@@ -476,6 +488,75 @@ public class ProductCatalogController {
         catch(Exception e)
         {
             ApiResponse<List<OrderCustomerChecks>> response = new ApiResponse<List<OrderCustomerChecks>>(false, "Failed to save customer checks: "+ e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    @PostMapping("/document")
+    public ResponseEntity<?> CreateDocument(@AuthenticationPrincipal Jwt jwt)
+    {
+        try
+        {
+            String token = jwt.getTokenValue();
+            String username = jwt.getSubject();
+            CustomerDto customer = customerService.GetMyProfile(token,username);
+
+            List<OrderResponse> orderResponse = orderService.GetMyOrders(customer);
+            return documentService.CreateDocument(orderResponse, customer);
+        }
+        catch(FileNotFoundException e)
+        {
+            log.info("CreateDocument FileNotFoundException: "+ e.getMessage());
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retreve document, file not found: "+ e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+        catch(DocumentException e)
+        {
+            log.info("CreateDocument DocumentException: "+ e.getMessage());
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retreve document, DocumentException thrown: "+ e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
+        }
+        catch(IOException e)
+        {
+            log.info("CreateDocument IOException: "+ e.getMessage());
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retreve document, IOException thrown: "+ e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
+        }
+        catch(Exception e)
+        {
+            log.info("CreateDocument Exception: "+ e.getMessage());
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to create document: "+ e.getMessage(), null);
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+
+    @GetMapping("/document")
+    public ResponseEntity<?> getOrderDocument(@AuthenticationPrincipal Jwt jwt)
+    {
+        try {
+            String username = jwt.getSubject();
+            String token = jwt.getTokenValue();
+            CustomerDto customer = customerService.GetMyProfile(token, username);
+
+            byte[] pdf = documentService.GetOrderDocument(customer.getId());
+
+            return ResponseEntity.ok()
+                    .header(
+                            HttpHeaders.CONTENT_DISPOSITION,
+                            "inline; filename=\"order_document.pdf\""
+                    )
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(pdf);
+        }
+        catch(NotFoundException e)
+        {
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retreve document: "+ e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+        catch(Exception e)
+        {
+            ApiResponse<CustomerDto> response = new ApiResponse<CustomerDto>(false, "Failed to retreve document: "+ e.getMessage(), null);
             return ResponseEntity.internalServerError().body(response);
         }
     }
