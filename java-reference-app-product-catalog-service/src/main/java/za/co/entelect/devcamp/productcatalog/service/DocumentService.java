@@ -102,6 +102,15 @@ public class DocumentService implements IDocumentService {
             document.add(new Paragraph("\n"));
             addOrderDetailsTables(document,orders);
 
+            document.add(new Paragraph("Signature"));
+
+            Paragraph signature = new Paragraph("________________________________");
+            signature.setAlignment(Element.ALIGN_LEFT);
+            document.add(signature);
+
+            document.add(new Paragraph("\n"));
+            document.add(new Paragraph("Date: __________________________"));
+
             document.close();
 
             Path path = Paths.get("/opt/app/OrderDocument.pdf");
