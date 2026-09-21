@@ -31,8 +31,7 @@ public class AuthService implements IAuthService {
     }
 
     @Override
-    public String GetSystemToken() throws Exception
-    {
+    public String GetSystemToken() throws Exception {
         try {
             LoginRequest request = new LoginRequest();
             request.setUsername(systemUsername);

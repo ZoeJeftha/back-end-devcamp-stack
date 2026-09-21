@@ -27,7 +27,7 @@ public class ProductServiceApiClient implements IProductServiceApiClient
 
     @Override
     public OrderResponse UpdateOrder(String token, OrderStatusUpdateRequest request) {
-        String url = "http://devcamp-pc-service:8080/v1/order-status-update/";
+        String url = "http://devcamp-pc-service:8080/v1/order/status/";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(token);
@@ -39,13 +39,11 @@ public class ProductServiceApiClient implements IProductServiceApiClient
         ResponseEntity<ApiResponse<OrderResponse>> response =
                 restTemplate.exchange(
                         url,
-                        HttpMethod.POST,
+                        HttpMethod.PUT,
                         entity,
                         new ParameterizedTypeReference<ApiResponse<OrderResponse>>() {}
                 );
 
-        log.info("fulfilment response: "+ response);
-        log.info("fulfilment response  response.getBody().getResult(): "+  response.getBody().getResult());
         return response.getBody().getResult();
     }
 

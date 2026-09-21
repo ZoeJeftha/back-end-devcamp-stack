@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -91,7 +92,6 @@ public class DocumentService implements IDocumentService {
             table.setWidthPercentage(100);
             table.setWidths(new float[]{1f, 2f, 2f});
 
-            //addTableHeader(table);
             addRows(table, customer,orders);
 
             document.add(table);
@@ -116,7 +116,16 @@ public class DocumentService implements IDocumentService {
             Path path = Paths.get("/opt/app/OrderDocument.pdf");
             byte[] document2 = Files.readAllBytes(path);
 
-            saveDocument(document2 , customer.getId());
+            Optional<OrderDocument> existingDocumentOp = orderDocumentRepository.findByCustomerId(customer.getId());
+
+            if(existingDocumentOp.isPresent()){
+                OrderDocument existingDocument = existingDocumentOp.get();
+                existingDocument.setDocument(document2);
+                orderDocumentRepository.save(existingDocument);
+            }
+            else {
+                saveDocument(document2, customer.getId());
+            }
 
             return ResponseEntity.ok()
                     .header(
@@ -129,6 +138,10 @@ public class DocumentService implements IDocumentService {
         catch(FileNotFoundException e)
         {
             throw new FileNotFoundException(e.getMessage());
+        }
+        catch(NotFoundException e)
+        {
+            throw new NotFoundException(e.getMessage());
         }
         catch(DocumentException e)
         {

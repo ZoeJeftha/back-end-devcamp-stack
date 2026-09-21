@@ -15,18 +15,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import za.co.entelect.devcamp.productcatalog.client.IAuthApiClient;
 import za.co.entelect.devcamp.productcatalog.requests.LoginRequest;
-import za.co.entelect.devcamp.productcatalog.service.AuthService;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthServiceTest {

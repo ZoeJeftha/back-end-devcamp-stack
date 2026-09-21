@@ -169,7 +169,6 @@ public class OrderService implements IOrderService
     {
         try
         {
-            log.info("UpdateOrderStatus OrderStatusUpdateRequest: "+request);
             Optional<Orders> orderOp = orderRepository.findById(request.getOrderId());
             if(orderOp.isPresent())
             {
@@ -189,9 +188,9 @@ public class OrderService implements IOrderService
 
                     ProductDto product = productService.getProductById(orderItem.getProductId());
                     orderResponse.setProduct(product);
-                    log.info("Order updated: " + orderResponse);
 
                     customerChecksService.SaveCustomerChecks(request.getSaveCustomerChecks());
+                    log.info("---------------Order updated----------------");
                     return orderResponse;
                 }
                 else

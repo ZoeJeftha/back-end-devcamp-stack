@@ -47,6 +47,7 @@ public class CustomerServiceTest
    @Test
    void GetMyProfile_ShouldReturnCustomer() throws NotFoundException, Exception
    {
+       //Arrange
        String token = "token";
        String username = "user@gmail.com";
 
@@ -64,8 +65,10 @@ public class CustomerServiceTest
        when(customerApiClient.GetMyProfile(token, username))
                .thenReturn(customerDtoResponse);
 
+       //Act
        CustomerDto result = customerService.GetMyProfile(token, username);
 
+       //Assert
        assertEquals(1L, result.getId());
        assertEquals("user@gmail.com", result.getUsername());
        assertEquals("User", result.getFirstName());

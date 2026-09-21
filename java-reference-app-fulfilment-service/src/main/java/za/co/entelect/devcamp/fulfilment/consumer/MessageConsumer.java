@@ -57,8 +57,6 @@ public class MessageConsumer {
 
             log.info("-------------Processing FulfilmentRequest - Attempt: " + (retryCount + 1));
 
-            log.info("----------Fulfilment Checks---------------");
-
             boolean passed = false;
 
             switch (fulfilmentRequest.getFulfilmentType()) {
@@ -89,7 +87,7 @@ public class MessageConsumer {
         }
         catch(Exception e)
         {
-            log.info("-----------------Fulfilment processing failed - Attempt: " + (retryCount + 1) + " of 6");
+            log.info("-----------------Fulfilment processing failed --------------------------");
             throw new RuntimeException(e);
         }
     }
@@ -98,6 +96,7 @@ public class MessageConsumer {
     {
         try
         {
+            log.info("---------------Processing Fulfilment process A--------------------");
             boolean kycCheck = kycCheckService.DoKycCheck(fulfilmentRequest.getId());
             log.info("Fulfilment kyc check: " + kycCheck);
 
@@ -107,7 +106,6 @@ public class MessageConsumer {
             saveCustomerChecksRequest.setHasPassed(kycCheck);
             saveCustomerChecksRequestList.add(saveCustomerChecksRequest);
 
-            log.info("Customer Checks A: "+ saveCustomerChecksRequestList);
             return kycCheck;
         }
         catch(Exception e)
@@ -121,6 +119,7 @@ public class MessageConsumer {
     {
         try
         {
+            log.info("---------------Processing Fulfilment process B--------------------");
             boolean kycCheck = kycCheckService.DoKycCheck(fulfilmentRequest.getId());
             log.info("Fulfilment kyc check: " + kycCheck);
 
@@ -157,14 +156,13 @@ public class MessageConsumer {
             saveCustomerChecksRequest4.setHasPassed(duplicateIdStatus);
             saveCustomerChecksRequestList.add(saveCustomerChecksRequest4);
 
-            log.info("ProcessFulfilmentTypeB: "+ (kycCheck && fraudCheck && livingStatus && duplicateIdStatus));
-            log.info("Customer Checks B: "+ saveCustomerChecksRequestList);
+            log.info("Process Fulfilment Type B: "+ (kycCheck && fraudCheck && livingStatus && duplicateIdStatus));
 
             return kycCheck && fraudCheck && livingStatus && duplicateIdStatus;
         }
         catch(Exception e)
         {
-            log.info("Fulfilment Exception type B" + e.getMessage());
+            log.info("Fulfilment Exception type B: " + e.getMessage());
             throw new Exception("ProcessFulfilmentTypeB failed: " + e.getMessage());
         }
 
@@ -173,9 +171,9 @@ public class MessageConsumer {
     public boolean ProcessFulfilmentTypeC(FulfilmentRequest fulfilmentRequest) throws Exception
     {
         try {
-            boolean processBFlag = ProcessFulfilmentTypeB(fulfilmentRequest);
+            log.info("---------------Processing Fulfilment process C--------------------");
 
-            log.info("Fulfilment processBFlag: " + processBFlag);
+            boolean processBFlag = ProcessFulfilmentTypeB(fulfilmentRequest);
 
             boolean maritalStatus = dhaService.DoMaritalCheck(Long.parseLong(fulfilmentRequest.getIdNumber()));
 
@@ -195,10 +193,8 @@ public class MessageConsumer {
             saveCustomerChecksRequest2.setHasPassed(creditCheck);
             saveCustomerChecksRequestList.add(saveCustomerChecksRequest2);
 
-            log.info("Fulfilment credit check" + creditCheck);
+            log.info("Fulfilment credit check: " + creditCheck);
 
-            log.info("ProcessFulfilmentTypeC check: " + (processBFlag && maritalStatus && creditCheck));
-            log.info("Customer Checks C: "+ saveCustomerChecksRequestList);
             return processBFlag && maritalStatus && creditCheck;
         }
         catch (IOException e) {
