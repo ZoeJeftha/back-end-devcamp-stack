@@ -1,51 +1,37 @@
 package za.co.entelect.devcamp.fulfilment.consumer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.io.IOException;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
-import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.retry.support.RetrySynchronizationManager;
 import org.springframework.stereotype.Service;
 import za.co.entelect.devcamp.fulfilment.configuration.RabbitConfig;
-import za.co.entelect.devcamp.fulfilment.enums.CustomerChecksEnum;
 import za.co.entelect.devcamp.fulfilment.enums.OrderStatusEnum;
-import za.co.entelect.devcamp.fulfilment.interfaces.ICreditCheckService;
-import za.co.entelect.devcamp.fulfilment.interfaces.IDhaService;
-import za.co.entelect.devcamp.fulfilment.interfaces.IFraudCheckService;
-import za.co.entelect.devcamp.fulfilment.interfaces.IKycCheckService;
 import za.co.entelect.devcamp.fulfilment.interfaces.IProductService;
 import za.co.entelect.devcamp.fulfilment.requests.FulfilmentRequest;
 import za.co.entelect.devcamp.fulfilment.requests.OrderStatusUpdateRequest;
 import za.co.entelect.devcamp.fulfilment.requests.SaveCustomerChecksRequest;
-import za.co.entelect.devcamp.fulfilment.responses.OrderResponse;
+import za.co.entelect.devcamp.fulfilment.strategy.FulfilmentStrategy;
 
 @Slf4j
 @Service
 public class MessageConsumer {
 
-    public final ICreditCheckService creditCheckService;
-    public final IDhaService dhaService;
-    public final IKycCheckService kycCheckService;
-    public final IFraudCheckService fraudCheckService;
     public final IProductService productService;
-    private  List<SaveCustomerChecksRequest> saveCustomerChecksRequestList;
+    private final Map<String, FulfilmentStrategy> strategies;
 
-    public MessageConsumer(ICreditCheckService creditCheckService,
-                           IDhaService dhaService,
-                           IKycCheckService kycCheckService,
-                           IFraudCheckService fraudCheckService,
-                           IProductService productService)
+    public MessageConsumer(IProductService productService,
+                           List<FulfilmentStrategy> fulfilmentStrategyList)
     {
-        this.creditCheckService = creditCheckService;
-        this.dhaService = dhaService;
-        this.kycCheckService = kycCheckService;
-        this.fraudCheckService = fraudCheckService;
         this.productService = productService;
-        this.saveCustomerChecksRequestList = new ArrayList<>();
+        this.strategies = fulfilmentStrategyList.stream()
+                .collect(Collectors.toMap(
+                        strategy -> getStrategyName(strategy),
+                        Function.identity()
+                ));
     }
 
     @RabbitListener(queues = RabbitConfig.QUEUE,   containerFactory = "rabbitListenerContainerFactory")
@@ -57,19 +43,25 @@ public class MessageConsumer {
 
             log.info("-------------Processing FulfilmentRequest - Attempt: " + (retryCount + 1));
 
-            boolean passed = false;
+            List<SaveCustomerChecksRequest> saveCustomerChecksRequestList =
+                    new java.util.ArrayList<>();
 
-            switch (fulfilmentRequest.getFulfilmentType()) {
-                case "A":
-                    passed = ProcessFulfilmentTypeA(fulfilmentRequest);
-                    break;
-                case "B":
-                    passed = ProcessFulfilmentTypeB(fulfilmentRequest);
-                    break;
-                case "C":
-                    passed =ProcessFulfilmentTypeC(fulfilmentRequest);
-                    break;
+            FulfilmentStrategy strategy = strategies.get(fulfilmentRequest.getFulfilmentType());
+
+            if (strategy == null) {
+                throw new IllegalArgumentException(
+                        "Unknown fulfilment type: "
+                                + fulfilmentRequest.getFulfilmentType()
+                );
             }
+
+
+            boolean passed =
+                    strategy.processRequest(
+                            fulfilmentRequest,
+                            saveCustomerChecksRequestList
+                    );
+
             log.info("ALL CHECKS DONE, RESULT: "+ passed);
             OrderStatusUpdateRequest request = new OrderStatusUpdateRequest();
             request.setOrderId(fulfilmentRequest.getOrderId());
@@ -77,13 +69,12 @@ public class MessageConsumer {
             if(passed)
             {
                 request.setStatus(OrderStatusEnum.ACCEPTED);
-                productService.UpdateOrder(request);
             }
             else
             {
                 request.setStatus(OrderStatusEnum.REJECTED);
-                productService.UpdateOrder(request);
             }
+            productService.UpdateOrder(request);
         }
         catch(Exception e)
         {
@@ -92,120 +83,22 @@ public class MessageConsumer {
         }
     }
 
-    public boolean ProcessFulfilmentTypeA(FulfilmentRequest fulfilmentRequest) throws Exception
-    {
-        try
-        {
-            log.info("---------------Processing Fulfilment process A--------------------");
-            boolean kycCheck = kycCheckService.DoKycCheck(fulfilmentRequest.getId());
-            log.info("Fulfilment kyc check: " + kycCheck);
+    private String getStrategyName(FulfilmentStrategy strategy) {
 
-            SaveCustomerChecksRequest saveCustomerChecksRequest = new SaveCustomerChecksRequest();
-            saveCustomerChecksRequest.setCustomerCheck(CustomerChecksEnum.KYC_CHECK);
-            saveCustomerChecksRequest.setOrderId(fulfilmentRequest.getOrderId());
-            saveCustomerChecksRequest.setHasPassed(kycCheck);
-            saveCustomerChecksRequestList.add(saveCustomerChecksRequest);
+        if (strategy instanceof za.co.entelect.devcamp.fulfilment.strategy.FulfilmentTypeAStrategy) {
+            return "A";
+        }
 
-            return kycCheck;
+        if (strategy instanceof za.co.entelect.devcamp.fulfilment.strategy.FulfilmentTypeBStrategy) {
+            return "B";
         }
-        catch(Exception e)
-        {
-            log.info("Fulfilment Exception type A: " + e.getMessage());
-            throw new Exception("ProcessFulfilmentTypeA failed: " + e.getMessage());
+
+        if (strategy instanceof za.co.entelect.devcamp.fulfilment.strategy.FulfilmentTypeCStrategy) {
+            return "C";
         }
+
+        throw new IllegalArgumentException(
+                "Unknown strategy: " + strategy.getClass().getSimpleName()
+        );
     }
-
-    public boolean ProcessFulfilmentTypeB(FulfilmentRequest fulfilmentRequest) throws Exception
-    {
-        try
-        {
-            log.info("---------------Processing Fulfilment process B--------------------");
-            boolean kycCheck = kycCheckService.DoKycCheck(fulfilmentRequest.getId());
-            log.info("Fulfilment kyc check: " + kycCheck);
-
-            SaveCustomerChecksRequest saveCustomerChecksRequest = new SaveCustomerChecksRequest();
-            saveCustomerChecksRequest.setCustomerCheck(CustomerChecksEnum.KYC_CHECK);
-            saveCustomerChecksRequest.setOrderId(fulfilmentRequest.getOrderId());
-            saveCustomerChecksRequest.setHasPassed(kycCheck);
-            saveCustomerChecksRequestList.add(saveCustomerChecksRequest);
-
-            boolean fraudCheck = fraudCheckService.DoFraudCheck(fulfilmentRequest.getId(),fulfilmentRequest.getIdNumber());
-            log.info("Fulfilment fraud check: " + fraudCheck);
-
-            SaveCustomerChecksRequest saveCustomerChecksRequest2 = new SaveCustomerChecksRequest();
-            saveCustomerChecksRequest2.setCustomerCheck(CustomerChecksEnum.FRAUD_CHECK);
-            saveCustomerChecksRequest2.setOrderId(fulfilmentRequest.getOrderId());
-            saveCustomerChecksRequest2.setHasPassed(fraudCheck);
-            saveCustomerChecksRequestList.add(saveCustomerChecksRequest2);
-
-            boolean livingStatus = dhaService.DoLivingStatusCheck(Long.parseLong(fulfilmentRequest.getIdNumber()));
-            log.info("Fulfilment living status check: " + livingStatus);
-
-            SaveCustomerChecksRequest saveCustomerChecksRequest3 = new SaveCustomerChecksRequest();
-            saveCustomerChecksRequest3.setCustomerCheck(CustomerChecksEnum.LIVING_STATUS_CHECK);
-            saveCustomerChecksRequest3.setOrderId(fulfilmentRequest.getOrderId());
-            saveCustomerChecksRequest3.setHasPassed(livingStatus);
-            saveCustomerChecksRequestList.add(saveCustomerChecksRequest3);
-
-            boolean duplicateIdStatus = dhaService.DoDuplicateIdCheck(Long.parseLong(fulfilmentRequest.getIdNumber()));
-            log.info("Fulfilment duplicate id status check: " + duplicateIdStatus);
-
-            SaveCustomerChecksRequest saveCustomerChecksRequest4 = new SaveCustomerChecksRequest();
-            saveCustomerChecksRequest4.setCustomerCheck(CustomerChecksEnum.DUPLICATE_ID_STATUS_CHECK);
-            saveCustomerChecksRequest4.setOrderId(fulfilmentRequest.getOrderId());
-            saveCustomerChecksRequest4.setHasPassed(duplicateIdStatus);
-            saveCustomerChecksRequestList.add(saveCustomerChecksRequest4);
-
-            log.info("Process Fulfilment Type B: "+ (kycCheck && fraudCheck && livingStatus && duplicateIdStatus));
-
-            return kycCheck && fraudCheck && livingStatus && duplicateIdStatus;
-        }
-        catch(Exception e)
-        {
-            log.info("Fulfilment Exception type B: " + e.getMessage());
-            throw new Exception("ProcessFulfilmentTypeB failed: " + e.getMessage());
-        }
-
-    }
-
-    public boolean ProcessFulfilmentTypeC(FulfilmentRequest fulfilmentRequest) throws Exception
-    {
-        try {
-            log.info("---------------Processing Fulfilment process C--------------------");
-
-            boolean processBFlag = ProcessFulfilmentTypeB(fulfilmentRequest);
-
-            boolean maritalStatus = dhaService.DoMaritalCheck(Long.parseLong(fulfilmentRequest.getIdNumber()));
-
-            SaveCustomerChecksRequest saveCustomerChecksRequest = new SaveCustomerChecksRequest();
-            saveCustomerChecksRequest.setCustomerCheck(CustomerChecksEnum.MARITAL_STATUS_CHECK);
-            saveCustomerChecksRequest.setOrderId(fulfilmentRequest.getOrderId());
-            saveCustomerChecksRequest.setHasPassed(maritalStatus);
-            saveCustomerChecksRequestList.add(saveCustomerChecksRequest);
-
-            log.info("Fulfilment marital statuses check: " + maritalStatus);
-
-            boolean creditCheck = creditCheckService.DoCreditCheck(fulfilmentRequest.getId());
-
-            SaveCustomerChecksRequest saveCustomerChecksRequest2 = new SaveCustomerChecksRequest();
-            saveCustomerChecksRequest2.setCustomerCheck(CustomerChecksEnum.CREDIT_CHECK);
-            saveCustomerChecksRequest2.setOrderId(fulfilmentRequest.getOrderId());
-            saveCustomerChecksRequest2.setHasPassed(creditCheck);
-            saveCustomerChecksRequestList.add(saveCustomerChecksRequest2);
-
-            log.info("Fulfilment credit check: " + creditCheck);
-
-            return processBFlag && maritalStatus && creditCheck;
-        }
-        catch (IOException e) {
-            log.info("Fulfilment IOException type C: " + e.getMessage());
-            throw new Exception("ProcessFulfilmentTypeC failed IOException: " + e.getMessage());
-        }
-        catch(Exception e)
-        {
-            log.info("Fulfilment Exception type C: " + e.getMessage());
-            throw new Exception("ProcessFulfilmentTypeC failed: " + e.getMessage());
-        }
-    }
-
 }
