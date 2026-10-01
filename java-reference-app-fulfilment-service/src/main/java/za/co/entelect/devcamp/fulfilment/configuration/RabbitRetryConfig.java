@@ -1,11 +1,11 @@
 package za.co.entelect.devcamp.fulfilment.configuration;
 
+import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.retry.interceptor.RetryInterceptorBuilder;
 import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 
 @Configuration
@@ -16,6 +16,9 @@ public class RabbitRetryConfig {
             ConnectionFactory connectionFactory,
             RabbitMessageRecoverer recoverer,
             Jackson2JsonMessageConverter converter) {
+
+        System.out.println("-----------------------Creating rabbitListenerContainerFactory !!!");
+        System.out.println("-----------------------Recoverer = " + recoverer.getClass().getName());
 
         SimpleRabbitListenerContainerFactory factory =
                 new SimpleRabbitListenerContainerFactory();
@@ -37,6 +40,7 @@ public class RabbitRetryConfig {
                         .recoverer(recoverer)
                         .build();
 
+        System.out.println("----------------------------------Retry interceptor created !!!");
         factory.setAdviceChain(interceptor);
 
         return factory;

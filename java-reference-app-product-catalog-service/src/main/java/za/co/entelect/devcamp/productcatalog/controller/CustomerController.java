@@ -2,7 +2,6 @@ package za.co.entelect.devcamp.productcatalog.controller;
 
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import za.co.entelect.devcamp.productcatalog.dto.CustomerDto;
 import za.co.entelect.devcamp.productcatalog.exception.NotFoundException;
 import za.co.entelect.devcamp.productcatalog.model.OrderCustomerChecks;
-import za.co.entelect.devcamp.productcatalog.producer.MessageProducer;
 import za.co.entelect.devcamp.productcatalog.requests.SaveCustomerChecksRequest;
 import za.co.entelect.devcamp.productcatalog.responses.ApiResponse;
 import za.co.entelect.devcamp.productcatalog.service.ICustomerChecksService;
@@ -68,7 +66,7 @@ public class CustomerController {
             String token = jwt.getTokenValue();
             String role = jwt.getClaimAsString("role");
 
-            if (!"admin".equals(role)) {
+            if ("customer".equals(role)) {
                 ApiResponse<List<CustomerDto>> response = new ApiResponse<>(false, "Not authorised to retrieve profiles", null);
 
                 return ResponseEntity

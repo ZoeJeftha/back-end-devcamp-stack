@@ -43,6 +43,7 @@ public class MessageConsumer {
 
             log.info("-------------Processing FulfilmentRequest - Attempt: " + (retryCount + 1));
 
+
             List<SaveCustomerChecksRequest> saveCustomerChecksRequestList =
                     new java.util.ArrayList<>();
 
@@ -78,7 +79,7 @@ public class MessageConsumer {
         }
         catch(Exception e)
         {
-            log.info("-----------------Fulfilment processing failed --------------------------");
+            log.error("-----------------Fulfilment processing failed --------------------------");
             throw new RuntimeException(e);
         }
     }

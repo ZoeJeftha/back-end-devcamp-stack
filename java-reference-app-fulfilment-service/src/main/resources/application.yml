@@ -14,8 +14,8 @@ spring:
   flyway:
     enabled: true
     ignore-migration-patterns: "*:missing"
-    schemas: pc
-    default-schema: pc
+    schemas: f
+    default-schema: f
   jpa:
     hibernate:
       ddl-auto: none

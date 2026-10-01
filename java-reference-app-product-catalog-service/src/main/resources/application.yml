@@ -1,3 +1,5 @@
+server:
+  port: 8080
 info:
   app: Product Catalog Service
   version: 0.0.1
