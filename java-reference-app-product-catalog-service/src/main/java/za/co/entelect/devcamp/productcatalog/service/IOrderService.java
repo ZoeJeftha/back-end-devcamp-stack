@@ -12,10 +12,12 @@ public interface IOrderService
 {
     OrderResponse SaveOrder(OrderRequest request) throws Exception;
 
-    OrderResponse GetOrder(Long orderId) throws Exception, NotFoundException;
+    OrderResponse GetOrder(Long orderId) throws Exception;
 
-    List<OrderResponse> GetMyOrders(CustomerDto customer) throws Exception, NotFoundException;
+    List<OrderResponse> GetMyOrders(CustomerDto customer) throws Exception;
 
-    OrderResponse UpdateOrderStatus(OrderStatusUpdateRequest request) throws Exception, NotFoundException;
+    OrderResponse UpdateOrderStatus(OrderStatusUpdateRequest request) throws Exception;
+
+    boolean CheckForExistingOrder(CustomerDto customer, long productId) throws Exception;
 }
 

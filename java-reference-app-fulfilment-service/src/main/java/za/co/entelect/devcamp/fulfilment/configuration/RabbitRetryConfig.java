@@ -17,9 +17,6 @@ public class RabbitRetryConfig {
             RabbitMessageRecoverer recoverer,
             Jackson2JsonMessageConverter converter) {
 
-        System.out.println("-----------------------Creating rabbitListenerContainerFactory !!!");
-        System.out.println("-----------------------Recoverer = " + recoverer.getClass().getName());
-
         SimpleRabbitListenerContainerFactory factory =
                 new SimpleRabbitListenerContainerFactory();
 
@@ -40,7 +37,6 @@ public class RabbitRetryConfig {
                         .recoverer(recoverer)
                         .build();
 
-        System.out.println("----------------------------------Retry interceptor created !!!");
         factory.setAdviceChain(interceptor);
 
         return factory;

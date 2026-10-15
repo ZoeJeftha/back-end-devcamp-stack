@@ -1,6 +1,5 @@
 package za.co.entelect.devcamp.fulfilment.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -15,14 +14,12 @@ import za.co.entelect.devcamp.fulfilment.repository.FailedMessageRepository;
 public class FailedMessageService {
 
     private final FailedMessageRepository failedMessageRepository;
-    private final ObjectMapper objectMapper;
 
     public FailedMessageService(
             FailedMessageRepository failedMessageRepository,
             ObjectMapper objectMapper) {
 
         this.failedMessageRepository = failedMessageRepository;
-        this.objectMapper = objectMapper;
     }
 
     public void saveFailedMessage(
@@ -32,9 +29,7 @@ public class FailedMessageService {
             String failureReason,
             int retryCount) {
 
-        log.info("---------------saveFailedMessage");
         if (failedMessageRepository.existsByMessageId(messageId)) {
-            log.info("---------------saveFailedMessage existsByMessageId: " +messageId );
             return;
         }
 
@@ -48,21 +43,6 @@ public class FailedMessageService {
         failedMessage.setStatus(FailedMessageStatus.FAILED);
         failedMessage.setCreatedAt(LocalDateTime.now());
 
-        log.info("---------------saveFailedMessage messageId: " +messageId );
-        log.info("---------------saveFailedMessage failedMessage: " +failedMessage );
-
         failedMessageRepository.save(failedMessage);
-    }
-
-    private String convertToJson(Object payload) {
-        try {
-            return objectMapper.writeValueAsString(payload);
-        } catch (JsonProcessingException exception) {
-            log.error("---------------convertToJson payload: " + payload);
-            throw new IllegalStateException(
-                    "Unable to convert failed message to JSON",
-                    exception
-            );
-        }
     }
 }

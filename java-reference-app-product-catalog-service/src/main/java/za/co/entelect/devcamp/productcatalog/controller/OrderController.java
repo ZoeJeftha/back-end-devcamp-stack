@@ -67,6 +67,12 @@ public class OrderController {
 
             ProductDto product = productService.getProductById(productId);
 
+            if(orderService.CheckForExistingOrder(customerDto, productId))
+            {
+                ApiResponse<OrderResponse> response = new ApiResponse<OrderResponse>(true,"An order for this product has already been placed", null);
+                return ResponseEntity.internalServerError().body(response);
+            }
+
             OrderRequest orderRequest = new OrderRequest();
             orderRequest.setCustomerId(customerDto.getId());
             orderRequest.setStatus("PENDING");

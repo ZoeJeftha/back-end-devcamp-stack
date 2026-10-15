@@ -28,7 +28,7 @@ public class CustomerService implements ICustomerService {
     }
 
     @Override
-    public CustomerDto GetMyProfile(String token, String username) throws NotFoundException, Exception
+    public CustomerDto GetMyProfile(String token, String username) throws Exception
     {
         ResponseEntity<CustomerDto> customer = customerApiClient.GetMyProfile(token, username);
         CustomerDto customerDto = customer.getBody();
@@ -40,7 +40,7 @@ public class CustomerService implements ICustomerService {
     }
 
     @Override
-    public CustomerDto GetMyUnmaskedProfile(String token, String username) throws NotFoundException, Exception
+    public CustomerDto GetMyUnmaskedProfile(String token, String username) throws Exception
     {
         ResponseEntity<CustomerDto> customer = customerApiClient.GetMyProfile(token, username);
         CustomerDto customerDto = customer.getBody();
@@ -48,7 +48,7 @@ public class CustomerService implements ICustomerService {
         return customerDto;
     }
 
-    public List<CustomerDto> GetProfiles(String token) throws NotFoundException, Exception
+    public List<CustomerDto> GetProfiles(String token) throws Exception
     {
         ResponseEntity<List<CustomerDto>> customers = customerApiClient.GetProfiles(token);
         List<CustomerDto> customerDtos = customers.getBody();

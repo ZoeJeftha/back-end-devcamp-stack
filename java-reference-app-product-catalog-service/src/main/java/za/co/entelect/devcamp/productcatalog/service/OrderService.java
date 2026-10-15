@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import za.co.entelect.devcamp.productcatalog.dto.CustomerDto;
 import za.co.entelect.devcamp.productcatalog.dto.ProductDto;
+import za.co.entelect.devcamp.productcatalog.enums.OrderStatusEnum;
 import za.co.entelect.devcamp.productcatalog.exception.NotFoundException;
 import za.co.entelect.devcamp.productcatalog.model.OrderCustomerChecks;
 import za.co.entelect.devcamp.productcatalog.model.OrderItems;
@@ -32,21 +33,24 @@ import za.co.entelect.devcamp.productcatalog.service.ICustomerChecksService;
 @Service
 public class OrderService implements IOrderService
 {
+    public final ICustomerChecksService customerChecksService;
+    public final ICustomerService customerService;
+    public final IProductService productService;
     public final OrderRepository orderRepository;
     public final OrderItemRepository orderItemRepository;
-    public final IProductService productService;
-    public final ICustomerChecksService customerChecksService;
 
     @Autowired
     public OrderService(OrderRepository orderRepository,
                         OrderItemRepository orderItemRepository,
                         IProductService productService,
-                        ICustomerChecksService customerChecksService)
+                        ICustomerChecksService customerChecksService,
+                        ICustomerService customerService)
     {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.productService = productService;
         this.customerChecksService = customerChecksService;
+        this.customerService = customerService;
     }
 
     @Override
@@ -213,4 +217,27 @@ public class OrderService implements IOrderService
         }
     }
 
+    @Override
+    public boolean CheckForExistingOrder(CustomerDto customer, long productId) throws Exception
+    {
+        try {
+            if(customer == null)
+            {
+                throw new Exception("Customer not found");
+            }
+
+            List<OrderResponse> orderResponses = GetMyOrders(customer);
+
+            return orderResponses.stream()
+                    .anyMatch(response ->
+                            response.getProduct().getProductId().equals(productId)
+                                    && (OrderStatusEnum.ACCEPTED.name().equals(response.getStatus())
+                                    || OrderStatusEnum.PENDING.name().equals(response.getStatus())));
+
+        } catch(NotFoundException e) {
+            return false;
+        } catch(Exception e) {
+            throw new Exception("Unable to find existing order: " + e.getMessage());
+        }
+    }
 }

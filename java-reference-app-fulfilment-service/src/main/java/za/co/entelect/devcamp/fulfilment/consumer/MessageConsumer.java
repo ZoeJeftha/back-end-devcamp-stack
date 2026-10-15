@@ -32,6 +32,9 @@ public class MessageConsumer {
                         strategy -> getStrategyName(strategy),
                         Function.identity()
                 ));
+            //A --> FulfilmentTypeAStrategy
+            //B --> FulfilmentTypeBStrategy
+            //C --> FulfilmentTypeCStrategy
     }
 
     @RabbitListener(queues = RabbitConfig.QUEUE,   containerFactory = "rabbitListenerContainerFactory")
@@ -42,7 +45,6 @@ public class MessageConsumer {
         try {
 
             log.info("-------------Processing FulfilmentRequest - Attempt: " + (retryCount + 1));
-
 
             List<SaveCustomerChecksRequest> saveCustomerChecksRequestList =
                     new java.util.ArrayList<>();
@@ -55,7 +57,6 @@ public class MessageConsumer {
                                 + fulfilmentRequest.getFulfilmentType()
                 );
             }
-
 
             boolean passed =
                     strategy.processRequest(
